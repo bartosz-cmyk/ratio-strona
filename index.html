@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ratio | Precyzja w budżetach i harmonogramach inwestycji</title>
+<meta name="description" content="Ratio — zarządzanie projektami, kosztorysowanie i harmonogramowanie inwestycji budowlanych z inżynieryjną precyzją." />
+<link rel="icon" type="image/svg+xml" href="assets/logo-symbol.svg" />
+
+<!-- Google Fonts: Zilla Slab (nagłówki) + Inter (tekst) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS (zbudowany lokalnie: npm run build) -->
+<link rel="stylesheet" href="assets/style.css" />
+</head>
+
+<body class="bg-white antialiased">
+
+<!-- NAWIGACJA -->
+<header class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm border-b border-gray-100">
+  <nav class="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+    <a href="index.html" class="flex items-center">
+      <img src="assets/logo-black.svg" alt="Ratio Logo" class="h-12" />
+    </a>
+    <div class="flex items-center gap-6">
+      <a href="case-studies.html" class="hidden sm:inline text-sm font-semibold text-ink hover:text-navy transition">Case studies</a>
+      <a href="#kontakt"
+         class="inline-flex items-center rounded-full bg-navy px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-navy-light">
+        Kontakt
+      </a>
+    </div>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="bg-[#1f2a4f]">
+  <div class="max-w-5xl mx-auto px-6 py-24 sm:py-32 lg:py-40 text-center">
+    <p class="text-accent font-semibold tracking-wide uppercase text-sm mb-5 font-sans">
+      Zarządzanie inwestycjami budowlanymi
+    </p>
+    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
+      Twój budżet inwestycyjny zasługuje na <span class="text-accent">precyzję</span>, nie przybliżenia.
+    </h1>
+    <p class="mt-6 text-lg sm:text-xl text-gray-200 max-w-3xl mx-auto leading-relaxed font-sans">
+      Niedoszacowany kosztorys i nierealny harmonogram kosztują więcej niż ich przygotowanie.
+      Ratio dostarcza dane inwestycyjne, na których można oprzeć decyzję, a projekt analizujemy
+      pod kątem optymalizacji kosztów — wskazujemy rozwiązania i warianty materiałowe,
+      które obniżają budżet bez utraty jakości i harmonogramu realizacji.
+    </p>
+    <div class="mt-10">
+      <a href="#kontakt"
+         class="inline-flex items-center justify-center rounded-full bg-accent px-8 py-4 text-base font-bold text-ink shadow-lg shadow-black/20 transition hover:bg-accent-light hover:-translate-y-0.5 font-sans">
+        Darmowa wycena
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- USŁUGI -->
+<section class="bg-gray-50 py-20 sm:py-28">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="max-w-2xl mb-16">
+      <h2 class="text-2xl sm:text-3xl font-bold text-ink">Zakres usług</h2>
+      <p class="mt-3 text-gray-600 font-sans">Trzy filary, na których opieramy pracę z każdą inwestycją.</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
+
+      <!-- Karta 1 -->
+      <div class="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-md transition">
+        <div class="h-12 w-12 rounded-xl bg-accent/15 flex items-center justify-center mb-6">
+          <svg class="h-6 w-6" style="color:#ffb719" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-ink mb-2 font-sans">Zarządzanie projektami</h3>
+        <p class="text-gray-600 text-sm leading-relaxed font-sans">
+          Koordynacja realizacji inwestycji, harmonogramowanie prac wykonawców i kontrola postępu.
+        </p>
+      </div>
+
+      <!-- Karta 2 -->
+      <div class="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-md transition">
+        <div class="h-12 w-12 rounded-xl bg-accent/15 flex items-center justify-center mb-6">
+          <svg class="h-6 w-6" style="color:#ffb719" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 0v6m0-6L4 20M9 7l6 13" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 20h16" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-ink mb-2 font-sans">Kosztorysowanie i zestawienia materiałów</h3>
+        <p class="text-gray-600 text-sm leading-relaxed font-sans">
+          Precyzyjne kosztorysy oraz zestawienia głównych materiałów, bez luk i niedoszacowań.
+        </p>
+      </div>
+
+      <!-- Karta 3 -->
+      <div class="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-md transition">
+        <div class="h-12 w-12 rounded-xl bg-accent/15 flex items-center justify-center mb-6">
+          <svg class="h-6 w-6" style="color:#ffb719" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-ink mb-2 font-sans">Harmonogramowanie</h3>
+        <p class="text-gray-600 text-sm leading-relaxed font-sans">
+          Realistyczne harmonogramy realizacji, uwzględniające zależności między etapami i zasobami.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ZAJAWKA PRODUKTÓW CYFROWYCH -->
+<section style="background-color:#ffd77f">
+  <div class="max-w-4xl mx-auto px-6 py-16 sm:py-20 text-center">
+    <span class="inline-block text-xs font-bold uppercase tracking-widest text-ink/70 mb-4 font-sans">Wkrótce</span>
+    <h2 class="text-2xl sm:text-3xl font-bold text-ink leading-snug">
+      Autorskie arkusze kalkulacyjne dla inżyniera budownictwa
+    </h2>
+    <p class="mt-4 text-ink/70 text-sm sm:text-base font-sans">
+      Przygotowujemy profesjonalne narzędzia automatyzujące kosztorysowanie i harmonogramowanie.
+      Zostaw kontakt, a poinformujemy Cię jako pierwszych o starcie sprzedaży.
+    </p>
+  </div>
+</section>
+
+<!-- KONTAKT / FOOTER -->
+<footer id="kontakt" class="footer-gradient">
+  <div class="max-w-2xl mx-auto px-6 py-20 sm:py-28">
+    <div class="text-center mb-12">
+      <h2 class="text-2xl sm:text-3xl font-bold text-white">Porozmawiajmy o Twojej inwestycji</h2>
+      <p class="mt-3 text-gray-300 font-sans">Wypełnij formularz — odpowiadamy w ciągu 24 godzin roboczych.</p>
+    </div>
+
+    <form
+      name="contact"
+      method="POST"
+      data-netlify="true"
+      class="bg-white rounded-2xl p-6 sm:p-10 shadow-xl font-sans"
+    >
+      <input type="hidden" name="form-name" value="contact" />
+
+      <div class="grid grid-cols-1 gap-6">
+
+        <div>
+          <label for="name" class="block text-sm font-semibold text-ink mb-2">Imię i nazwisko</label>
+          <input
+            type="text" id="name" name="name" required
+            class="w-full rounded-lg border border-gray-300 px-4 py-3 text-ink focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
+            placeholder="Jan Kowalski"
+          />
+        </div>
+
+        <div>
+          <label for="email" class="block text-sm font-semibold text-ink mb-2">Adres e-mail</label>
+          <input
+            type="email" id="email" name="email" required
+            class="w-full rounded-lg border border-gray-300 px-4 py-3 text-ink focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
+            placeholder="jan.kowalski@firma.pl"
+          />
+        </div>
+
+        <div>
+          <label for="service" class="block text-sm font-semibold text-ink mb-2">Wybierz usługę</label>
+          <select
+            id="service" name="service"
+            class="w-full rounded-lg border border-gray-300 px-4 py-3 text-ink bg-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
+          >
+            <option value="Kosztorys">Kosztorys</option>
+            <option value="Zestawienie głównych materiałów">Zestawienie głównych materiałów</option>
+            <option value="Harmonogram">Harmonogram</option>
+            <option value="Doradztwo">Doradztwo</option>
+            <option value="Inne">Inne</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="message" class="block text-sm font-semibold text-ink mb-2">Wiadomość</label>
+          <textarea
+            id="message" name="message" rows="5" required
+            class="w-full rounded-lg border border-gray-300 px-4 py-3 text-ink focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent resize-none"
+            placeholder="Opisz krótko zakres inwestycji..."
+          ></textarea>
+        </div>
+
+        <div>
+          <button
+            type="submit"
+            class="w-full rounded-full bg-accent px-6 py-4 text-base font-bold text-ink transition hover:bg-accent-light"
+          >
+            Wyślij zapytanie
+          </button>
+          <p class="mt-3 text-xs text-gray-500 text-center">
+            Wysyłając wiadomość, akceptujesz Politykę Prywatności.
+          </p>
+        </div>
+
+      </div>
+    </form>
+  </div>
+
+  <div class="border-t border-white/10">
+    <div class="max-w-7xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="text-sm text-gray-400 font-sans">&copy; 2026 Ratio. Wszelkie prawa zastrzeżone.</p>
+      <img src="assets/logo-white.svg" alt="Ratio Logo" class="h-12 opacity-95" />
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
