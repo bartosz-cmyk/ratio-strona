@@ -139,6 +139,7 @@
 
     <form
       name="contact"
+      id="contact-form"
       method="POST"
       data-netlify="true"
       enctype="multipart/form-data"
@@ -167,7 +168,7 @@
         </div>
 
         <div>
-          <label for="service" class="block text-sm font-semibold text-ink mb-2">Wybierz usługę</label>
+          <label for="service" class="block text-sm font-semibold text-ink mb-2">Rodzaj usługi</label>
           <select
             id="service" name="service"
             class="w-full rounded-lg border border-gray-300 px-4 py-3 text-ink bg-white focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
@@ -182,20 +183,22 @@
 
         <div>
           <label for="documentation" class="block text-sm font-semibold text-ink mb-2">
-            Załącz dokumentację (PDF)
+            Załącz dokumentację projektową (PDF)
           </label>
           <input
             type="file" id="documentation" name="documentation" accept="application/pdf" multiple
             class="w-full rounded-lg border border-gray-300 px-4 py-3 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-navy file:text-white file:text-sm file:font-semibold hover:file:bg-navy-light"
           />
           <p class="mt-2 text-xs text-gray-500">
-            Prosimy o pojedyncze pliki PDF (nie ZIP ani foldery) — dzięki temu szybciej przeanalizujemy zgłoszenie.
+            Prosimy o przesyłanie wyłącznie pojedynczych plików w formacie PDF.
+            Archiwa (ZIP) oraz foldery nie są akceptowane.
           </p>
+          <p id="documentation-error" class="mt-2 text-xs text-red-600 hidden"></p>
         </div>
 
         <div>
           <label for="drive_link" class="block text-sm font-semibold text-ink mb-2">
-            Lub link do folderu Google Drive z projektem
+            Ewentualnie: link do folderu Google Drive z dokumentacją
           </label>
           <input
             type="url" id="drive_link" name="drive_link"
@@ -203,16 +206,18 @@
             placeholder="https://drive.google.com/..."
           />
           <p class="mt-2 text-xs text-gray-500">
-            Opcjonalnie — jeśli Twoje biuro projektowe udostępnia dokumentację przez Google Drive, wklej tu link zamiast załącznika.
+            Pole opcjonalne. W przypadku udostępniania dokumentacji projektowej
+            za pośrednictwem serwisu Google Drive prosimy o podanie odnośnika
+            do folderu.
           </p>
         </div>
 
         <div>
-          <label for="message" class="block text-sm font-semibold text-ink mb-2">Wiadomość</label>
+          <label for="message" class="block text-sm font-semibold text-ink mb-2">Opis zapytania</label>
           <textarea
             id="message" name="message" rows="5" required
             class="w-full rounded-lg border border-gray-300 px-4 py-3 text-ink focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent resize-none"
-            placeholder="Opisz krótko zakres inwestycji..."
+            placeholder="Proszę opisać zakres planowanej inwestycji."
           ></textarea>
         </div>
 
@@ -221,11 +226,11 @@
             type="submit"
             class="w-full rounded-full bg-accent px-6 py-4 text-base font-bold text-ink transition hover:bg-accent-light"
           >
-            Wyślij zapytanie
+            Prześlij zapytanie
           </button>
           <p class="mt-3 text-xs text-gray-500 text-center">
-            Wysyłając wiadomość, akceptujesz
-            <a href="polityka-prywatnosci.html" class="text-navy hover:text-accent transition underline">Politykę Prywatności</a>.
+            Przesłanie formularza jest równoznaczne z akceptacją
+            <a href="polityka-prywatnosci.html" class="text-navy hover:text-accent transition underline">Polityki Prywatności</a>.
           </p>
         </div>
 
@@ -268,5 +273,33 @@
   </div>
 </footer>
 
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var form = document.getElementById('contact-form');
+    var fileInput = document.getElementById('documentation');
+    var errorEl = document.getElementById('documentation-error');
+
+    if (!form || !fileInput || !errorEl) return;
+
+    form.addEventListener('submit', function (e) {
+      errorEl.classList.add('hidden');
+      errorEl.textContent = '';
+
+      if (fileInput.files && fileInput.files.length > 0) {
+        for (var i = 0; i < fileInput.files.length; i++) {
+          var file = fileInput.files[i];
+          var isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+          if (!isPdf) {
+            e.preventDefault();
+            errorEl.textContent = 'Plik „' + file.name + '” nie jest plikiem PDF. Prosimy o przesłanie wyłącznie pojedynczych plików w formacie PDF.';
+            errorEl.classList.remove('hidden');
+            fileInput.focus();
+            return;
+          }
+        }
+      }
+    });
+  });
+</script>
 </body>
 </html>
