@@ -25,6 +25,7 @@
       <img src="assets/logo-black.svg" alt="Ratio Logo" class="h-12" />
     </a>
     <div class="flex items-center gap-6">
+      <a href="jak-pracujemy.html" class="hidden sm:inline text-sm font-semibold text-ink hover:text-navy transition">Jak pracujemy</a>
       <a href="case-studies.html" class="hidden sm:inline text-sm font-semibold text-ink hover:text-navy transition">Case studies</a>
       <a href="#kontakt"
          class="inline-flex items-center rounded-full bg-navy px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-navy-light">
@@ -91,7 +92,9 @@
         </div>
         <h3 class="text-lg font-semibold text-ink mb-2 font-sans">Kosztorysowanie i zestawienia materiałów</h3>
         <p class="text-gray-600 text-sm leading-relaxed font-sans">
-          Precyzyjne kosztorysy oraz zestawienia głównych materiałów, bez luk i niedoszacowań.
+          Kosztorys w oparciu o normy budowlane do uchwycenia cen rynkowych,
+          uzupełniony o realne zestawienie głównych materiałów — bo norma nie
+          zawsze pokrywa 100% zakresu inwestycji.
         </p>
       </div>
 
@@ -138,6 +141,7 @@
       name="contact"
       method="POST"
       data-netlify="true"
+      enctype="multipart/form-data"
       class="bg-white rounded-2xl p-6 sm:p-10 shadow-xl font-sans"
     >
       <input type="hidden" name="form-name" value="contact" />
@@ -174,6 +178,33 @@
             <option value="Doradztwo">Doradztwo</option>
             <option value="Inne">Inne</option>
           </select>
+        </div>
+
+        <div>
+          <label for="documentation" class="block text-sm font-semibold text-ink mb-2">
+            Załącz dokumentację (PDF)
+          </label>
+          <input
+            type="file" id="documentation" name="documentation" accept="application/pdf" multiple
+            class="w-full rounded-lg border border-gray-300 px-4 py-3 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-navy file:text-white file:text-sm file:font-semibold hover:file:bg-navy-light"
+          />
+          <p class="mt-2 text-xs text-gray-500">
+            Prosimy o pojedyncze pliki PDF (nie ZIP ani foldery) — dzięki temu szybciej przeanalizujemy zgłoszenie.
+          </p>
+        </div>
+
+        <div>
+          <label for="drive_link" class="block text-sm font-semibold text-ink mb-2">
+            Lub link do folderu Google Drive z projektem
+          </label>
+          <input
+            type="url" id="drive_link" name="drive_link"
+            class="w-full rounded-lg border border-gray-300 px-4 py-3 text-ink focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
+            placeholder="https://drive.google.com/..."
+          />
+          <p class="mt-2 text-xs text-gray-500">
+            Opcjonalnie — jeśli Twoje biuro projektowe udostępnia dokumentację przez Google Drive, wklej tu link zamiast załącznika.
+          </p>
         </div>
 
         <div>
@@ -221,6 +252,7 @@
           <ul class="space-y-3 font-sans text-sm">
             <li><a href="index.html" class="text-gray-300 hover:text-accent transition">Strona główna</a></li>
             <li><a href="index.html#uslugi" class="text-gray-300 hover:text-accent transition">Usługi</a></li>
+            <li><a href="jak-pracujemy.html" class="text-gray-300 hover:text-accent transition">Jak pracujemy</a></li>
             <li><a href="case-studies.html" class="text-gray-300 hover:text-accent transition">Case studies</a></li>
             <li><a href="index.html#kontakt" class="text-gray-300 hover:text-accent transition">Kontakt</a></li>
           </ul>
