@@ -175,6 +175,12 @@ h1,h2,h3{font-family:var(--font-heading)}
 .btn:hover{opacity:1;background:#ffc74c}
 .btn.ghost{background:transparent;color:var(--series-1);border-color:var(--axis)}
 .btn.ghost:hover{color:var(--series-1);border-color:var(--series-1);background:rgba(31,42,79,.05)}
+.consent-row{
+  display:flex; gap:10px; align-items:flex-start; margin:18px 0 4px;
+  font-size:13px; color:var(--ink-2); line-height:1.5;
+}
+.consent-row input[type="checkbox"]{ margin-top:3px; flex-shrink:0; width:16px; height:16px; }
+.consent-row a{ color:var(--series-1); text-decoration:underline; }
 @media (prefers-color-scheme: dark){
   :root:where(:not([data-theme="light"])){
     --series-1:#ffffff; --series-1-soft:rgba(255,255,255,.10); --accent-text:#c9c8c1;
@@ -301,6 +307,12 @@ ol.steps li::before{color:var(--accent-text);border-color:var(--axis);font-varia
 </header>
 <div class="wrap">
 
+<form name="ankieta-profil-inwestora" data-netlify="true" hidden>
+  <input type="hidden" name="form-name" value="ankieta-profil-inwestora" />
+  <input type="text" name="result_summary" />
+  <textarea name="answers_json"></textarea>
+</form>
+
 <!-- ============ INTRO ============ -->
 <section id="intro">
   <h1>Jak powinieneś budować swój dom</h1>
@@ -318,8 +330,15 @@ ol.steps li::before{color:var(--accent-text);border-color:var(--axis);font-varia
     <dt>Pytań</dt><dd>39</dd>
     <dt>Czas</dt><dd>8–10 minut</dd>
     <dt>Wynik</dt><dd>jeden z ośmiu profilów, konkretny model realizacji i lista rzeczy do zrobienia</dd>
-    <dt>Dane</dt><dd>nic nie jest nigdzie wysyłane — wszystko liczy się w Twojej przeglądarce</dd>
+    <dt>Dane</dt><dd>wynik liczy się w Twojej przeglądarce; Twoje odpowiedzi możesz opcjonalnie pomóc nam wykorzystać do rozwoju ankiety</dd>
   </dl>
+
+  <label class="consent-row">
+    <input type="checkbox" id="consent-data" />
+    <span>Zgadzam się na przesłanie moich odpowiedzi i wyniku wyłącznie w celu doskonalenia tej ankiety
+    (opcjonalne — ankieta działa tak samo bez zaznaczenia). Szczegóły w
+    <a href="../polityka-prywatnosci.html" target="_blank" rel="noopener">Polityce Prywatności</a>.</span>
+  </label>
 
   <div class="actions">
     <button class="btn" id="start">Zaczynamy</button>
@@ -1401,6 +1420,23 @@ function showResult(){
   r.querySelectorAll('.dimtable .r').forEach(x=> x.onclick = ()=> x.classList.toggle('open'));
   el('again').onclick = ()=>{ state.i=0; state.ans=new Array(Q.length).fill(null); r.hidden=true; el('quiz').hidden=false; renderQ(); };
   window.scrollTo({top:0,behavior:'instant'});
+
+  const consentEl = document.getElementById('consent-data');
+  if (consentEl && consentEl.checked) {
+    submitSurveyData('ankieta-profil-inwestora', {
+      result_summary: top.name + ' — ' + top.tag,
+      answers_json: JSON.stringify(state.ans)
+    });
+  }
+}
+
+function submitSurveyData(formName, fields){
+  const body = new URLSearchParams({ 'form-name': formName, ...fields }).toString();
+  fetch('/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body
+  }).catch(e => console.error('Nie udało się przesłać danych ankiety:', e));
 }
 
 /* ---------- start ---------- */
