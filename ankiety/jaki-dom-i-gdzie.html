@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jaki dom i gdzie — profil oczekiwań</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../assets/logo-symbol.svg" />
+<style>
+:root{
+  color-scheme: light;
+  --surface-1:#fcfcfb; --plane:#f4f3ef; --card:#ffffff;
+  --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --hair:rgba(11,11,11,.10);
+  --series-1:#2a78d6; --series-1-soft:rgba(42,120,214,.14);
+  --good:#0ca30c; --warning:#fab219; --critical:#d03b3b;
+  --radius:14px;
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="light"])){
+    color-scheme: dark;
+    --surface-1:#1a1a19; --plane:#0d0d0d; --card:#1a1a19;
+    --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --axis:#383835; --hair:rgba(255,255,255,.10);
+    --series-1:#3987e5; --series-1-soft:rgba(57,135,229,.20);
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--font); background:var(--plane); color:var(--ink);
+  line-height:1.55; -webkit-font-smoothing:antialiased;
+  font-size:16px;
+}
+.wrap{max-width:760px;margin:0 auto;padding:24px 20px 80px}
+h1{font-size:clamp(28px,5vw,42px);line-height:1.12;letter-spacing:-.02em;margin:0 0 16px;font-weight:700}
+h2{font-size:clamp(21px,3.4vw,27px);line-height:1.2;letter-spacing:-.015em;margin:0 0 12px;font-weight:650}
+h3{font-size:17px;margin:0 0 8px;font-weight:650;letter-spacing:-.005em}
+p{margin:0 0 14px}
+.lead{font-size:18px;color:var(--ink-2)}
+.muted{color:var(--muted);font-size:14px}
+.card{background:var(--card);border:1px solid var(--hair);border-radius:var(--radius);padding:22px}
+.btn{
+  font:inherit;font-weight:600;cursor:pointer;border-radius:10px;
+  border:1px solid transparent;padding:13px 22px;background:var(--ink);color:var(--plane);
+  transition:opacity .12s ease, transform .08s ease;
+}
+.btn:hover{opacity:.86}
+.btn:active{transform:translateY(1px)}
+.btn[disabled]{opacity:.32;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink-2);border-color:var(--hair)}
+.btn.ghost:hover{color:var(--ink);border-color:var(--axis)}
+.btn.sm{padding:9px 16px;font-size:14px}
+
+/* ---------- intro ---------- */
+#intro .kv{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:20px 0 4px;font-size:15px}
+#intro .kv dt{color:var(--muted)}
+#intro .kv dd{margin:0;color:var(--ink-2)}
+.dims-preview{display:flex;flex-wrap:wrap;gap:7px;margin:18px 0 6px}
+.chip{font-size:13px;padding:5px 11px;border-radius:100px;border:1px solid var(--hair);color:var(--ink-2);background:var(--surface-1)}
+
+/* ---------- progress ---------- */
+.topbar{position:sticky;top:0;z-index:20;background:var(--plane);padding:14px 0 12px;margin:-24px 0 22px}
+.pbar{height:4px;background:var(--grid);border-radius:100px;overflow:hidden}
+.pbar>i{display:block;height:100%;background:var(--series-1);border-radius:100px;transition:width .28s cubic-bezier(.4,0,.2,1)}
+.pmeta{display:flex;justify-content:space-between;align-items:baseline;margin-top:9px;font-size:13px;color:var(--muted)}
+.pmeta b{color:var(--ink-2);font-weight:600}
+
+/* ---------- question ---------- */
+.sectitle{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--series-1);font-weight:700;margin-bottom:14px}
+.qtext{font-size:clamp(20px,3.2vw,25px);line-height:1.3;letter-spacing:-.015em;font-weight:600;margin:0 0 12px}
+.qhelp{font-size:14.5px;color:var(--ink-2);background:var(--surface-1);border-left:2px solid var(--axis);padding:11px 14px;border-radius:0 8px 8px 0;margin:0 0 22px}
+.opts{display:flex;flex-direction:column;gap:9px;margin-top:20px}
+.opt{
+  display:flex;gap:13px;align-items:flex-start;text-align:left;width:100%;
+  font:inherit;color:var(--ink);cursor:pointer;
+  background:var(--card);border:1px solid var(--hair);border-radius:11px;padding:14px 16px;
+  transition:border-color .12s ease, background .12s ease;
+}
+.opt:hover{border-color:var(--series-1)}
+.opt .mk{
+  flex:0 0 20px;height:20px;margin-top:1px;border-radius:50%;border:1.5px solid var(--axis);
+  display:grid;place-items:center;transition:all .12s ease;
+}
+.opt[data-multi] .mk{border-radius:5px}
+.opt .mk i{width:9px;height:9px;border-radius:50%;background:transparent;display:block}
+.opt[data-multi] .mk i{border-radius:2px}
+.opt.on{border-color:var(--series-1);background:var(--series-1-soft)}
+.opt.on .mk{border-color:var(--series-1);background:var(--series-1)}
+.opt.on .mk i{background:#fff}
+.opt .lbl{flex:1}
+.qnav{display:flex;gap:10px;align-items:center;margin-top:24px}
+.qnav .spacer{flex:1}
+
+/* ---------- result ---------- */
+.hero{background:var(--card);border:1px solid var(--hair);border-radius:18px;padding:28px;margin-bottom:16px}
+.hero .eyebrow{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:10px}
+.hero .pname{font-size:clamp(32px,6vw,46px);line-height:1.05;letter-spacing:-.03em;font-weight:700;margin:0 0 6px}
+.hero .ptag{font-size:17px;color:var(--series-1);font-weight:600;margin:0 0 18px}
+.hero .plead{font-size:18px;line-height:1.5;margin:0 0 14px}
+.matchrow{display:flex;align-items:baseline;gap:10px;margin-top:20px;padding-top:18px;border-top:1px solid var(--hair);font-size:14px;color:var(--muted)}
+.matchrow b{font-size:26px;color:var(--ink);font-weight:700;letter-spacing:-.02em}
+
+.sec{margin:34px 0 0}
+.sec>h2{margin-bottom:14px}
+
+.numgrid{display:grid;gap:1px;background:var(--hair);border:1px solid var(--hair);border-radius:12px;overflow:hidden}
+.numgrid .row{display:grid;grid-template-columns:minmax(140px,38%) 1fr;gap:14px;background:var(--card);padding:13px 16px;font-size:15px}
+.numgrid .row .k{color:var(--muted);font-size:14px}
+.numgrid .row .v{font-weight:600}
+
+ol.steps{margin:0;padding:0;list-style:none;counter-reset:s}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:26px 1fr;gap:13px;padding:13px 0;border-bottom:1px solid var(--hair);font-size:15.5px}
+ol.steps li:last-child{border-bottom:0}
+ol.steps li::before{
+  content:counter(s);font-size:12px;font-weight:700;color:var(--series-1);
+  width:24px;height:24px;border-radius:50%;border:1px solid var(--series-1);
+  display:grid;place-items:center;margin-top:1px;
+}
+
+.flag{display:grid;grid-template-columns:20px 1fr;gap:12px;padding:15px 16px;border-radius:11px;border:1px solid var(--hair);background:var(--card);margin-bottom:9px}
+.flag .ico{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;margin-top:2px}
+.flag.critical .ico{background:var(--critical)}
+.flag.warning .ico{background:var(--warning);color:#3a2a00}
+.flag h3{margin:0 0 4px;font-size:15.5px}
+.flag p{margin:0;font-size:14.5px;color:var(--ink-2)}
+
+.alt{border:1px dashed var(--axis);border-radius:12px;padding:18px;background:transparent}
+
+/* radar */
+.vizwrap{display:grid;grid-template-columns:1fr;gap:22px;align-items:start}
+@media(min-width:700px){.vizwrap{grid-template-columns:360px 1fr}}
+.radar{display:block;width:100%;max-width:380px;margin:0 auto;overflow:visible}
+.dimtable{display:grid;gap:1px;background:var(--hair);border:1px solid var(--hair);border-radius:12px;overflow:hidden}
+.dimtable .r{background:var(--card);padding:10px 14px}
+.dimtable .r .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.dimtable .r .nm{font-size:14.5px;font-weight:600}
+.dimtable .r .vl{font-size:14.5px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
+.dimtable .r .track{height:5px;background:var(--grid);border-radius:100px;margin-top:7px;overflow:hidden}
+.dimtable .r .track>i{display:block;height:100%;background:var(--series-1);border-radius:100px}
+.dimtable .r .ds{font-size:13px;color:var(--muted);margin-top:6px;display:none}
+.dimtable .r.open .ds{display:block}
+
+.foot{margin-top:44px;padding-top:22px;border-top:1px solid var(--hair);font-size:13.5px;color:var(--muted)}
+.foot p{margin:0 0 10px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:5px;vertical-align:middle;margin-left:6px;white-space:nowrap}
+.tag.fix{background:rgba(208,59,59,.12);color:var(--critical)}
+.tag.proj{background:var(--series-1-soft);color:var(--series-1)}
+.tag.mit{background:rgba(250,178,25,.16);color:#8a5d00}
+@media (prefers-color-scheme: dark){:root:where(:not([data-theme="light"])) .tag.mit{color:var(--warning)}}
+.flag.info .ico{background:var(--muted)}
+.gauge{margin-top:4px}
+.gtrack{position:relative;height:10px;background:var(--grid);border-radius:100px;overflow:hidden}
+.gtrack>i{display:block;height:100%;background:var(--series-1);border-radius:100px}
+.gtick{position:absolute;top:0;bottom:0;width:2px;background:var(--surface-1)}
+.glabels{display:flex;justify-content:space-between;margin-top:7px;font-size:11.5px;color:var(--muted)}
+@media print{
+  body{background:#fff}
+  .topbar,.actions,.btn{display:none!important}
+  .card,.hero,.numgrid,.dimtable{break-inside:avoid}
+}
+
+/* ===================================================================
+   RATIO — nadpisanie tokenów marki.
+   Monochromia inżynierska: jedynym kolorem w całym produkcie są stany
+   (zielony, żółty, czerwony). Dzięki temu kolor coś znaczy, bo jest rzadki.
+   =================================================================== */
+:root{
+  --series-1:#1f2a4f; --series-1-soft:rgba(31,42,79,.10); --accent-text:#1f2a4f;
+  --plane:#ffffff; --card:#ffffff; --surface-1:#fafafa;
+  --ink:#11172a; --ink-2:#3d4459; --muted:#6b7280;
+  --hair:rgba(17,23,42,.10); --grid:#e5e7eb; --axis:#c7c6bf;
+  --good:#16a34a; --warning:#f59e0b; --critical:#dc2626;
+  --radius:10px;
+  --font:'Inter',system-ui,-apple-system,sans-serif;
+  --font-heading:'Zilla Slab',serif;
+  --accent:#ffb719;
+}
+h1,h2,h3{font-family:var(--font-heading)}
+.btn{background:var(--accent);color:#11172a}
+.btn:hover{opacity:1;background:#ffc74c}
+.btn.ghost{background:transparent;color:var(--series-1);border-color:var(--axis)}
+.btn.ghost:hover{color:var(--series-1);border-color:var(--series-1);background:rgba(31,42,79,.05)}
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="light"])){
+    --series-1:#ffffff; --series-1-soft:rgba(255,255,255,.10); --accent-text:#c9c8c1;
+    --plane:#0a0a0a; --card:#131312; --surface-1:#171716;
+    --ink:#ffffff; --ink-2:#c3c2b7; --muted:#8b8a83;
+    --hair:rgba(255,255,255,.14); --grid:#2b2b29; --axis:#3d3d3a;
+    --good:#22c322; --warning:#e0a020; --critical:#ef5350;
+  }
+}
+:root[data-theme="dark"]{
+    --series-1:#ffffff; --series-1-soft:rgba(255,255,255,.10); --accent-text:#c9c8c1;
+    --plane:#0a0a0a; --card:#131312; --surface-1:#171716;
+    --ink:#ffffff; --ink-2:#c3c2b7; --muted:#8b8a83;
+    --hair:rgba(255,255,255,.14); --grid:#2b2b29; --axis:#3d3d3a;
+    --good:#22c322; --warning:#e0a020; --critical:#ef5350;
+}
+
+/* akcent na tekście grafitowy, żeby nie zlewał się z czarnymi nagłówkami */
+.sectitle{color:var(--accent-text)}
+.hero .ptag{color:var(--accent-text);font-weight:550}
+.card h3[style]{color:var(--accent-text)!important}
+ol.steps li::before{color:var(--accent-text);border-color:var(--axis);font-variant-numeric:tabular-nums}
+.tag.proj{background:var(--series-1-soft);color:var(--accent-text)}
+.tag.mit{color:var(--warning);background:rgba(181,116,0,.12)}
+.tag.fix{color:var(--critical);background:rgba(198,40,40,.11)}
+
+/* karty odcięte wyłącznie włoskiem — tło strony i karty są tym samym bielą */
+.card,.hero,.opt,.flag{box-shadow:none}
+.qhelp{background:var(--surface-1);border-left-color:var(--ink)}
+.flag.warning .ico{color:#fff}
+
+/* ===================================================================
+   Jasny motyw jest domyślny — zawsze.
+   Ankieta ma być spójna ze stroną, a nie z ustawieniem systemu klienta.
+   Tryb ciemny włącza się WYŁĄCZNIE, gdy strona ustawi go świadomie:
+       <html data-theme="dark">
+   Jeśli kiedyś dodasz na stronie przełącznik motywu, wystarczy że
+   będzie ustawiał ten atrybut — ankieta pójdzie za nim automatycznie.
+   =================================================================== */
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="dark"])){
+    color-scheme: light;
+    --series-1:#0b0b0b; --series-1-soft:rgba(11,11,11,.07); --accent-text:#3a3937;
+    --plane:#ffffff; --card:#ffffff; --surface-1:#f6f6f4;
+    --ink:#0b0b0b; --ink-2:#46453f; --muted:#77766f;
+    --hair:rgba(11,11,11,.13); --grid:#e4e4e0; --axis:#c7c6bf;
+    --good:#0ca30c; --warning:#b57400; --critical:#c62828;
+  }
+}
+
+/* dyskretny przełącznik do prezentacji — usuń przy osadzaniu na stronie */
+.rp-theme{
+  position:fixed; top:14px; right:14px; z-index:60;
+  font:inherit; font-size:12px; font-weight:600; letter-spacing:.03em;
+  padding:7px 12px; border-radius:100px; cursor:pointer;
+  background:var(--card); color:var(--muted);
+  border:1px solid var(--hair);
+}
+.rp-theme:hover{ color:var(--ink); border-color:var(--axis) }
+@media print{ .rp-theme{ display:none } }
+
+/* ===================================================================
+   RATIO — nawigacja i stopka (spójne z resztą serwisu ratiopro.net)
+   =================================================================== */
+.ratio-nav{
+  position:sticky; top:0; z-index:100; background:rgba(255,255,255,.92);
+  backdrop-filter:blur(6px); border-bottom:1px solid #f3f4f6;
+}
+.ratio-nav-inner{
+  max-width:900px; margin:0 auto; padding:14px 20px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.ratio-nav-inner img{ height:36px; display:block }
+.ratio-nav-links{ display:flex; align-items:center; gap:20px }
+.ratio-nav-links a{
+  font-family:'Inter',sans-serif; font-size:14px; font-weight:600;
+  color:#11172a; text-decoration:none;
+}
+.ratio-nav-links a:hover{ color:#1f2a4f }
+.ratio-nav-links a.cta{
+  background:#1f2a4f; color:#fff; padding:9px 18px; border-radius:999px;
+}
+.ratio-nav-links a.cta:hover{ background:#2d3d74; color:#fff }
+.ratio-nav-links .hide-mobile{ display:none }
+@media (min-width:640px){ .ratio-nav-links .hide-mobile{ display:inline } }
+
+.ratio-footer{
+  background:linear-gradient(160deg,#2d3d74 0%,#1f2a4f 100%);
+  margin-top:48px; font-family:'Inter',sans-serif;
+}
+.ratio-footer-inner{ max-width:900px; margin:0 auto; padding:44px 20px 0; }
+.ratio-footer-grid{ display:grid; grid-template-columns:1fr; gap:32px; }
+@media (min-width:640px){ .ratio-footer-grid{ grid-template-columns:1fr 1fr } }
+.ratio-footer img{ height:40px; margin-bottom:18px }
+.ratio-footer p{ color:#d1d5db; font-size:13px; line-height:1.6; margin:0 0 4px }
+.ratio-footer a{ color:#d1d5db; text-decoration:none }
+.ratio-footer a:hover{ color:#ffb719 }
+.ratio-footer-nav-title{
+  font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+  color:#9ca3af; margin:0 0 14px;
+}
+.ratio-footer-nav ul{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px }
+.ratio-footer-nav a{ font-size:13px }
+.ratio-footer-bottom{
+  border-top:1px solid rgba(255,255,255,.1); margin-top:32px; padding:20px;
+  display:flex; flex-direction:column; gap:10px; align-items:center; justify-content:space-between;
+  font-size:11px; color:#9ca3af; text-align:center;
+}
+@media (min-width:640px){ .ratio-footer-bottom{ flex-direction:row; text-align:left } }
+.ratio-footer-bottom .legal-links{ display:flex; gap:16px }
+</style>
+</head>
+<body>
+<header class="ratio-nav">
+  <div class="ratio-nav-inner">
+    <a href="../index.html"><img src="../assets/logo-black.svg" alt="Ratio Logo" /></a>
+    <nav class="ratio-nav-links">
+      <a href="../jak-pracujemy.html" class="hide-mobile">Jak pracujemy</a>
+      <a href="../case-studies.html" class="hide-mobile">Case studies</a>
+      <a href="../ankiety.html" class="hide-mobile">Ankiety</a>
+      <a href="../index.html#kontakt" class="cta">Kontakt</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+
+<!-- ============ INTRO ============ -->
+<section id="intro">
+  <h1>Jaki dom i gdzie</h1>
+  <p class="lead">Dwie różne osoby mogą zbudować ten sam dom i jedna będzie szczęśliwa, a druga nie. Ta ankieta sprawdza, po co Ci ten dom — i czy działka, którą masz albo której szukasz, jest w stanie to unieść.</p>
+  <p>Są ludzie, którzy budują dom, żeby coś o sobie powiedzieć: nowoczesna bryła, wielkie przeszklenia, technologia, przestrzeń, która robi wrażenie. I są tacy, którzy budują miejsce do życia rodziny, gdzie liczy się, czy jest gdzie powiesić pranie i czy da się zamknąć drzwi, kiedy ktoś ogląda film. Żadna z tych motywacji nie jest lepsza od drugiej.</p>
+  <p>Ta ankieta nie próbuje nikogo z niczego wyleczyć. Robi dwie rzeczy: nazywa Twoją motywację po imieniu i pokazuje jej rachunek — w złotówkach, w godzinach obsługi i w tym, co się znudzi szybciej, niż sądzisz. Druga część to audyt działki, bo działka przesądza o domu bardziej niż jakakolwiek decyzja projektowa.</p>
+
+  <div class="dims-preview">
+    <span class="chip">Pokazanie</span><span class="chip">Nowość</span><span class="chip">Doznanie przestrzeni</span>
+    <span class="chip">Funkcja</span><span class="chip">Rodzina</span><span class="chip">Prywatność</span>
+    <span class="chip">Horyzont</span><span class="chip">Realizm eksploatacyjny</span>
+  </div>
+
+  <dl class="kv">
+    <dt>Pytań</dt><dd>27 albo 40, zależnie od tego, czy masz już działkę</dd>
+    <dt>Czas</dt><dd>7–11 minut</dd>
+    <dt>Wynik</dt><dd>profil domu, ocena działki z listą ryzyk i wskazanie miejsc, w których dom kłóci się z działką</dd>
+    <dt>Dane</dt><dd>nic nie jest nigdzie wysyłane — wszystko liczy się w Twojej przeglądarce</dd>
+  </dl>
+
+  <div class="actions"><button class="btn" id="start">Zaczynamy</button></div>
+
+  <div class="foot">
+    <p><b>Dwie uwagi na start.</b> Po pierwsze: kilka pytań dotyczy tego, jak Twój dom odbiorą inni. Nikt tego nie sprawdza i nie ma tu odpowiedzi, których należałoby się wstydzić — chęć zbudowania czegoś, co robi wrażenie, jest jednym z najstarszych powodów budowania w ogóle. Po drugie: jeśli masz już działkę, przygotuj sobie jej podstawowe parametry. Szerokość, stronę, z której jest wjazd, i informację o mediach.</p>
+  </div>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section id="quiz" hidden>
+  <div class="topbar">
+    <div class="pbar"><i id="pfill" style="width:0%"></i></div>
+    <div class="pmeta"><span id="psec"></span><span>Pytanie <b id="pnum">1</b> z <span id="ptot">39</span></span></div>
+  </div>
+  <div id="qbody"></div>
+  <div class="qnav">
+    <button class="btn ghost sm" id="back">Wstecz</button>
+    <div class="spacer"></div>
+    <button class="btn sm" id="next" hidden>Dalej</button>
+  </div>
+</section>
+
+<!-- ============ RESULT ============ -->
+<section id="result" hidden></section>
+
+</div>
+<script>
+/* ====================================================================
+   JAKI DOM I GDZIE — dane merytoryczne
+   Wymiary domu:
+   P = pokazanie (motywacja zewnętrzna)   N = nowość i wyjątkowość
+   D = doznanie (przestrzeń, światło)     F = funkcja i codzienność
+   R = rodzina i wspólnota                Y = prywatność i azyl
+   H = horyzont (dom na całe życie)       E = realizm eksploatacyjny
+   ==================================================================== */
+
+const DIMS = {
+  P:{short:'Pokazanie',  name:'Pokazanie',            desc:'Ile w Twojej motywacji jest tego, jak dom zostanie odebrany przez innych. Nie jest to wada — sygnalizowanie statusu jest normalną funkcją domu od zawsze. Jest to jednak informacja kosztowa: efekt, który ma robić wrażenie, kosztuje więcej i szybciej się dezaktualizuje.'},
+  N:{short:'Nowość',     name:'Nowość i wyjątkowość', desc:'Potrzeba, żeby dom był nowy, inny, niepowtarzalny. Wysoki wynik to jednocześnie ryzyko: rozwiązania bez historii serwisowej i mody, które przemijają szybciej niż kredyt.'},
+  D:{short:'Doznanie',   name:'Doznanie przestrzeni', desc:'Ile znaczy dla Ciebie samo przeżycie przestrzeni: światło, wysokość, widok, otwarcie na ogród. To wymiar autentycznie estetyczny — niezależny od tego, czy ktokolwiek to zobaczy.'},
+  F:{short:'Funkcja',    name:'Funkcja i codzienność',desc:'Waga rzeczy, które działają: schowki, pralnia, akustyka, koszty utrzymania, sensowne odległości. Nudne i najlepiej korelujące z zadowoleniem po pięciu latach.'},
+  R:{short:'Rodzina',    name:'Rodzina i wspólnota',  desc:'Na ile dom ma być narzędziem życia rodzinnego: wspólne siedzenie, miejsce dla dzieci, dla rodziców, dla gości.'},
+  Y:{short:'Prywatność', name:'Prywatność i azyl',    desc:'Potrzeba odcięcia się — od sąsiadów, od ulicy, czasem od domowników. Wymiar najczęściej pomijany na etapie projektu i najczęściej żałowany później.'},
+  H:{short:'Horyzont',   name:'Horyzont',             desc:'Czy to dom na całe życie, czy na etap. Zmienia praktycznie wszystko: standard, elastyczność układu, sens inwestowania w rzeczy, których nie da się odzyskać przy sprzedaży.'},
+  E:{short:'Realizm',    name:'Realizm eksploatacyjny',desc:'Na ile trzeźwo patrzysz na to, co dom będzie kosztował w utrzymaniu — w złotówkach i w godzinach. Niski wynik nie oznacza, że nie powinieneś budować tego, co chcesz. Oznacza, że warto policzyć rachunek zanim, a nie po.'}
+};
+
+/* --------------------------------------------------------------------
+   PYTANIA
+   -------------------------------------------------------------------- */
+
+const Q = [
+
+/* ===================== BLOK A — DOM (20) ===================== */
+
+{ sec:'Dom', t:'Zacznijmy od tego, po co Ci ten dom',
+  q:'Dom jest gotowy. Wchodzi ktoś, kogo dawno nie widziałeś. Co pokazujesz najpierw?',
+  h:'To jedno z najbardziej diagnostycznych pytań w całej ankiecie. Ludzie prowadzą gości do tego, co uważają za najlepszą część siebie.',
+  wt:{P:2,D:2,R:2},
+  o:[
+    { t:'Salon z przeszkleniem otwartym na ogród',            s:{P:78,D:95,R:40,F:30,Y:15} },
+    { t:'Kuchnię — i tak wszyscy w niej siedzą',              s:{P:25,D:45,R:95,F:75,Y:40} },
+    { t:'Kotłownię, rozdzielnicę, panel sterowania',          s:{P:55,D:30,R:30,F:85,N:95} },
+    { t:'Nic nie pokazuję — siadamy i rozmawiamy',            s:{P:5, D:35,R:70,F:60,Y:85} }
+  ]},
+
+{ sec:'Dom',
+  q:'Masz 80 000 zł ponad zaplanowany budżet. Możesz wydać je tylko na jedną rzecz:',
+  h:'Wybory z realną ceną mówią więcej niż deklaracje. Każda z tych opcji jest sensowna — chodzi o to, która jest sensowna dla Ciebie.',
+  wt:{P:2,F:2,D:2},
+  o:[
+    { t:'Przeszklenie w salonie od podłogi do sufitu',        s:{P:60,D:97,F:20,E:25,N:60} },
+    { t:'Pralnia, spiżarnia i porządna garderoba',            s:{P:8, D:25,F:100,E:85,R:75} },
+    { t:'Pompa ciepła i rekuperacja wyższej klasy',           s:{P:30,D:25,F:85,E:95,N:80} },
+    { t:'Piętnaście metrów kwadratowych więcej powierzchni',  s:{P:62,D:60,F:60,E:40,R:70} },
+    { t:'Nic — zostają jako rezerwa na nieprzewidziane',      s:{P:5, D:20,F:80,E:100,H:45} }
+  ]},
+
+{ sec:'Dom',
+  q:'Znajomy pokazuje Ci zdjęcia swojego nowego domu. Jest bardzo podobny do Twojego projektu, tylko skończony rok wcześniej. Pierwsza myśl:',
+  h:null,
+  wt:{N:3},
+  o:[
+    { t:'Świetnie — podpytam go, co by zmienił',              s:{N:8, P:10} },
+    { t:'Lekkie rozczarowanie, chciałbym czegoś swojego',     s:{N:70,P:50} },
+    { t:'Zaczynam myśleć, co zmienić, żeby mój był inny',     s:{N:100,P:78} },
+    { t:'W ogóle mnie to nie zajmuje',                        s:{N:0, P:0} }
+  ]},
+
+{ sec:'Dom',
+  q:'Ludzie, którzy budują domy z bardzo dużymi przeszkleniami, robią to przede wszystkim dlatego, że:',
+  h:'Pytanie o innych, nie o Ciebie. Odpowiadając za innych, ludzie ujawniają własne motywy dużo dokładniej niż odpowiadając wprost o sobie.',
+  wt:{P:3},
+  o:[
+    { t:'Chcą mieć w domu światło i kontakt z ogrodem',       s:{P:18,D:85} },
+    { t:'Dobrze to wygląda i robi wrażenie',                  s:{P:88,D:55} },
+    { t:'Taki jest teraz standard, wszyscy tak robią',        s:{P:65,N:20,D:40} },
+    { t:'Nie zastanawiałem się nad tym',                      s:{P:45,D:50} }
+  ]},
+
+{ sec:'Dom',
+  q:'Mija dwadzieścia lat, dzieci się wyprowadziły. Ten dom:',
+  h:null,
+  wt:{H:3},
+  o:[
+    { t:'Zostaje nasz — zestarzejemy się w nim',              s:{H:100,R:80} },
+    { t:'Pewnie zamienimy go na coś mniejszego',              s:{H:30} },
+    { t:'Sprzedamy, coś się wymyśli',                         s:{H:5} },
+    { t:'Nie wiem, to dla mnie za daleko',                    s:{H:50} }
+  ]},
+
+{ sec:'Dom',
+  q:'Sąsiad obok stawia dom wyraźnie większy i bardziej efektowny od Twojego. To:',
+  h:null,
+  wt:{P:3},
+  o:[
+    { t:'Nie robi na mnie żadnego wrażenia',                  s:{P:0} },
+    { t:'Ciekawi mnie, chętnie wejdę zobaczyć',               s:{P:32} },
+    { t:'Trochę mnie uwiera',                                 s:{P:75} },
+    { t:'Zastanowiłbym się, co zmienić u siebie',             s:{P:100,N:70} }
+  ]},
+
+{ sec:'Dom',
+  q:'Które zdanie brzmi najbardziej jak Ty?',
+  h:null,
+  wt:{D:2,F:2,R:2,N:2},
+  o:[
+    { t:'Chcę wejść do środka i poczuć „wow”',                s:{D:98,P:52,F:30,N:60} },
+    { t:'Chcę, żeby wszystko było na miejscu i nic nie irytowało', s:{F:100,D:30,P:10,E:85} },
+    { t:'Chcę miejsca, do którego wszyscy chętnie schodzą',   s:{R:100,F:70,D:45,P:15} },
+    { t:'Chcę najnowszych rozwiązań i domu, który sam się ogarnia', s:{N:98,F:75,E:60,P:45} },
+    { t:'Chcę móc zamknąć za sobą drzwi i mieć spokój',       s:{Y:100,F:60,P:5,R:40} }
+  ]},
+
+{ sec:'Dom',
+  q:'Salon otwarty na dwie kondygnacje, wysoki na sześć metrów, z antresolą. Kosztuje około 8% budżetu i podnosi rachunki za ogrzewanie. Twoja reakcja:',
+  h:'Przestrzeń, której nie da się zamieszkać, jest najdroższym metrem kwadratowym w całym domu. To nie argument przeciw — to cena, którą warto znać.',
+  wt:{D:2,E:2},
+  o:[
+    { t:'Biorę — właśnie o taki efekt mi chodzi',             s:{D:100,P:55,E:15,F:20} },
+    { t:'Biorę, jeśli policzę, że różnica w rachunkach jest do przyjęcia', s:{D:72,P:45,E:85,F:55} },
+    { t:'Wolę zamienić to na dodatkowy pokój',                s:{D:35,F:90,R:80,E:80} },
+    { t:'To strata metrów i pieniędzy',                       s:{D:5, F:100,E:95,P:5} }
+  ]},
+
+{ sec:'Dom',
+  q:'Duże okna oznaczają, że z ulicy i od sąsiada widać, co się dzieje w środku. Dla Ciebie to:',
+  h:null,
+  wt:{Y:3},
+  o:[
+    { t:'Żaden problem',                                      s:{Y:0, D:80} },
+    { t:'Rozwiąże się roletami i zielenią',                   s:{Y:38,D:65} },
+    { t:'To by mi realnie przeszkadzało',                     s:{Y:85,D:40} },
+    { t:'To dla mnie wykluczające',                           s:{Y:100,D:25} }
+  ]},
+
+{ sec:'Dom',
+  q:'Ile godzin miesięcznie jesteś gotów oddać na utrzymanie efektu — mycie dużych szyb, czyszczenie betonu, ogród ozdobny, serwis automatyki?',
+  h:'Sześć metrów przeszklenia to nie jest okno. To powierzchnia, którą ktoś musi umyć — i przy wysokim salonie zwykle nie jesteś to Ty, tylko firma z podnośnikiem.',
+  wt:{E:3},
+  o:[
+    { t:'Ponad 10 godzin albo zapłacę komuś',                 s:{E:100,P:60} },
+    { t:'Cztery do ośmiu godzin',                             s:{E:72} },
+    { t:'Jedną do trzech',                                    s:{E:35} },
+    { t:'Zero — ma się utrzymywać samo',                      s:{E:0, F:80} }
+  ]},
+
+{ sec:'Dom',
+  q:'Czego z domu, o którym marzysz, najszybciej przestaniesz zauważać?',
+  h:'Ludzie systematycznie przeceniają, jak długo dana cecha domu będzie ich cieszyć, i nie doceniają, jak długo będzie ich uwierać rzecz, która przeszkadza codziennie. Świadomość tego jest realną przewagą przy projektowaniu.',
+  wt:{E:2},
+  o:[
+    { t:'Niczego — będę się cieszył codziennie',              s:{E:10,P:55} },
+    { t:'Widoku i przeszkleń',                                s:{E:88} },
+    { t:'Wielkości pokoi',                                    s:{E:92} },
+    { t:'Nowoczesnych rozwiązań i automatyki',                s:{E:85,N:55} }
+  ]},
+
+{ sec:'Dom', type:'multi',
+  q:'Zaznacz wszystko, co w Twoim domu MUSI być:',
+  h:null,
+  wt:{F:2,P:2},
+  o:[
+    { t:'Pralnia z miejscem na suszarkę',    s:{F:100,E:85} },
+    { t:'Spiżarnia',                          s:{F:100,E:80} },
+    { t:'Garderoba przy sypialni',            s:{F:90, E:70} },
+    { t:'Osobny pokój do pracy, z drzwiami',  s:{F:85, Y:85} },
+    { t:'Pomieszczenie gospodarcze lub warsztat', s:{F:95,E:80} },
+    { t:'Pokój gościnny albo dla rodziców',   s:{R:100,F:70} },
+    { t:'Duży zadaszony taras',               s:{D:85, P:70,R:65} },
+    { t:'Basen lub jacuzzi',                  s:{P:95, D:80,E:20} },
+    { t:'Sauna',                              s:{P:75, D:80,E:35} },
+    { t:'Garaż dwustanowiskowy',              s:{F:75, P:55} },
+    { t:'Wyspa kuchenna jako centrum domu',   s:{D:80, R:75,P:65} }
+  ]},
+
+{ sec:'Dom',
+  q:'Ile osób będzie mieszkać w tym domu za pięć lat?',
+  h:null,
+  wt:{R:2},
+  o:[
+    { t:'Jedna albo dwie',                                    s:{R:20,Y:80} },
+    { t:'Trzy',                                               s:{R:65} },
+    { t:'Cztery',                                             s:{R:88} },
+    { t:'Pięć lub więcej',                                    s:{R:100,F:85} },
+    { t:'Jeszcze nie wiemy — planujemy dzieci',               s:{R:80,H:75} }
+  ]},
+
+{ sec:'Dom',
+  q:'Otwarta przestrzeń: salon, jadalnia i kuchnia razem, bez ścian. Z dziećmi w domu oznacza to, że zapach obiadu, telewizor, rozmowy i lekcje dzieją się w jednym pomieszczeniu.',
+  h:'Akustyka jest najczęściej pomijanym parametrem otwartego układu i jednocześnie tym, który najbardziej męczy po kilku latach. Da się to zaprojektować — ale trzeba o tym pomyśleć przed, nie po.',
+  wt:{F:2,D:2,Y:2},
+  o:[
+    { t:'I tak chcę otwartą przestrzeń',                      s:{D:92,F:22,Y:10,P:60} },
+    { t:'Otwartą, ale z osobnym pokojem do wycofania się',    s:{D:70,F:82,Y:65} },
+    { t:'Kuchnia osobno, reszta otwarta',                     s:{D:52,F:88,Y:55} },
+    { t:'Wolę klasyczny układ z osobnymi pomieszczeniami',    s:{D:18,F:88,Y:90} }
+  ]},
+
+{ sec:'Dom', type:'multi',
+  q:'Skąd czerpiesz pomysły na swój dom?',
+  h:null,
+  wt:{N:2,P:2},
+  o:[
+    { t:'Instagram, Pinterest, TikTok',                       s:{N:88,P:90,D:75} },
+    { t:'Portale z projektami gotowymi',                      s:{N:25,P:40,F:65} },
+    { t:'Domy znajomych i rodziny',                           s:{N:20,P:60,F:70} },
+    { t:'Czasopisma i książki o architekturze',               s:{N:80,P:22,D:96} },
+    { t:'Rozmowy z architektem',                              s:{N:65,P:18,D:88,F:75} },
+    { t:'Z tego, czego brakowało mi tam, gdzie mieszkałem',   s:{N:10,P:10,F:100,E:90} }
+  ]},
+
+{ sec:'Dom',
+  q:'Jedno słowo, które najlepiej opisuje dom, w jakim chcesz mieszkać:',
+  h:null,
+  wt:{P:2,F:2,R:2,N:2,Y:2},
+  o:[
+    { t:'Imponujący',   s:{P:100,D:85,N:70,F:30,R:35,Y:20} },
+    { t:'Wygodny',      s:{P:15, D:45,N:25,F:100,R:65,Y:60} },
+    { t:'Ciepły',       s:{P:12, D:55,N:20,F:75, R:100,Y:65} },
+    { t:'Nowoczesny',   s:{P:70, D:80,N:95,F:55, R:40,Y:35} },
+    { t:'Spokojny',     s:{P:8,  D:60,N:25,F:75, R:60,Y:100} },
+    { t:'Wyjątkowy',    s:{P:52, D:94,N:100,F:35,R:45,Y:50} }
+  ]},
+
+{ sec:'Dom',
+  q:'Budżet się nie domyka i trzeba coś wyciąć. Co idzie pierwsze?',
+  h:null,
+  wt:{P:2,F:2,D:2},
+  o:[
+    { t:'Metry — zbuduję mniejszy dom',                       s:{P:15,F:85,D:60,E:90} },
+    { t:'Standard wykończenia — zrobię go później',           s:{P:35,F:70,D:55,H:80} },
+    { t:'Efektowne rozwiązania: przeszklenia, antresola, elewacja', s:{P:5,F:95,D:20,E:95} },
+    { t:'Technologia i automatyka',                           s:{P:40,N:15,F:75,E:80} },
+    { t:'Pomieszczenia pomocnicze: pralnia, spiżarnia',       s:{P:80,F:8, D:85,E:20} }
+  ]},
+
+{ sec:'Dom',
+  q:'Wprowadzasz się do domu dokładnie takiego, jak sobie wyobrażałeś. Co byłoby dla Ciebie największą porażką?',
+  h:null,
+  wt:{P:2,F:2,R:2,Y:2,E:2},
+  o:[
+    { t:'Że jest zwyczajny, taki jak wszystkie inne',         s:{P:95,N:100,D:80,F:30,R:35,Y:30,E:35} },
+    { t:'Że coś w nim codziennie irytuje',                    s:{P:20,N:30,D:45,F:100,R:60,Y:60,E:90} },
+    { t:'Że rodzina i tak nie spędza w nim czasu razem',      s:{P:15,N:25,D:50,F:70,R:100,Y:45,E:70} },
+    { t:'Że kosztuje majątek w utrzymaniu',                   s:{P:20,N:25,D:35,F:90,R:55,Y:55,E:100} },
+    { t:'Że nie mam w nim poczucia prywatności',              s:{P:10,N:30,D:45,F:70,R:50,Y:100,E:70} }
+  ]},
+
+{ sec:'Dom',
+  q:'Ile razy w tygodniu będziecie mieli w domu kogoś spoza najbliższej rodziny?',
+  h:null,
+  wt:{P:2,Y:2},
+  o:[
+    { t:'Praktycznie codziennie',                             s:{P:75,Y:10,R:85} },
+    { t:'Kilka razy w tygodniu',                              s:{P:60,Y:32,R:75} },
+    { t:'Raz na tydzień albo dwa',                            s:{P:38,Y:58,R:55} },
+    { t:'Prawie nigdy — to nasza przestrzeń',                 s:{P:8, Y:100,R:45} }
+  ]},
+
+{ sec:'Dom',
+  q:'Gdyby dało się wybrać tylko jedno: dom, którym zachwycają się inni, czy dom, w którym Ty czujesz się najlepiej — nawet gdyby wydawał się komuś dziwny?',
+  h:'Nie ma tu dobrej odpowiedzi. Oba wybory są uczciwe i oba mają swoją cenę.',
+  wt:{P:3},
+  o:[
+    { t:'Zdecydowanie taki, którym zachwycają się inni',      s:{P:100,D:70} },
+    { t:'Raczej ten pierwszy',                                s:{P:75,D:65} },
+    { t:'Trudno wybrać, chcę obu naraz',                      s:{P:52,D:70} },
+    { t:'Raczej ten, w którym mnie jest dobrze',              s:{P:22,D:78,Y:58} },
+    { t:'Zdecydowanie ten drugi',                             s:{P:2, D:72,Y:82} }
+  ]},
+
+/* ===================== ROZGAŁĘZIENIE ===================== */
+
+{ sec:'Działka', t:'Teraz działka',
+  q:'Na czym stoisz z działką?',
+  h:'Działka przesądza o większej części tego, czym może być dom, niż jakakolwiek decyzja projektowa. Dlatego dalsze pytania zależą od tej odpowiedzi.',
+  wt:{},
+  o:[
+    { t:'Mam kupioną działkę',                                s:{}, m:{dz:'mam', zrodlo:'kupiona'} },
+    { t:'Dostałem ją albo odziedziczyłem',                    s:{}, m:{dz:'mam', zrodlo:'rodzina'} },
+    { t:'Mam wybraną, ale jeszcze nie kupiłem',               s:{}, m:{dz:'mam', zrodlo:'wybrana'} },
+    { t:'Szukam działki',                                     s:{}, m:{dz:'szukam'} },
+    { t:'Jeszcze nawet nie zacząłem szukać',                  s:{}, m:{dz:'szukam'} }
+  ]},
+
+/* ===================== ŚCIEŻKA A: MAM DZIAŁKĘ (16) ===================== */
+
+{ when:m=>m.dz==='mam', sec:'Działka', t:'Audyt działki',
+  q:'Status planistyczny działki:',
+  h:'To jest pytanie numer jeden. Gminy muszą uchwalić plany ogólne do 30 czerwca 2026 — działki bez planu i bez wydanej decyzji o warunkach zabudowy mogą mieć znacznie trudniejszą drogę.',
+  dz:{w:3},
+  o:[
+    { t:'Jest miejscowy plan zagospodarowania i znam jego zapisy', s:{}, d:100 },
+    { t:'Jest plan, ale nie czytałem zapisów',                     s:{}, d:70, r:['mpzp_nieczytany'] },
+    { t:'Nie ma planu, ale mam prawomocną decyzję o warunkach zabudowy', s:{}, d:82 },
+    { t:'Nie ma planu i nie mam decyzji o warunkach zabudowy',     s:{}, d:32, r:['brak_wz'] },
+    { t:'To działka rolna, nieodrolniona',                         s:{}, d:12, r:['rolna'] }
+  ]},
+
+{ when:m=>m.dz==='mam', sec:'Działka', type:'multi',
+  q:'Które z tych ograniczeń narzuca plan lub decyzja o warunkach zabudowy?',
+  h:'Te zapisy potrafią wykluczyć dokładnie ten dom, o którym marzysz — najczęściej cichy, płaski dach albo dużą przeszkloną elewację frontową.',
+  dz:{w:2},
+  o:[
+    { t:'Narzucony kąt nachylenia dachu',        d:60, r:['mpzp_dach'] },
+    { t:'Narzucony rodzaj lub kolor pokrycia',   d:70, r:['mpzp_material'] },
+    { t:'Ograniczona wysokość lub liczba kondygnacji', d:65, r:['mpzp_wysokosc'] },
+    { t:'Narzucony kierunek kalenicy',           d:60, r:['mpzp_kalenica'] },
+    { t:'Mały dopuszczalny procent zabudowy',    d:55, r:['mpzp_zabudowa'] },
+    { t:'Duża wymagana powierzchnia biologicznie czynna', d:65, r:['mpzp_zielen'] },
+    { t:'Nieprzekraczalna linia zabudowy blisko drogi', d:70, r:['mpzp_linia'] },
+    { t:'Żadne z powyższych albo nie wiem',      d:88, excl:true, r:['mpzp_niewiem'] }
+  ]},
+
+{ when:m=>m.dz==='mam', sec:'Działka',
+  q:'Szerokość działki w najwęższym miejscu, licząc wzdłuż frontu:',
+  h:'Prawo wymaga 4 m od granicy przy ścianie z oknami i 3 m przy ścianie bez otworów. Na działce o szerokości 16 m i mniej wolno w określonych warunkach budować bliżej lub w granicy — ale to zawsze kosztuje układem domu.',
+  dz:{w:3},
+  o:[
+    { t:'Ponad 25 metrów',        d:100 },
+    { t:'20–25 metrów',           d:92 },
+    { t:'16–20 metrów',           d:72, r:['waska_srednio'] },
+    { t:'12–16 metrów',           d:42, r:['waska'] },
+    { t:'Poniżej 12 metrów',      d:18, r:['waska_bardzo'] },
+    { t:'Nie wiem',               d:60, r:['nie_zmierzone'] }
+  ]},
+
+{ when:m=>m.dz==='mam', sec:'Działka',
+  q:'Kształt działki:',
+  h:null,
+  dz:{w:2},
+  o:[
+    { t:'Prostokąt o dobrych proporcjach',                d:100 },
+    { t:'Bardzo długi i wąski prostokąt',                 d:52, r:['ksztalt_dlugi'] },
+    { t:'Nieregularny, z ostrymi kątami',                 d:48, r:['ksztalt_nieregularny'] },
+    { t:'Trójkątny albo trapezowy',                       d:42, r:['ksztalt_nieregularny'] },
+    { t:'Duży i praktycznie kwadratowy',                  d:96 }
+  ]},
+
+{ when:m=>m.dz==='mam', sec:'Działka',
+  q:'Z której strony działki wjeżdża się na nią z drogi?',
+  h:'Wjazd i ogród są po przeciwnych stronach. Wjazd od północy oznacza ogród i taras od południa, czyli układ, o który wszyscy walczą. Wjazd od południa oznacza odwrotnie — i tego nie da się naprawić inaczej niż kompromisem w projekcie.',
+  dz:{w:3},
+  o:[
+    { t:'Od północy — ogród wychodzi na południe',        d:100 },
+    { t:'Od wschodu — ogród na zachód',                   d:88 },
+    { t:'Od północnego wschodu lub zachodu',              d:92 },
+    { t:'Od zachodu — ogród na wschód',                   d:70, r:['ekspozycja_srednia'] },
+    { t:'Od południa — ogród wychodzi na północ',         d:34, r:['ekspozycja_zla'] },
+    { t:'Nie wiem',                                       d:60, r:['nie_zmierzone'] }
+  ]},
+
+{ when:m=>m.dz==='mam', sec:'Działka',
+  q:'Dostęp do drogi publicznej:',
+  h:'Bez prawnie zapewnionego dostępu do drogi publicznej nie da się uzyskać pozwolenia na budowę. To jest jedyny parametr na tej liście, który potrafi zablokować inwestycję całkowicie.',
+  dz:{w:3},
+  o:[
+    { t:'Działka graniczy bezpośrednio z drogą publiczną',      d:100 },
+    { t:'Droga wewnętrzna, mam w niej udział',                  d:82 },
+    { t:'Droga wewnętrzna, nie mam w niej udziału',             d:44, r:['droga_bez_udzialu'] },
+    { t:'Służebność drogi przez cudzą działkę',                 d:40, r:['sluzebnosc'] },
+    { t:'Nie mam formalnie zapewnionego dostępu',               d:5,  r:['brak_dostepu'] }
+  ]},
+
+{ when:m=>m.dz==='mam', sec:'Działka',
+  q:'Nawierzchnia drogi dojazdowej i przejezdność zimą:',
+  h:null,
+  dz:{w:1},
+  o:[
+    { t:'Asfalt, odśnieżany przez gminę',                       d:100 },
+    { t:'Kostka lub asfalt, odśnieżanie na mieszkańcach',       d:80 },
+    { t:'Utwardzony tłuczeń',                                   d:62, r:['droga_gruntowa'] },
+    { t:'Droga gruntowa',                                       d:35, r:['droga_gruntowa'] }
+  ]},
+
+{ when:m=>m.dz==='mam', sec:'Działka', type:'multi',
+  q:'Które media są doprowadzone do granicy działki?',
+  h:'„Działka uzbrojona” w ogłoszeniu potrafi znaczyć, że media są w drodze 200 metrów dalej. Sprawdź to warunkami technicznymi od gestora, nie opisem sprzedającego.',
+  dz:{w:3},
+  o:[
+    { t:'Prąd',                d:100 },
+    { t:'Woda',                d:100 },
+    { t:'Kanalizacja',         d:100 },
+    { t:'Gaz',                 d:90 },
+    { t:'Żadne z powyższych',  d:10, excl:true, r:['brak_mediow'] }
+  ]},
+
+{ when:m=>m.dz==='mam', sec:'Działka',
+  q:'Jak daleko jest najbliższy punkt przyłączenia wody i kanalizacji od granicy działki?',
+  h:'Przyłącze wody kosztuje typowo 6–10 tys. zł, ale przy 50 metrach dojścia rośnie do 20–40 tys. Przyłącze gazu przy 15 metrach to ok. 3–3,5 tys., przy większych odległościach nawet 20 tys.',
+  dz:{w:2},
+  o:[
+    { t:'Do 15 metrów',            d:100 },
+    { t:'15–50 metrów',            d:76, r:['przylacza_dalekie'] },
+    { t:'50–150 metrów',           d:42, r:['przylacza_bardzo_dalekie'] },
+    { t:'Ponad 150 metrów albo brak sieci', d:20, r:['przylacza_bardzo_dalekie'] },
+    { t:'Nie wiem',                d:60, r:['nie_zmierzone'] }
+  ]},
+
+{ when:m=>m.dz==='mam', sec:'Działka',
+  q:'Ukształtowanie terenu:',
+  h:'Podpiwniczenie lub budowa na wyraźnym spadku podnosi koszt o 30–40%, czyli realnie o 50–120 tys. zł. Niwelacja terenu to 5–15 tys.',
+  dz:{w:2},
+  o:[
+    { t:'Praktycznie płaska',                          d:100 },
+    { t:'Lekki, równomierny spadek',                   d:88 },
+    { t:'Wyraźny spadek — dom trzeba wpasować',        d:52, r:['spadek'] },
+    { t:'Skarpa albo bardzo duża różnica poziomów',    d:28, r:['skarpa'] },
+    { t:'Teren podmokły lub zagłębiony',               d:22, r:['podmokly'] }
+  ]},
+
+{ when:m=>m.dz==='mam', sec:'Działka',
+  q:'Warunki gruntowo-wodne:',
+  h:'Badania geotechniczne kosztują 800–2 000 zł, typowo ok. 1 500. To najtańsza rzecz na tej liście i jedna z niewielu, które potrafią uratować sto tysięcy.',
+  dz:{w:3},
+  o:[
+    { t:'Mam badania geotechniczne, wyszły dobrze',           d:100 },
+    { t:'Mam badania, wykazały wysoką wodę lub słaby grunt',  d:38, r:['grunt_slaby'] },
+    { t:'Nie mam badań, ale sąsiedzi budowali bez problemów', d:74, r:['brak_geo'] },
+    { t:'Nie mam badań i nie wiem, czego się spodziewać',     d:52, r:['brak_geo'] },
+    { t:'Wiem, że jest tam nasyp albo torf',                  d:15, r:['grunt_slaby'] }
+  ]},
+
+{ when:m=>m.dz==='mam', sec:'Działka', type:'multi',
+  q:'Co znajduje się w bezpośrednim sąsiedztwie działki?',
+  h:'Hałas i sąsiedztwo to jedyne parametry, których nie da się zmienić ani projektem, ani pieniędzmi. Warto je znać przed, a nie po.',
+  dz:{w:3},
+  o:[
+    { t:'Droga krajowa, ekspresowa lub ruchliwa trasa',   d:28, r:['halas_droga'] },
+    { t:'Linia kolejowa',                                 d:32, r:['halas_kolej'] },
+    { t:'Lotnisko lub korytarz podejścia',                d:25, r:['halas_lotnisko'] },
+    { t:'Ferma, zakład produkcyjny, oczyszczalnia',       d:22, r:['uciazliwosc'] },
+    { t:'Linia energetyczna wysokiego napięcia',          d:38, r:['linia_wn'] },
+    { t:'Teren zalewowy lub osuwiskowy',                  d:14, r:['zalewowy'] },
+    { t:'Las, park, woda albo otwarte pola',              d:100, r:['sasiedztwo_dobre'] },
+    { t:'Spokojna zabudowa jednorodzinna',                d:100 },
+    { t:'Nic z powyższych',                               d:88, excl:true }
+  ]},
+
+{ when:m=>m.dz==='mam', sec:'Działka',
+  q:'Czy sprawdziłeś, co może powstać na sąsiednich działkach?',
+  h:'Widok, za który zapłaciłeś, jest Twój tylko wtedy, gdy plan sąsiedniej działki go chroni. Puste pole obok to nie jest widok — to jest niewiadoma.',
+  dz:{w:2},
+  o:[
+    { t:'Tak — sprawdziłem plan i wydane pozwolenia wokół',  d:100 },
+    { t:'Sprawdziłem pobieżnie',                              d:68, r:['sasiedztwo_niesprawdzone'] },
+    { t:'Nie sprawdzałem',                                    d:42, r:['sasiedztwo_niesprawdzone'] },
+    { t:'Wokół jest już gotowa zabudowa, nie ma gdzie budować', d:96 }
+  ]},
+
+{ when:m=>m.dz==='mam', sec:'Działka',
+  q:'Ile zajmuje dojazd stąd do pracy — w jedną stronę, w godzinach szczytu?',
+  h:'Ludzie regularnie zamieniają dłuższy dojazd na lepszy dom i systematycznie nie doszacowują, ile ich to kosztuje. Do dojazdu — w odróżnieniu od domu — nie da się przyzwyczaić. Godzina dziennie to około 230 godzin rocznie.',
+  dz:{w:2},
+  o:[
+    { t:'Do 15 minut',                d:100 },
+    { t:'15–30 minut',                d:88 },
+    { t:'30–45 minut',                d:62, r:['dojazd'] },
+    { t:'45–60 minut',                d:38, r:['dojazd'] },
+    { t:'Ponad godzinę',              d:18, r:['dojazd_dlugi'] },
+    { t:'Pracuję zdalnie, to bez znaczenia', d:92 }
+  ]},
+
+{ when:m=>m.dz==='mam', sec:'Działka',
+  q:'Stan prawny działki:',
+  h:null,
+  dz:{w:3},
+  o:[
+    { t:'Wyłącznie moja albo nasza wspólna, księga czysta',   d:100 },
+    { t:'Współwłasność z rodziną, wszyscy się zgadzają',      d:66, r:['wspolwlasnosc'] },
+    { t:'Współwłasność, nie wszyscy są zgodni',               d:26, r:['wspolwlasnosc_konflikt'] },
+    { t:'Nieuregulowany spadek albo trwa dział spadku',       d:20, r:['spadek_nieuregulowany'] },
+    { t:'Obciążona służebnością mieszkania lub inną',         d:44, r:['obciazenie'] }
+  ]},
+
+{ when:m=>m.dz==='mam', sec:'Działka',
+  q:'Odłóż na bok wszystkie parametry. Kiedy stoisz na tej działce, czujesz się:',
+  h:'To pytanie nie jest miękkie. Przywiązanie do miejsca jest jednym z najlepiej udokumentowanych predyktorów długoterminowego zadowolenia z domu — i nie da się go wyprodukować projektem.',
+  dz:{w:3},
+  o:[
+    { t:'Świetnie, to jest to miejsce',                       d:100 },
+    { t:'Dobrze, choć bez wielkich emocji',                   d:78 },
+    { t:'Obojętnie',                                          d:50, r:['brak_przywiazania'] },
+    { t:'Nie do końca dobrze, coś mi tu nie gra',             d:26, r:['zle_przeczucie'] },
+    { t:'Źle — ale tak wyszło',                               d:8,  r:['zle_przeczucie'] }
+  ]},
+
+{ when:m=>m.dz==='mam', sec:'Działka', type:'multi',
+  q:'Co byś w tej działce zmienił, gdybyś mógł?',
+  h:null,
+  dz:{w:0},
+  o:[
+    { t:'Lokalizację — jest za daleko',          r:['chce_lokalizacja'] },
+    { t:'Ekspozycję, ustawienie względem słońca',r:['chce_ekspozycja'] },
+    { t:'Wielkość — jest za mała',               r:['chce_wielkosc'] },
+    { t:'Kształt',                                r:['chce_ksztalt'] },
+    { t:'Sąsiedztwo',                             r:['chce_sasiedztwo'] },
+    { t:'Ukształtowanie terenu',                  r:['chce_teren'] },
+    { t:'Nic — jest dobra',                       excl:true }
+  ]},
+
+/* ===================== ŚCIEŻKA B: SZUKAM (7) ===================== */
+
+{ when:m=>m.dz==='szukam', sec:'Działka', t:'Czego szukać',
+  q:'Ile masz na działkę w budżecie całej inwestycji?',
+  h:'Działka to zwykle 15–30% budżetu inwestycji. Poniżej 15% zaczyna się szukanie kompromisów, których nie da się potem naprawić.',
+  dz:{w:0},
+  o:[
+    { t:'Poniżej 15% budżetu',    s:{}, m:{budzetDz:'niski'} },
+    { t:'15–25% budżetu',         s:{}, m:{budzetDz:'sredni'} },
+    { t:'25–35% budżetu',         s:{}, m:{budzetDz:'wysoki'} },
+    { t:'Ponad 35% — lokalizacja jest kluczowa', s:{}, m:{budzetDz:'bardzo'} },
+    { t:'Nie policzyłem tego',    s:{}, m:{budzetDz:'brak'} }
+  ]},
+
+{ when:m=>m.dz==='szukam', sec:'Działka',
+  q:'Ile czasu realnie możesz poświęcić na szukanie?',
+  h:'Dobra działka rzadko trafia się w pierwszym miesiącu. Pośpiech przy zakupie działki jest najdroższym pośpiechem w całym procesie — bo błędu nie da się cofnąć projektem.',
+  dz:{w:0},
+  o:[
+    { t:'Ile trzeba — nie mam presji',        s:{}, m:{czasDz:'duzo'} },
+    { t:'Kilka miesięcy',                     s:{}, m:{czasDz:'srednio'} },
+    { t:'Chcę kupić w ciągu kilku tygodni',   s:{}, m:{czasDz:'malo'}, r:['pospiech'] },
+    { t:'Muszę kupić już',                    s:{}, m:{czasDz:'malo'}, r:['pospiech'] }
+  ]},
+
+{ when:m=>m.dz==='szukam', sec:'Działka',
+  q:'Co jest ważniejsze?',
+  h:null,
+  dz:{w:0},
+  o:[
+    { t:'Bliskość pracy, szkół i sklepów',            s:{}, m:{lokDz:'miasto'} },
+    { t:'Cisza, przestrzeń i zieleń wokół',           s:{}, m:{lokDz:'wies'} },
+    { t:'Kompromis — obrzeża miasta',                 s:{}, m:{lokDz:'obrzeza'} },
+    { t:'Konkretna okolica, w której chcę mieszkać',  s:{}, m:{lokDz:'konkret'} }
+  ]},
+
+{ when:m=>m.dz==='szukam', sec:'Działka',
+  q:'Maksymalny dojazd do pracy, jaki zaakceptujesz na stałe:',
+  h:'Ludzie akceptują dojazd, licząc, że się do niego przyzwyczają. Badania konsekwentnie pokazują, że nie przyzwyczajają się — w odróżnieniu od domu, do którego przyzwyczajają się bardzo szybko.',
+  dz:{w:0},
+  o:[
+    { t:'Do 20 minut',      s:{}, m:{dojazdMax:20} },
+    { t:'Do 30 minut',      s:{}, m:{dojazdMax:30} },
+    { t:'Do 45 minut',      s:{}, m:{dojazdMax:45} },
+    { t:'Godzina i więcej', s:{}, m:{dojazdMax:60}, r:['dojazd_akceptowany'] },
+    { t:'Pracuję zdalnie',  s:{}, m:{dojazdMax:0} }
+  ]},
+
+{ when:m=>m.dz==='szukam', sec:'Działka',
+  q:'Czy wiesz, jak sprawdzić plan miejscowy i warunki zabudowy dla konkretnej działki?',
+  h:null,
+  dz:{w:0},
+  o:[
+    { t:'Tak, robiłem to już',                        s:{}, m:{wiedzaDz:'tak'} },
+    { t:'Mniej więcej wiem, gdzie szukać',            s:{}, m:{wiedzaDz:'czesc'} },
+    { t:'Nie mam pojęcia',                            s:{}, m:{wiedzaDz:'nie'}, r:['brak_wiedzy'] }
+  ]},
+
+{ when:m=>m.dz==='szukam', sec:'Działka',
+  q:'Gdybyś znalazł działkę idealną pod każdym względem poza jednym — na który kompromis pójdziesz najłatwiej?',
+  h:null,
+  dz:{w:0},
+  o:[
+    { t:'Mniejsza powierzchnia',                s:{}, m:{kompromis:'wielkosc'} },
+    { t:'Dalszy dojazd',                        s:{}, m:{kompromis:'dojazd'} },
+    { t:'Ogród od gorszej strony świata',       s:{}, m:{kompromis:'ekspozycja'} },
+    { t:'Brak części mediów',                   s:{}, m:{kompromis:'media'} },
+    { t:'Mniej ciekawe sąsiedztwo',             s:{}, m:{kompromis:'sasiedztwo'} }
+  ]},
+
+{ when:m=>m.dz==='szukam', sec:'Działka',
+  q:'Czy masz już wybrany projekt albo bardzo konkretną wizję domu?',
+  h:'Kolejność ma znaczenie. Projekt dobrany do działki prawie zawsze wychodzi lepiej niż działka dobierana do projektu — ale jeśli wizja jest już mocna, trzeba jej podporządkować kryteria wyboru działki.',
+  dz:{w:0},
+  o:[
+    { t:'Tak, wiem dokładnie, co chcę zbudować',      s:{}, m:{projekt:'tak'} },
+    { t:'Mam kierunek, ale to elastyczne',            s:{}, m:{projekt:'kierunek'} },
+    { t:'Nie, dobiorę projekt do działki',            s:{}, m:{projekt:'nie'} }
+  ]}
+];
+
+/* --------------------------------------------------------------------
+   PROFILE DOMU
+   -------------------------------------------------------------------- */
+
+const PROFILES = [
+{
+  id:'witryna', name:'Witryna', tag:'Dom, który ma robić wrażenie — i niech robi',
+  proto:{P:92,N:85,D:92,F:35,R:45,Y:25,H:55,E:35},
+  w:    {P:3, N:2, D:3, F:2, R:1, Y:2, H:1, E:2},
+  lead:'Chcesz domu, który zwraca uwagę. To całkowicie uprawniony powód budowania i nie ma sensu udawać, że jest inaczej.',
+  body:'Dom sygnalizujący status jest funkcją domu od kilku tysięcy lat i nie ma w tym nic wstydliwego — ludzie od zawsze budowali też po to, żeby coś o sobie powiedzieć. Problem nie leży w motywacji, tylko w tym, że efekt ma dwie ceny, o których rzadko się mówi przed podpisaniem umowy: cenę wykonania i cenę utrzymania. Twoje odpowiedzi pokazują wysoki priorytet dla efektu przy wyraźnie niższym dla codziennej eksploatacji — a to jest dokładnie ta kombinacja, która po pięciu latach zamienia się w rozgoryczenie. Nie dlatego, że dom jest zły. Dlatego, że nikt nie policzył rachunku z wyprzedzeniem.',
+  reko:[
+    'Policz koszt utrzymania efektu ZANIM zamkniesz projekt: mycie przeszkleń powyżej 4 m wymaga firmy z podnośnikiem, beton architektoniczny wymaga impregnacji, ogród ozdobny to stały koszt lub stały weekend.',
+    'Postaw na jeden mocny gest zamiast pięciu średnich. Jedna świetnie zaprojektowana przestrzeń robi większe wrażenie niż dom, w którym wszystko próbuje być efektowne — i kosztuje wyraźnie mniej.',
+    'Efekt ulokuj w rzeczach trwałych: proporcje, wysokość, światło, relacja z ogrodem. Unikaj lokowania go w rzeczach modnych: kolory, faktury, konkretne materiały wykończeniowe. Pierwsze nie starzeją się nigdy, drugie starzeją się w pięć lat.',
+    'Zaprojektuj zaplecze, nawet jeśli Cię nudzi. Dom bez pralni i spiżarni po roku wygląda inaczej niż na zdjęciach, bo wszystko, co nie ma swojego miejsca, ląduje na widoku.',
+    'Zamknij decyzje estetyczne przed startem budowy. Przy Twoim profilu zmiany w trakcie będą kuszące i będą najdroższą pozycją w całym budżecie.'
+  ],
+  uwaga:'Do widoku i przeszkleń przyzwyczaisz się szybciej, niż myślisz — to najlepiej udokumentowany mechanizm w psychologii zadowolenia. Do braku miejsca na odkurzacz nie przyzwyczaisz się nigdy. To nie jest argument przeciwko efektownemu domowi. To argument za tym, żeby efekt i zaplecze zaprojektować w tym samym momencie.'
+},
+{
+  id:'gniazdo', name:'Gniazdo', tag:'Dom jako narzędzie życia rodzinnego',
+  proto:{P:15,N:22,D:52,F:92,R:95,Y:60,H:88,E:85},
+  w:    {P:2, N:2, D:2, F:3, R:3, Y:2, H:2, E:2},
+  lead:'Budujesz miejsce, a nie obiekt. Dom ma obsłużyć życie, które już się dzieje.',
+  body:'Twoje odpowiedzi układają się bardzo spójnie: liczy się to, co dom robi dla ludzi, którzy w nim mieszkają, a nie to, jak wygląda na zdjęciu. To profil o najwyższej przewidywanej satysfakcji po pięciu latach — i jednocześnie ten, który najłatwiej dać sobie wyperswadować w rozmowie z architektem albo pod wpływem tego, co widać w internecie. Twoje ryzyko nie polega na tym, że zbudujesz zły dom. Polega na tym, że dasz się namówić na cudzy.',
+  reko:[
+    'Zbuduj program domu od czynności, nie od pomieszczeń: gdzie wchodzą dzieci z błotem, gdzie schnie pranie w listopadzie, gdzie stoi wózek, gdzie ktoś może zamknąć drzwi i porozmawiać przez telefon.',
+    'Akustyka jest ważniejsza niż metraż. Otwarta przestrzeń z dziećmi wymaga przynajmniej jednego pomieszczenia, w którym da się zamknąć drzwi — inaczej wieczorem nie ma gdzie usiąść.',
+    'Zaplanuj dom na trzy etapy życia: małe dzieci, nastolatki, pusty dom. Najtańszy sposób to elastyczny układ na parterze i sypialnia, która może stać się gabinetem.',
+    'Nie oszczędzaj na izolacji akustycznej między pokojami dzieci i na drzwiach. To pozycja rzędu kilku tysięcy, o której nikt nie mówi, i jedna z najczęściej żałowanych.',
+    'Miejsce, w którym wszyscy siadają, zaprojektuj jako pierwsze. W większości domów jest to kuchnia ze stołem, a nie salon — i warto to przyznać na etapie projektu, a nie po wprowadzeniu.'
+  ],
+  uwaga:'Ostrożnie z jedną rzeczą: dom zaprojektowany wyłącznie pod dzieci będzie za duży przez ostatnie trzydzieści lat życia w nim. Warto już teraz sprawdzić, jak ten dom działa dla dwóch osób.'
+},
+{
+  id:'autor', name:'Autor', tag:'Architektura dla siebie, nie dla oglądających',
+  proto:{P:28,N:90,D:96,F:58,R:48,Y:70,H:82,E:60},
+  w:    {P:3, N:3, D:3, F:2, R:1, Y:2, H:2, E:2},
+  lead:'Zależy Ci na architekturze naprawdę, a nie na tym, żeby ktoś ją pochwalił. To rzadka i bardzo dobra kombinacja.',
+  body:'Wysoka wrażliwość na przestrzeń przy niskiej motywacji statusowej to profil, który najczęściej kończy się domami, o których mówi się „ten jest inny” — bo powstały z przekonania, a nie z porównania. Twoje ryzyko nie leży w motywacji, tylko w tempie: chcesz rozwiązań, które nie mają jeszcze historii serwisowej, a dom to nie jest dobre miejsce na prototypowanie. Drugie ryzyko jest bardziej prozaiczne: architektura autorska bywa trudna w eksploatacji, a Ty masz tendencję zakładać, że to Cię nie dotyczy.',
+  reko:[
+    'Wybierz architekta, a nie projekt gotowy. Przy Twoim profilu adaptacja katalogu skończy się serią zmian, które kosztują więcej niż projekt indywidualny od początku.',
+    'Postaw twardą granicę na rozwiązania eksperymentalne: maksymalnie jedno na cały dom, i najlepiej takie, którego awaria nie zatrzymuje mieszkania. Reszta ma być sprawdzona.',
+    'Zapytaj o serwis, zanim zapytasz o cenę. Nietypowa stolarka, niestandardowe systemy i importowane rozwiązania są świetne do momentu pierwszej usterki.',
+    'Zamroź projekt wykonawczy przed startem. Autorska wizja plus zmiany w trakcie to najdroższa kombinacja, jaka istnieje na budowie.',
+    'Zapisz sobie, czego z tego domu nie da się zmienić później, a co da. Odważne decyzje warto podejmować tam, gdzie są odwracalne.'
+  ],
+  uwaga:'Twoim naturalnym sojusznikiem jest dobry architekt, a naturalnym przeciwnikiem — kompromis wprowadzany po cichu przez wykonawcę na etapie realizacji. Pilnuj detali, które decydują o całości, i odpuszczaj te, które nie decydują.'
+},
+{
+  id:'maszyna', name:'Maszyna', tag:'Technologia, efektywność, dom, który sam się ogarnia',
+  proto:{P:45,N:90,D:55,F:88,R:50,Y:50,H:75,E:88},
+  w:    {P:2, N:3, D:2, F:3, R:1, Y:1, H:2, E:3},
+  lead:'Interesuje Cię, jak dom działa, bardziej niż jak wygląda. Efektowność mierzysz w kilowatogodzinach.',
+  body:'To profil zorientowany na sprawność: pompa ciepła, rekuperacja, fotowoltaika, automatyka, szczelność, sterowanie. Nowość szukasz w technologii, nie w formie — i to jest istotna różnica, bo technologia w odróżnieniu od mody ma mierzalny zwrot. Twoje ryzyko jest specyficzne: łatwo przeinwestować w systemy, których zwrot liczy się w dekadach, i przeoczyć rzeczy podstawowe, których żadna automatyka nie naprawi — bryłę, orientację względem słońca i mostki termiczne.',
+  reko:[
+    'Kolejność jest odwrotna niż intuicyjna: najpierw bryła, izolacja i szczelność, potem instalacje, dopiero na końcu automatyka. Zła bryła z drogą pompą ciepła przegrywa z dobrą bryłą i tanią pompą.',
+    'Wymagaj testu szczelności budynku. To kilkaset złotych i jedyny sposób, żeby sprawdzić, czy dostałeś to, za co zapłaciłeś.',
+    'Przy automatyce trzymaj się jednego standardu i wybieraj systemy, które działają także wtedy, gdy padnie serwer producenta. Dom nie może przestać działać dlatego, że firma zmieniła model biznesowy.',
+    'Policz zwrot każdej technologii osobno, z realną ceną energii, a nie z folderu. Część rozwiązań zwraca się w 6 lat, część w 25 — i sprzedaje się je tym samym tonem.',
+    'Zostaw sobie zapas w rozdzielnicy i przepusty na przyszłe instalacje. To najtańsza inwestycja w elastyczność, jaką można zrobić.'
+  ],
+  uwaga:'Uważaj na jedną rzecz: efektywność jest łatwo mierzalna, więc łatwo staje się celem samym w sobie. Sprawdź, czy w tym domu ktoś będzie chciał usiąść — bo to jest parametr, którego żaden system nie pokaże w aplikacji.'
+},
+{
+  id:'azyl', name:'Azyl', tag:'Dom jako miejsce odcięcia się od świata',
+  proto:{P:8, N:35,D:65,F:82,R:55,Y:95,H:88,E:78},
+  w:    {P:3, N:2, D:2, F:2, R:2, Y:3, H:2, E:2},
+  lead:'Dom ma być miejscem, w którym się chowasz, a nie pokazujesz. Prywatność jest tu funkcją, nie dodatkiem.',
+  body:'Wysoka potrzeba prywatności przy niskiej motywacji statusowej daje bardzo konkretny program: dom zamknięty od ulicy i otwarty do środka, na własne podwórze. To układ znany od starożytności i wciąż jeden z najlepiej działających — ale w Polsce rzadko projektowany, bo katalogowe domy zakładają, że najładniejsza elewacja ma być od drogi. U Ciebie jest odwrotnie: od drogi ma być spokój, a widok ma być na to, co Twoje.',
+  reko:[
+    'Rozważ układ z dziedzińcem albo dom w kształcie litery L otaczający ogród. Przeszklenia kieruj do środka działki, nie na ulicę — dostaniesz światło bez oddawania prywatności.',
+    'Ogrodzenie, zieleń i ukształtowanie terenu zaplanuj razem z domem, a nie po. Wał, żywopłot i dobrze postawiony budynek gospodarczy robią więcej dla prywatności niż jakikolwiek płot.',
+    'Zadbaj o miejsce do wycofania się wewnątrz domu, nie tylko wobec sąsiadów. Przy Twoim profilu pokój z drzwiami, które da się zamknąć, jest ważniejszy niż dodatkowe metry salonu.',
+    'Sprawdź linie zabudowy i to, gdzie stanie dom sąsiada oraz jego okna. Jedno okno w złym miejscu potrafi zepsuć cały układ.',
+    'Akustyka od strony drogi: potrójna szyba i układ z sypialniami od ogrodu. To decyzja projektowa, nie zakupowa — po fakcie nie da się jej naprawić.'
+  ],
+  uwaga:'Uważaj, żeby dom nie zamknął się nadmiernie. Granica między azylem a izolacją bywa cienka, zwłaszcza gdy dzieci dorosną i wyprowadzą się. Zostaw sobie jedną przestrzeń otwartą na świat.'
+},
+{
+  id:'rachmistrz', name:'Rachmistrz', tag:'Dom rozsądny, policzony, z myślą o wartości',
+  proto:{P:33,N:26,D:36,F:94,R:56,Y:50,H:20,E:97},
+  w:    {P:2, N:2, D:2, F:3, R:1, Y:1, H:3, E:3},
+  lead:'Patrzysz na dom jak na decyzję finansową, którą trzeba zamknąć rozsądnie. To nie jest brak wyobraźni — to inna funkcja celu.',
+  body:'Twoje odpowiedzi pokazują krótszy horyzont i wysoki realizm eksploatacyjny: dom ma być dobry, ale nie ma być dziełem życia. Przy takim nastawieniu największym zagrożeniem nie jest przeinwestowanie w efekt, tylko przeinwestowanie w rzeczy, których nie odzyskasz przy sprzedaży — bardzo osobiste rozwiązania, nietypowy układ, technologia, której następny właściciel nie umie obsłużyć.',
+  reko:[
+    'Buduj układ, który da się łatwo opisać i łatwo sprzedać: cztery sypialnie biją trzy plus pracownię, nawet jeśli dziś potrzebujesz pracowni.',
+    'Trzymaj się sprawdzonych technologii i rozwiązań, na które są ekipy w promieniu 30 km. Egzotyka to koszt przy budowie i dyskonto przy sprzedaży.',
+    'Prosta bryła i dach dwuspadowy to 10–15% oszczędności przy budowie — a różnica między dachem dwuspadowym a wielospadowym to 20–60 tys. zł.',
+    'Nie podpiwniczaj bez wyraźnej potrzeby: to plus 30–40% kosztów, czyli 50–120 tys. zł, których rynek zwykle nie wycenia.',
+    'Zainwestuj tam, gdzie widać to w wycenie: standard energetyczny, stan techniczny, ogród i elewacja. Odpuść tam, gdzie nie widać: bardzo drogie wykończenia wnętrz.'
+  ],
+  uwaga:'Warto sprawdzić jedno założenie. Statystycznie ludzie zostają w domach jednorodzinnych dłużej, niż planowali w momencie budowy. Jeśli to prawdopodobne także u Ciebie, kilka decyzji podjętych „pod odsprzedaż” może uwierać przez dwadzieścia lat.'
+},
+{
+  id:'salon', name:'Salon i zaplecze', tag:'Jeden mocny gest, reszta bezwzględnie funkcjonalna',
+  proto:{P:56,N:56,D:90,F:90,R:74,Y:50,H:80,E:74},
+  w:    {P:1, N:2, D:3, F:3, R:2, Y:2, H:2, E:2},
+  lead:'Chcesz i efektu, i wygody — i to jest wykonalne, ale wyłącznie pod warunkiem, że rozdzielisz jedno od drugiego świadomie.',
+  body:'Twoje wyniki są wysokie zarówno na doznaniu przestrzeni, jak i na funkcji. To dobra kombinacja, ale kosztowna, jeśli próbować ją realizować równomiernie w całym domu — wtedy kończy się kompromisem, w którym ani efekt nie jest efektem, ani funkcja nie działa. Strategia, która sprawdza się przy tym profilu, jest inna: skoncentrować cały budżet na wrażenie w jednej strefie i bezlitośnie zoptymalizować resztę.',
+  reko:[
+    'Wyznacz jedną strefę reprezentacyjną — zwykle salon z jadalnią i wyjściem na taras — i tam ulokuj wysokość, światło, materiał i widok. To jest miejsce, w którym budżet ma pracować na wrażenie.',
+    'Cała reszta domu projektowana czysto użytkowo: normalne wysokości, zwykłe okna, maksimum schowków. Nikt tam nie zagląda, a Ty korzystasz z tego codziennie.',
+    'Wejście i strefa wiatrołapu to najbardziej niedoceniana część domu przy tym profilu. Pierwsze wrażenie i największy bałagan dzieją się w tym samym miejscu — rozdziel je.',
+    'Zaplanuj „kuchnię brudną” albo choćby spiżarnię z blatem. Otwarta kuchnia jako element reprezentacyjny działa tylko wtedy, gdy jest gdzie schować to, co ją psuje.',
+    'Zrób kosztorys w dwóch koszykach: efekt i funkcja. Jeśli budżet pęknie, tniesz w koszyku efektu, ale w jednym miejscu, a nie po trochu wszędzie.'
+  ],
+  uwaga:'Największe ryzyko tego profilu to rozmycie. Dom, w którym wszystko jest „trochę efektowne”, kosztuje jak efektowny i działa jak zwykły. Wybierz jedno miejsce i broń go do końca.'
+}
+];
+
+/* --------------------------------------------------------------------
+   RYZYKA DZIAŁKI
+   kind: fix = nieusuwalne | proj = do rozwiązania projektem | mit = do złagodzenia
+   -------------------------------------------------------------------- */
+
+const RISKS = {
+  brak_dostepu:{lvl:'critical',kind:'fix',t:'Brak zapewnionego dostępu do drogi publicznej',
+    d:'Bez prawnie zapewnionego dostępu do drogi publicznej nie uzyskasz pozwolenia na budowę. To jedyna pozycja na tej liście, która blokuje inwestycję całkowicie. Rozwiązania są dwa: ustanowienie służebności drogi koniecznej (droga sądowa, czas liczony w miesiącach) albo wykup udziału w drodze. Zanim cokolwiek zaplanujesz, to musi być domknięte.'},
+  sluzebnosc:{lvl:'warning',kind:'mit',t:'Dojazd na służebności przez cudzą działkę',
+    d:'Służebność działa, dopóki działa relacja z właścicielem drogi. Sprawdź, czy jest wpisana do księgi wieczystej, jakiej jest szerokości i czy obejmuje przejazd pojazdów budowlanych. Betoniarka i dźwig potrzebują innej szerokości niż samochód osobowy.'},
+  droga_bez_udzialu:{lvl:'warning',kind:'mit',t:'Droga wewnętrzna bez Twojego udziału',
+    d:'Nie masz wpływu na jej stan, odśnieżanie ani ewentualne ograniczenia. Sprawdź w księdze wieczystej, kto jest właścicielem, i rozważ wykup udziału — to zwykle najtańszy sposób na uspokojenie tej sprawy.'},
+  brak_wz:{lvl:'critical',kind:'proj',t:'Brak planu miejscowego i decyzji o warunkach zabudowy',
+    d:'Gminy mają obowiązek uchwalić plany ogólne do 30 czerwca 2026. Działki poza planami mogą stracić status budowlanych, a uzyskanie decyzji o warunkach zabudowy stanie się znacząco trudniejsze. Wystąpienie o warunki zabudowy teraz jest najpilniejszą rzeczą na Twojej liście — jeszcze przed projektem.'},
+  rolna:{lvl:'critical',kind:'proj',t:'Działka rolna, nieodrolniona',
+    d:'Przed budową konieczne jest odrolnienie i wyłączenie z produkcji rolnej. Koszt i czas zależą od klasy gruntu — przy klasach I–III procedura jest znacznie trudniejsza, przy IV–VI zwykle prostsza. Ustal to zanim policzysz cokolwiek innego, bo wpływa na termin startu o kilkanaście miesięcy.'},
+  mpzp_nieczytany:{lvl:'warning',kind:'proj',t:'Plan miejscowy istnieje, ale nie znasz jego zapisów',
+    d:'To najtańsza rzecz do naprawienia w całej ankiecie i jedna z najczęściej pomijanych. Plan potrafi narzucić kąt dachu, wysokość, kolor pokrycia, kierunek kalenicy, procent zabudowy i powierzchnię biologicznie czynną. Wypis i wyrys kosztuje kilkadziesiąt złotych, a potrafi unieważnić cały wybrany projekt.'},
+  mpzp_niewiem:{lvl:'warning',kind:'proj',t:'Nie wiesz, jakie ograniczenia narzuca plan',
+    d:'Pobierz wypis i wyrys z planu, zanim wybierzesz projekt. Kolejność odwrotna — najpierw projekt, potem plan — to najczęstsza przyczyna kosztownych adaptacji.'},
+  mpzp_dach:{lvl:'warning',kind:'fix',t:'Plan narzuca kąt nachylenia dachu',
+    d:'Jeśli marzysz o domu z płaskim dachem albo o nowoczesnej bryle, ten zapis jest rozstrzygający. Odstępstwa są w praktyce nieosiągalne. Projekt trzeba dobrać do zapisu, nie odwrotnie.'},
+  mpzp_material:{lvl:'info',kind:'fix',t:'Plan narzuca rodzaj lub kolor pokrycia',
+    d:'Ogranicza paletę wykończenia dachu i elewacji. Zwykle da się z tym pracować, ale warto wiedzieć przed wyborem projektu, a nie po.'},
+  mpzp_wysokosc:{lvl:'warning',kind:'fix',t:'Ograniczona wysokość lub liczba kondygnacji',
+    d:'To bezpośrednio decyduje, czy w tym domu zmieści się wysoki salon albo antresola. Sprawdź zapis dokładnie: bywa liczony do kalenicy, bywa do okapu, a różnica potrafi wynosić metr.'},
+  mpzp_kalenica:{lvl:'info',kind:'fix',t:'Narzucony kierunek kalenicy',
+    d:'Determinuje ustawienie domu na działce, a przez to układ pomieszczeń względem stron świata. Warto to nałożyć na mapę zanim wybierzesz projekt.'},
+  mpzp_zabudowa:{lvl:'warning',kind:'fix',t:'Niski dopuszczalny procent zabudowy',
+    d:'Ogranicza powierzchnię, jaką dom może zająć na działce. Przy domu parterowym to ograniczenie bije najmocniej — parterowy potrzebuje mniej więcej dwa razy więcej powierzchni zabudowy niż piętrowy o tym samym metrażu.'},
+  mpzp_zielen:{lvl:'info',kind:'fix',t:'Wysoki wymagany udział powierzchni biologicznie czynnej',
+    d:'Ogranicza łączną powierzchnię utwardzoną: podjazd, taras, ścieżki, budynki gospodarcze. Policz to na etapie koncepcji, bo bywa, że wyklucza wymarzony duży taras albo podjazd na dwa auta.'},
+  mpzp_linia:{lvl:'warning',kind:'fix',t:'Nieprzekraczalna linia zabudowy blisko drogi',
+    d:'Wypycha dom w stronę drogi i skraca strefę prywatną od frontu. Przy dużej potrzebie prywatności to istotne ograniczenie — trzeba je zrekompensować układem wnętrza i zielenią.'},
+  waska_srednio:{lvl:'info',kind:'proj',t:'Działka umiarkowanie wąska (16–20 m)',
+    d:'Wystarczająca dla większości projektów, ale z ograniczeniami: garaż wolnostojący i dom parterowy z rozłożystym rzutem będą trudne. Trzeba trzymać się 4 m od granicy przy ścianie z oknami i 3 m przy ścianie bez otworów.'},
+  waska:{lvl:'warning',kind:'proj',t:'Wąska działka (12–16 m)',
+    d:'Katalog projektów gwałtownie się zawęża. W tym przedziale przepisy dopuszczają w określonych warunkach budowę bliżej granicy niż standardowo, ale każde takie rozwiązanie ma cenę: mniej okien z jednej strony i mniejsza prywatność. Realnie oznacza to dom wąski i głęboki albo piętrowy.'},
+  waska_bardzo:{lvl:'critical',kind:'fix',t:'Bardzo wąska działka (poniżej 12 m)',
+    d:'To ograniczenie strukturalne, nie kosmetyczne. Dom będzie musiał być wąski, prawdopodobnie piętrowy, z oknami głównie na dwie strony, a garaż wbudowany zamiast wolnostojącego. Duże przeszklenia i rozłożysty parter są w tych warunkach praktycznie wykluczone.'},
+  ksztalt_dlugi:{lvl:'info',kind:'proj',t:'Bardzo długa i wąska działka',
+    d:'Ogród będzie liniowy, a dojazd długi — co oznacza dłuższe i droższe przyłącza oraz więcej utwardzenia. Plusem bywa prywatność w głębi działki.'},
+  ksztalt_nieregularny:{lvl:'warning',kind:'proj',t:'Nieregularny kształt działki',
+    d:'Wymusza projekt indywidualny albo poważną adaptację. Ostre kąty i skosy zwykle oznaczają, że część powierzchni jest nieużyteczna pod zabudowę. Warto zlecić architektowi analizę chłonności działki przed wyborem projektu — to koszt rzędu kilkuset złotych.'},
+  ekspozycja_srednia:{lvl:'info',kind:'proj',t:'Ogród wystawiony na wschód',
+    d:'Słońce w ogrodzie rano, cień po południu — czyli akurat wtedy, gdy zwykle się z ogrodu korzysta. Da się to zrekompensować układem tarasu i przesunięciem strefy dziennej, ale kosztem elastyczności rzutu.'},
+  ekspozycja_zla:{lvl:'critical',kind:'fix',t:'Ogród wystawiony na północ',
+    d:'To jedno z niewielu ograniczeń, których nie da się usunąć — ani projektem, ani pieniędzmi. Strefa dzienna i taras będą w cieniu przez większość dnia, a duże przeszklenia od północy dają straty ciepła bez zysków słonecznych. Można to złagodzić: przesunąć dom do granicy północnej, otworzyć strefę dzienną na zachód, zaprojektować taras w naświetlonym narożniku. Ale komfort będzie niższy niż przy ogrodzie od południa i warto wiedzieć to teraz.'},
+  droga_gruntowa:{lvl:'info',kind:'mit',t:'Droga dojazdowa nieutwardzona',
+    d:'W trakcie budowy to realny problem: ciężki sprzęt rozjeżdża drogę gruntową, a betonowóz może na nią nie wjechać po deszczu. Po budowie — kwestia komfortu i odśnieżania. Sprawdź, czy gmina ma tę drogę w planach utwardzenia.'},
+  brak_mediow:{lvl:'critical',kind:'mit',t:'Brak mediów przy działce',
+    d:'To bezpośredni koszt i bezpośredni czas. Procedury przyłączeniowe potrafią trwać od kilku do kilkunastu miesięcy, a przy braku sieci konieczne są rozwiązania zastępcze: studnia 10–20 tys. zł, szambo 5–12 tys. lub przydomowa oczyszczalnia 10–25 tys. Wystąp o warunki techniczne do gestorów zanim zaczniesz projektować.'},
+  przylacza_dalekie:{lvl:'warning',kind:'mit',t:'Punkt przyłączenia w odległości 15–50 m',
+    d:'Koszt przyłącza rośnie z odległością. Przyłącze wody przy 50 metrach dojścia to już 20–40 tys. zł zamiast typowych 6–10 tys. Doliczy do budżetu kilkanaście do kilkudziesięciu tysięcy, których zwykle nie ma w kosztorysie.'},
+  przylacza_bardzo_dalekie:{lvl:'critical',kind:'mit',t:'Bardzo duża odległość do sieci',
+    d:'Przy takich odległościach koszt uzbrojenia potrafi przekroczyć sto tysięcy złotych i bywa porównywalny z różnicą w cenie działki uzbrojonej. Wystąp o warunki techniczne i konkretną wycenę zanim podejmiesz jakiekolwiek dalsze decyzje.'},
+  spadek:{lvl:'warning',kind:'proj',t:'Wyraźny spadek terenu',
+    d:'Da się z tego zrobić atut — dom z wejściem na dwóch poziomach, garaż wkopany w skarpę, taras kaskadowy. Ale kosztuje: niwelacja 5–15 tys. zł, a jeśli spadek wymusi podpiwniczenie, to plus 30–40% kosztów budowy, czyli realnie 50–120 tys. zł.'},
+  skarpa:{lvl:'critical',kind:'proj',t:'Skarpa lub bardzo duża różnica poziomów',
+    d:'Wymaga projektu indywidualnego, prawdopodobnie murów oporowych i rozbudowanego odwodnienia. To nie jest działka pod projekt katalogowy. Koszt dodatkowy liczony w setkach tysięcy w skrajnych przypadkach — zleć analizę architektowi i geotechnikowi przed jakimikolwiek innymi wydatkami.'},
+  podmokly:{lvl:'critical',kind:'proj',t:'Teren podmokły lub zagłębiony',
+    d:'Wysoki poziom wód gruntowych oznacza droższe fundamenty, izolację przeciwwodną zamiast przeciwwilgociowej, konieczność drenażu i wykluczenie podpiwniczenia. Badania geotechniczne są tu obowiązkowe, nie opcjonalne.'},
+  grunt_slaby:{lvl:'critical',kind:'proj',t:'Słaby grunt lub wysoki poziom wody gruntowej',
+    d:'Wymiana gruntu, pale, płyta fundamentowa zamiast ław, izolacja przeciwwodna — każde z tych rozwiązań to dziesiątki tysięcy złotych. Dobra wiadomość: wiesz o tym przed budową, a nie po wykopie. Poproś geotechnika o rekomendację posadowienia i wyceń ją przed wyborem projektu.'},
+  brak_geo:{lvl:'warning',kind:'proj',t:'Brak badań geotechnicznych',
+    d:'To najtańsza polisa w całym procesie: 800–2 000 zł, typowo około 1 500. Doświadczenia sąsiadów nie są dowodem — warunki gruntowe potrafią zmieniać się na przestrzeni kilkudziesięciu metrów. Zrób badania zanim zamówisz projekt, a nie zanim wejdzie koparka.'},
+  halas_droga:{lvl:'critical',kind:'mit',t:'Ruchliwa droga w sąsiedztwie',
+    d:'Hałas komunikacyjny to jeden z nielicznych czynników, do których ludzie się nie przyzwyczajają — w odróżnieniu od większości cech domu. Złagodzić da się: sypialnie od strony ogrodu, potrójne szyby, wał ziemny i gęsta zieleń. Usunąć się nie da. Warto pojechać tam wieczorem i w godzinach szczytu, zanim zapadnie decyzja o projekcie.'},
+  halas_kolej:{lvl:'critical',kind:'mit',t:'Linia kolejowa w sąsiedztwie',
+    d:'Hałas kolejowy jest odbierany inaczej niż drogowy — jest rzadszy, ale gwałtowniejszy, i szczególnie uciążliwy nocą. Sprawdź natężenie ruchu towarowego, bo to on jedzie po nocach. Rozwiązania: układ z sypialniami po przeciwnej stronie i stolarka o podwyższonej izolacyjności akustycznej.'},
+  halas_lotnisko:{lvl:'critical',kind:'fix',t:'Lotnisko lub korytarz podejścia',
+    d:'Sprawdź, czy działka nie leży w obszarze ograniczonego użytkowania — to bywa formalne ograniczenie, nie tylko kwestia komfortu. Hałasu lotniczego praktycznie nie da się zniwelować środkami budowlanymi w stopniu, który zmienia odbiór.'},
+  uciazliwosc:{lvl:'critical',kind:'fix',t:'Uciążliwe sąsiedztwo produkcyjne lub rolnicze',
+    d:'Zapach jest jeszcze trudniejszy do zniesienia niż hałas i nie ma na niego rozwiązania technicznego. Odwiedź działkę o różnych porach dnia i przy różnych kierunkach wiatru — a jeśli to ferma, koniecznie latem.'},
+  linia_wn:{lvl:'warning',kind:'fix',t:'Linia energetyczna wysokiego napięcia',
+    d:'Oznacza strefę ochronną, w której nie wolno budować, i realne ograniczenie powierzchni zabudowy. Sprawdź szerokość strefy u operatora sieci — bywa, że wycina znaczną część działki.'},
+  zalewowy:{lvl:'critical',kind:'fix',t:'Teren zalewowy lub osuwiskowy',
+    d:'To oznacza problemy z pozwoleniem, z ubezpieczeniem i z odsprzedażą. Sprawdź mapy zagrożenia powodziowego oraz rejestr terenów osuwiskowych, zanim podejmiesz jakiekolwiek dalsze kroki.'},
+  sasiedztwo_niesprawdzone:{lvl:'warning',kind:'proj',t:'Nie wiesz, co powstanie w sąsiedztwie',
+    d:'Widok, za który zapłaciłeś, jest Twój tylko wtedy, gdy chroni go plan sąsiedniej działki. Sprawdź w planie przeznaczenie sąsiednich terenów i zapytaj w wydziale architektury o wydane pozwolenia. To jedno popołudnie pracy.'},
+  wspolwlasnosc:{lvl:'info',kind:'proj',t:'Współwłasność z rodziną',
+    d:'Dziś wszyscy się zgadzają. Warto to utrwalić formalnie przed startem: zniesienie współwłasności albo umowa o podziale do korzystania. Sytuacja rodzinna potrafi się zmienić w trakcie dwuletniej budowy, a wtedy koszt niedomkniętej sprawy jest wysoki.'},
+  wspolwlasnosc_konflikt:{lvl:'critical',kind:'proj',t:'Współwłasność bez zgody wszystkich',
+    d:'To trzeba domknąć przed jakimkolwiek wydatkiem na projekt. Bez zgody współwłaścicieli nie uzyskasz skutecznego oświadczenia o prawie do dysponowania nieruchomością na cele budowlane — a bez niego nie ma pozwolenia. Sprawa dla prawnika, nie dla architekta.'},
+  spadek_nieuregulowany:{lvl:'critical',kind:'proj',t:'Nieuregulowany stan spadkowy',
+    d:'Do czasu zakończenia postępowania spadkowego i ujawnienia w księdze wieczystej nie da się skutecznie rozpocząć inwestycji. To pierwsza rzecz do załatwienia, przed wszystkim innym.'},
+  obciazenie:{lvl:'warning',kind:'proj',t:'Działka obciążona służebnością',
+    d:'Sprawdź dokładnie treść wpisu w księdze wieczystej. Służebność mieszkania, przechodu czy przejazdu potrafi ograniczyć zabudowę albo współżycie z sąsiadem w sposób, którego nie widać na mapie.'},
+  dojazd:{lvl:'info',kind:'fix',t:'Dłuższy dojazd do pracy',
+    d:'Trzydzieści minut w jedną stronę to około 230 godzin rocznie. Badania konsekwentnie pokazują, że do dojazdu ludzie się nie przyzwyczajają — w odróżnieniu od cech domu, do których przyzwyczajają się bardzo szybko. To nie znaczy, że decyzja jest zła. To znaczy, że warto ją policzyć uczciwie.'},
+  dojazd_dlugi:{lvl:'warning',kind:'fix',t:'Bardzo długi dojazd do pracy',
+    d:'Ponad godzina w jedną stronę to około 480 godzin rocznie, czyli dwanaście pełnych tygodni pracy. Do tego koszt paliwa i zużycia samochodu, zwykle 15–25 tys. zł rocznie przy takich dystansach. Warto zestawić tę kwotę z różnicą w cenie działki bliżej.'},
+  brak_przywiazania:{lvl:'info',kind:'fix',t:'Brak emocjonalnego związku z miejscem',
+    d:'Przywiązanie do miejsca jest jednym z lepiej udokumentowanych predyktorów długoterminowego zadowolenia z domu i nie da się go wyprodukować projektem. Obojętność nie jest wyrokiem — czasem przychodzi z czasem. Ale warto to zauważyć teraz i sprawdzić, czy nie stoi za tym coś konkretnego.'},
+  zle_przeczucie:{lvl:'warning',kind:'fix',t:'Nie czujesz się na tej działce dobrze',
+    d:'To najbardziej miękka pozycja na tej liście i jednocześnie taka, której nie warto lekceważyć. Spróbuj nazwać, co konkretnie nie gra: hałas, sąsiedztwo, ekspozycja, dojazd, coś w otoczeniu. Jeśli uda się to nazwać, przynajmniej część da się zaadresować projektem. Jeśli się nie uda — to też jest informacja, którą warto mieć przed wydaniem pierwszej złotówki na projekt.'},
+  nie_zmierzone:{lvl:'info',kind:'proj',t:'Część parametrów działki jest nieznana',
+    d:'Kilka podstawowych rzeczy — szerokość, ekspozycja, odległość do sieci — da się ustalić w jedno popołudnie: mapa zasadnicza, geoportal i wizyta na miejscu z kompasem w telefonie. To najlepiej zainwestowane cztery godziny w całym procesie.'},
+  pospiech:{lvl:'warning',kind:'proj',t:'Bardzo krótki czas na wybór działki',
+    d:'Błąd w wyborze działki jest jedynym błędem w całym procesie budowy, którego nie da się naprawić projektem ani pieniędzmi. Jeśli presja czasu jest nieusuwalna, przynajmniej zawęź poszukiwania do działek z planem miejscowym i pełnym uzbrojeniem — to eliminuje większość nieodwracalnych pułapek.'},
+  brak_wiedzy:{lvl:'info',kind:'proj',t:'Brak rozeznania w formalnościach',
+    d:'Minimum, które trzeba umieć: sprawdzić plan miejscowy w geoportalu i na stronie gminy, odczytać księgę wieczystą po numerze, wystąpić o warunki techniczne do gestorów mediów. Alternatywnie: architekt lub doradca za kilkaset złotych zrobi analizę działki przed zakupem. To najtańsze pieniądze w całej inwestycji.'},
+  dojazd_akceptowany:{lvl:'info',kind:'fix',t:'Akceptujesz bardzo długi dojazd',
+    d:'Warto zrobić jeden rachunek przed decyzją: godzina dziennie w jedną stronę to około 480 godzin rocznie plus 15–25 tys. zł kosztów. Przez dziesięć lat to kwota porównywalna z różnicą w cenie działki położonej bliżej.'},
+  sasiedztwo_dobre:{lvl:'good',kind:'',t:'Dobre otoczenie',
+    d:'Las, woda, park albo otwarty krajobraz w sąsiedztwie to jedyna cecha działki, która praktycznie nie traci na wartości i której nie da się dokupić później. Sprawdź tylko, czy jest chroniona zapisami planu.'},
+  chce_lokalizacja:{lvl:'warning',kind:'fix',t:'Chciałbyś zmienić lokalizację',
+    d:'To jedyna rzecz, której projekt nie naprawi w żadnym stopniu.'},
+  chce_ekspozycja:{lvl:'warning',kind:'proj',t:'Chciałbyś zmienić ekspozycję',
+    d:'Częściowo do zaadresowania układem domu na działce i rozmieszczeniem strefy dziennej — ale tylko częściowo.'},
+  chce_wielkosc:{lvl:'info',kind:'fix',t:'Chciałbyś większej działki',
+    d:'Sprawdź, czy sąsiednia działka albo jej część jest do dokupienia. To zaskakująco często wykonalne i zwykle tańsze niż przeprowadzka.'},
+  chce_ksztalt:{lvl:'info',kind:'proj',t:'Chciałbyś innego kształtu',
+    d:'Do zaadresowania projektem indywidualnym i analizą chłonności działki.'},
+  chce_sasiedztwo:{lvl:'warning',kind:'mit',t:'Chciałbyś innego sąsiedztwa',
+    d:'Do złagodzenia zielenią, ogrodzeniem i układem domu — ale nie do usunięcia.'},
+  chce_teren:{lvl:'info',kind:'proj',t:'Chciałbyś innego ukształtowania terenu',
+    d:'Do zaadresowania projektem, ale zawsze kosztem: niwelacja, mury oporowe albo dostosowanie bryły.'}
+};
+
+/* --------------------------------------------------------------------
+   WYMAGANIA WOBEC DZIAŁKI ZALEŻNE OD PROFILU DOMU
+   -------------------------------------------------------------------- */
+
+const PLOT_NEEDS = {
+  witryna:{
+    must:['Ogród i strefa dzienna od południa lub zachodu — bez tego duże przeszklenia tracą sens i zaczynają wychładzać dom',
+          'Szerokość minimum 20 m, żeby dom dało się ustawić z rozmachem i nie zaglądać sąsiadowi w okno',
+          'Sąsiedztwo z przewidywalnym planem — widok, za który płacisz, musi być chroniony zapisami',
+          'Plan miejscowy bez narzuconego kąta dachu, jeśli myślisz o nowoczesnej bryle'],
+    avoid:['Ogród od północy','Działka wąska poniżej 16 m','Nieokreślone przeznaczenie sąsiednich terenów']
+  },
+  gniazdo:{
+    must:['Szkoła i przedszkole w rozsądnej odległości — to parametr, który będzie Was dotyczył codziennie przez kilkanaście lat',
+          'Cicha okolica, z dala od drogi tranzytowej — hałas jest jednym z niewielu czynników, do których się nie przyzwyczajamy',
+          'Płaski teren i bezpieczny, spokojny dojazd',
+          'Powierzchnia pozwalająca na ogród użytkowy, nie tylko trawnik między domem a płotem'],
+    avoid:['Droga krajowa i linia kolejowa w pobliżu','Bardzo długi dojazd do szkoły','Skarpa przy małych dzieciach']
+  },
+  autor:{
+    must:['Działka z charakterem — spadek, drzewa, nietypowy kształt są dla Ciebie zasobem, a nie problemem',
+          'Plan miejscowy bez sztywnych zapisów o formie: kącie dachu, kolorze, kierunku kalenicy',
+          'Otoczenie, które nie narzuca stylistyki — luźna zabudowa albo pierwsza linia',
+          'Zapas powierzchni, żeby dom mógł mieć relację z terenem, a nie tylko na nim stać'],
+    avoid:['Restrykcyjny plan narzucający formę','Ciasna zabudowa szeregowa','Osiedla deweloperskie z regulaminem']
+  },
+  maszyna:{
+    must:['Ekspozycja południowa dla fotowoltaiki i zysków słonecznych — to policzalna różnica w rachunkach',
+          'Dostępny gaz lub odpowiednia moc przyłączeniowa energii elektrycznej pod pompę ciepła',
+          'Grunt nadający się pod dolne źródło, jeśli myślisz o pompie gruntowej',
+          'Brak zacienienia od wysokich drzew i budynków od strony południowej'],
+    avoid:['Działka zacieniona','Bardzo niska moc przyłączeniowa','Grunt skalisty przy planach na pompę gruntową']
+  },
+  azyl:{
+    must:['Wystarczająca szerokość, żeby odsunąć się od sąsiadów — minimum 20 m, im więcej tym lepiej',
+          'Zieleń istniejąca albo miejsce na nią; drzewa robią dla prywatności więcej niż jakikolwiek płot',
+          'Spokojna droga dojazdowa, nie tranzytowa',
+          'Sąsiedztwo z niską intensywnością zabudowy — sprawdź plan, nie stan obecny'],
+    avoid:['Działka od strony ruchliwej ulicy','Ciasna zabudowa z oknami naprzeciwko','Teren przeznaczony w planie pod usługi']
+  },
+  rachmistrz:{
+    must:['Pełne uzbrojenie w granicy działki — każdy metr przyłącza to koszt, którego rynek nie zwróci',
+          'Plan miejscowy, nie warunki zabudowy — plan to mniejsze ryzyko i szybsza procedura',
+          'Regularny kształt umożliwiający projekt katalogowy',
+          'Płaski teren bez potrzeby podpiwniczenia i niwelacji'],
+    avoid:['Skarpa i spadek','Brak mediów','Działka rolna nieodrolniona','Nieuregulowany stan prawny']
+  },
+  salon:{
+    must:['Jedna dobra ekspozycja dla strefy reprezentacyjnej — południe lub zachód',
+          'Wystarczająca głębokość działki, żeby rozdzielić strefę wejściową od ogrodowej',
+          'Miejsce na taras o sensownej wielkości, z uwzględnieniem limitu powierzchni biologicznie czynnej',
+          'Przewidywalne sąsiedztwo od strony ogrodu'],
+    avoid:['Ogród od północy','Działka płytka, gdzie dom zajmuje całą głębokość','Wjazd od strony południowej']
+  }
+};
+/* ====================================================================
+   SILNIK 2 — punktacja domu, audyt działki, rozgałęzienie, render
+   ==================================================================== */
+
+const DIM_ORDER = ['P','N','D','F','R','Y','H','E'];
+const state = { i:0, ans:[] };
+
+/* ---------- które pytania są aktywne przy obecnych odpowiedziach ---------- */
+function metaSoFar(upTo){
+  const m = { dz:null };
+  for(let i=0;i<Q.length;i++){
+    if(upTo!==undefined && i>=upTo) break;
+    const a = state.ans[i];
+    if(a===null||a===undefined) continue;
+    const q=Q[i];
+    if(q.type==='multi') continue;
+    const o=q.o[a];
+    if(o && o.m) Object.assign(m,o.m);
+  }
+  return m;
+}
+function activeList(){
+  const m = metaSoFar();
+  return Q.map((q,i)=>({q,i})).filter(({q})=> !q.when || q.when(m));
+}
+
+/* ---------- punktacja ---------- */
+function compute(){
+  const sum={}, wts={}; DIM_ORDER.forEach(d=>{sum[d]=0;wts[d]=0;});
+  const meta={dz:null}; const risks=new Set();
+  let dSum=0, dW=0;
+
+  activeList().forEach(({q,i})=>{
+    const a=state.ans[i];
+    if(a===null||a===undefined) return;
+
+    /* --- pytania działkowe (mają .dz) --- */
+    if(q.dz){
+      const w=q.dz.w||0;
+      if(q.type==='multi'){
+        const picked=(a||[]).map(j=>q.o[j]);
+        picked.forEach(o=>{ if(o.r) o.r.forEach(r=>risks.add(r)); });
+        if(w>0 && picked.length){
+          // przy multi bierzemy najgorszy wynik — jedno poważne obciążenie psuje działkę
+          const worst=Math.min(...picked.map(o=> o.d===undefined?88:o.d));
+          dSum+=worst*w; dW+=w;
+        }
+      } else {
+        const o=q.o[a];
+        if(o.r) o.r.forEach(r=>risks.add(r));
+        if(o.m) Object.assign(meta,o.m);
+        if(w>0 && o.d!==undefined){ dSum+=o.d*w; dW+=w; }
+      }
+      return;
+    }
+
+    /* --- pytania o dom --- */
+    if(q.type==='multi'){
+      const picked=(a||[]).map(j=>q.o[j]).filter(o=>o.s);
+      if(!picked.length) return;
+      const touched=new Set(); q.o.forEach(o=>Object.keys(o.s||{}).forEach(d=>touched.add(d)));
+      touched.forEach(d=>{
+        const vals=picked.map(o=>o.s[d]).filter(v=>v!==undefined);
+        if(!vals.length) return;
+        const w=(q.wt&&q.wt[d])||1;
+        sum[d]+=(vals.reduce((x,y)=>x+y,0)/vals.length)*w; wts[d]+=w;
+      });
+      return;
+    }
+
+    const opt=q.o[a];
+    if(opt.m) Object.assign(meta,opt.m);
+    if(opt.r) opt.r.forEach(r=>risks.add(r));
+    const touched=new Set(); q.o.forEach(o=>Object.keys(o.s||{}).forEach(d=>touched.add(d)));
+    touched.forEach(d=>{
+      const w=(q.wt&&q.wt[d])||1;
+      const v=(opt.s&&opt.s[d]!==undefined)?opt.s[d]:50;
+      sum[d]+=v*w; wts[d]+=w;
+    });
+  });
+
+  const dim={}; DIM_ORDER.forEach(d=>{ dim[d]= wts[d]? Math.round(sum[d]/wts[d]) : 50; });
+
+  // Sufit od ryzyk krytycznych. Bez tego pojedyncza wada nie do usunięcia — linia kolejowa,
+  // brak dostępu do drogi, ogród od północy — rozmywa się w średniej i działka dostaje
+  // wysoką notę mimo wady, której nie da się naprawić.
+  let plot = dW ? Math.round(dSum/dW) : null;
+  if(plot!==null){
+    const nCrit=[...risks].filter(r=>RISKS[r]&&RISKS[r].lvl==='critical').length;
+    const nWarn=[...risks].filter(r=>RISKS[r]&&RISKS[r].lvl==='warning').length;
+    if(nCrit||nWarn) plot=Math.min(plot, Math.max(15, 100 - 15*nCrit - 4*nWarn));
+  }
+  return { dim, meta, risks, plot };
+}
+
+/* ---------- dopasowanie profilu domu ---------- */
+function matchProfiles(dim){
+  return PROFILES.map(p=>{
+    let num=0,den=0;
+    DIM_ORDER.forEach(d=>{ const w=p.w[d]||1; num+=w*Math.abs(p.proto[d]-dim[d]); den+=w; });
+    let s=100-(num/den);
+    // bramki: profil musi mieć swoją cechę wyróżniającą, nie tylko leżeć blisko środka skali
+    if(p.id==='salon'){      if(dim.D<62||dim.F<62) s-=24; else if(dim.D>=72&&dim.F>=72) s+=7; }
+    if(p.id==='rachmistrz'){ if(dim.H>=58) s-=20;          else if(dim.H<=35&&dim.E>=70) s+=8; }
+    if(p.id==='witryna'){    if(dim.P>=68&&dim.D>=68) s+=11; if(dim.P<45) s-=14; }
+    if(p.id==='autor'){      if(dim.P<=45&&dim.D>=68) s+=13; if(dim.P>=68) s-=16; }
+    if(p.id==='gniazdo'){    if(dim.R>=72&&dim.F>=68) s+=9;  if(dim.R<50) s-=12; }
+    if(p.id==='azyl'){       if(dim.Y>=72) s+=9;             if(dim.Y<50) s-=14; }
+    if(p.id==='maszyna'){    if(dim.N>=68&&dim.E>=68) s+=9;  if(dim.N<48) s-=12; }
+    return { p, s };
+  }).sort((a,b)=>b.s-a.s);
+}
+const pct = s => Math.max(41, Math.min(97, Math.round(s)));
+
+/* ---------- konflikt dom × działka ---------- */
+function conflicts(profileId, risks, dim){
+  const out=[];
+  const has=r=>risks.has(r);
+  const wideNeed = ['witryna','azyl','salon'].includes(profileId);
+
+  if(has('ekspozycja_zla') && (dim.D>=65 || profileId==='witryna' || profileId==='salon'))
+    out.push({t:'Duże przeszklenia kontra ogród od północy',
+      d:'Twój profil domu opiera się na świetle i otwarciu na ogród, a działka ma stronę ogrodową skierowaną na północ. To najpoważniejsza rozbieżność, jaka wyszła w tym badaniu, bo dotyczy rzeczy, której nie da się kupić ani zaprojektować. Możliwe kierunki: przesunąć dom maksymalnie do granicy północnej i zbudować ogród od południa przed domem, otworzyć strefę dzienną na zachód zamiast na południe, albo zaprojektować wewnętrzny dziedziniec doświetlany od góry. Każde z tych rozwiązań jest wykonalne i każde kosztuje — warto je wycenić przed wyborem projektu.'});
+
+  if((has('waska')||has('waska_bardzo')) && wideNeed)
+    out.push({t:'Program domu kontra szerokość działki',
+      d:'Twój profil domu potrzebuje rozmachu w poziomie — szerokiej elewacji ogrodowej, dystansu od sąsiadów albo rozłożystego parteru. Szerokość działki na to nie pozwala. Realne kierunki: dom piętrowy zamiast parterowego, układ w kształcie litery L zamknięty na własne podwórze, garaż wbudowany zamiast wolnostojącego. Warto zlecić architektowi analizę chłonności działki, zanim wybierzesz projekt — to koszt rzędu kilkuset złotych i najlepiej wydane pieniądze na tym etapie.'});
+
+  if(dim.Y>=70 && (has('halas_droga')||has('halas_kolej')||has('mpzp_linia')))
+    out.push({t:'Potrzeba prywatności kontra otoczenie działki',
+      d:'Prywatność i spokój są u Ciebie wysoko, a działka ma cechy, które temu przeczą. Da się to złagodzić układem — sypialnie i strefa wypoczynkowa po przeciwnej stronie, wał ziemny z gęstą zielenią, stolarka o podwyższonej izolacyjności akustycznej — ale nie da się tego usunąć. Warto pojechać tam wieczorem i w weekend, zanim zapadnie decyzja projektowa.'});
+
+  if(profileId==='maszyna' && has('ekspozycja_zla'))
+    out.push({t:'Efektywność energetyczna kontra ekspozycja',
+      d:'Przy Twoim nastawieniu na sprawność energetyczną orientacja działki jest parametrem pierwszej klasy: to ona decyduje o zyskach słonecznych i o sensowności fotowoltaiki. Sprawdź, czy dach da się zorientować korzystniej niż bryłę, i policz wariant z panelami na osobnej konstrukcji w ogrodzie.'});
+
+  if(profileId==='rachmistrz' && (has('skarpa')||has('grunt_slaby')||has('przylacza_bardzo_dalekie')||has('rolna')))
+    out.push({t:'Nastawienie na wartość kontra koszty ukryte działki',
+      d:'Przy Twoim profilu każda złotówka powinna być odzyskiwalna przy sprzedaży, a ta działka wymaga nakładów, których rynek nie wycenia: fundamenty, uzbrojenie, niwelacja albo procedury. Policz łączną kwotę tych nakładów i zestaw ją z różnicą w cenie działki bez tych obciążeń — to jedyny rachunek, który tu ma znaczenie.'});
+
+  if(dim.R>=75 && has('dojazd_dlugi'))
+    out.push({t:'Dom rodzinny kontra długi dojazd',
+      d:'Budujesz dom pod wspólne życie rodziny, a dojazd zabiera z niego kilkanaście godzin tygodniowo. To najczęściej niedoszacowany koszt w całym procesie — do dojazdu, w odróżnieniu od domu, ludzie się nie przyzwyczajają. Warto policzyć to w godzinach obecności w domu, a nie w kilometrach.'});
+
+  return out;
+}
+
+/* ---------- radar ---------- */
+function radar(dim){
+  const R=104, cx=200, cy=156, n=DIM_ORDER.length;
+  const ang=i=>(-Math.PI/2)+i*2*Math.PI/n;
+  const pt=(i,r)=>[cx+Math.cos(ang(i))*r, cy+Math.sin(ang(i))*r];
+  let s=`<svg class="radar" viewBox="0 0 400 322" role="img" aria-label="Profil ośmiu wymiarów">`;
+  [0.25,0.5,0.75,1].forEach(f=>{
+    s+=`<polygon points="${DIM_ORDER.map((_,i)=>pt(i,R*f).map(v=>v.toFixed(1)).join(',')).join(' ')}" fill="none" stroke="var(--grid)" stroke-width="1"/>`;});
+  DIM_ORDER.forEach((_,i)=>{const [x,y]=pt(i,R);
+    s+=`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="var(--grid)" stroke-width="1"/>`;});
+  s+=`<polygon points="${DIM_ORDER.map((d,i)=>pt(i,R*Math.max(dim[d],3)/100).map(v=>v.toFixed(1)).join(',')).join(' ')}" fill="var(--series-1-soft)" stroke="var(--series-1)" stroke-width="2" stroke-linejoin="round"/>`;
+  DIM_ORDER.forEach((d,i)=>{const [x,y]=pt(i,R*Math.max(dim[d],3)/100);
+    s+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4.5" fill="var(--series-1)" stroke="var(--surface-1)" stroke-width="2"/>`;});
+  DIM_ORDER.forEach((d,i)=>{const [x,y]=pt(i,R+25);
+    const anc=Math.abs(x-cx)<6?'middle':(x>cx?'start':'end');
+    s+=`<text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="${anc}" font-size="11.5" fill="var(--muted)" font-family="var(--font)">${DIMS[d].short}</text>`;
+    s+=`<text x="${x.toFixed(1)}" y="${(y+17).toFixed(1)}" text-anchor="${anc}" font-size="12" font-weight="700" fill="var(--ink-2)" font-family="var(--font)">${dim[d]}</text>`;});
+  return s+`</svg>`;
+}
+
+/* ---------- miernik działki ---------- */
+function gauge(v){
+  const w=100, seg=[[0,40],[40,60],[60,80],[80,100]];
+  return `<div class="gauge"><div class="gtrack">
+    <i style="width:${v}%"></i>
+    ${seg.slice(1).map(s=>`<span class="gtick" style="left:${s[0]}%"></span>`).join('')}
+  </div><div class="glabels"><span>Wiele ograniczeń</span><span>Trudna</span><span>Z charakterem</span><span>Dobra</span></div></div>`;
+}
+
+/* ---------- render pytania ---------- */
+const el=id=>document.getElementById(id);
+
+function renderQ(){
+  const act=activeList();
+  const pos=act.findIndex(x=>x.i===state.i);
+  const q=Q[state.i], a=state.ans[state.i], multi=q.type==='multi';
+
+  el('pfill').style.width=((pos)/act.length*100).toFixed(1)+'%';
+  el('pnum').textContent=pos+1; el('ptot').textContent=act.length;
+  el('psec').textContent=q.sec;
+  el('back').disabled = pos===0;
+  el('next').hidden = !multi;
+  if(multi) el('next').disabled = !(a && a.length);
+
+  let h='';
+  if(q.t) h+=`<div class="sectitle">${q.t}</div>`;
+  h+=`<p class="qtext">${q.q}</p>`;
+  if(q.h) h+=`<div class="qhelp">${q.h}</div>`;
+  if(multi) h+=`<p class="muted" style="margin:-8px 0 0">Możesz zaznaczyć kilka odpowiedzi.</p>`;
+  h+=`<div class="opts">`;
+  q.o.forEach((o,i)=>{
+    const on = multi ? (a||[]).includes(i) : a===i;
+    h+=`<button class="opt${on?' on':''}" ${multi?'data-multi':''} data-i="${i}"><span class="mk"><i></i></span><span class="lbl">${o.t}</span></button>`;
+  });
+  el('qbody').innerHTML=h+`</div>`;
+
+  el('qbody').querySelectorAll('.opt').forEach(b=>{
+    b.onclick=()=>{
+      const i=+b.dataset.i;
+      if(multi){
+        let cur=state.ans[state.i]||[];
+        const noneIdx=q.o.findIndex(o=>o.excl);
+        if(i===noneIdx) cur = cur.includes(i)?[]:[i];
+        else cur = cur.includes(i)?cur.filter(x=>x!==i):cur.filter(x=>x!==noneIdx).concat(i);
+        state.ans[state.i]=cur; renderQ();
+      } else { state.ans[state.i]=i; setTimeout(advance,150); }
+    };
+  });
+  window.scrollTo({top:0,behavior:'instant'});
+}
+
+function advance(){
+  const act=activeList();
+  const pos=act.findIndex(x=>x.i===state.i);
+  if(pos>=0 && pos<act.length-1){ state.i=act[pos+1].i; renderQ(); }
+  else showResult();
+}
+function goBack(){
+  const act=activeList();
+  const pos=act.findIndex(x=>x.i===state.i);
+  if(pos>0){ state.i=act[pos-1].i; renderQ(); }
+}
+
+/* ---------- wynik ---------- */
+const KIND={ fix:['Nie do usunięcia','fix'], proj:['Do rozwiązania projektem','proj'], mit:['Do złagodzenia','mit'], '':['','']};
+
+function showResult(){
+  const { dim, meta, risks, plot } = compute();
+  const ranked=matchProfiles(dim);
+  const top=ranked[0].p, alt=ranked[1].p;
+  const conf=conflicts(top.id, risks, dim);
+
+  let h=`
+  <div class="hero">
+    <div class="eyebrow">Twój profil domu</div>
+    <p class="pname">${top.name}</p>
+    <p class="ptag">${top.tag}</p>
+    <p class="plead">${top.lead}</p>
+    <p style="color:var(--ink-2)">${top.body}</p>
+    <div class="matchrow"><b>${pct(ranked[0].s)}%</b><span>dopasowania · drugi w kolejności: ${alt.name} (${pct(ranked[1].s)}%)</span></div>
+  </div>
+
+  <div class="sec"><h2>Co to znaczy dla projektu</h2>
+    <div class="card"><ol class="steps">${top.reko.map(k=>`<li><span>${k}</span></li>`).join('')}</ol></div>
+    <div class="card" style="margin-top:12px;border-left:3px solid var(--series-1)">
+      <h3 style="color:var(--series-1)">Rzecz, którą warto wiedzieć zawczasu</h3>
+      <p style="margin:0;color:var(--ink-2)">${top.uwaga}</p>
+    </div>
+  </div>
+
+  <div class="sec"><h2>Twój profil w ośmiu wymiarach</h2>
+    <div class="vizwrap">${radar(dim)}
+      <div class="dimtable">${DIM_ORDER.map(d=>`<div class="r"><div class="top"><span class="nm">${DIMS[d].name}</span><span class="vl">${dim[d]}</span></div><div class="track"><i style="width:${dim[d]}%"></i></div><div class="ds">${DIMS[d].desc}</div></div>`).join('')}</div>
+    </div>
+    <p class="muted" style="margin-top:12px">Kliknij wymiar, żeby zobaczyć, co oznacza. Żaden z nich nie jest dobry ani zły — to opis, nie ocena.</p>
+  </div>`;
+
+  /* ---- DZIAŁKA: ścieżka „mam” ---- */
+  if(meta.dz==='mam' && plot!==null){
+    const tier = plot>=80 ? ['Dobra działka','Parametry grają. Skup się na tym, żeby ich nie zmarnować projektem.']
+              : plot>=60 ? ['Działka z charakterem','Ma swoje ograniczenia, ale wszystkie są do obsłużenia — pod warunkiem, że projekt je uwzględni od początku, a nie w trakcie.']
+              : plot>=40 ? ['Trudna działka','Kilka rzeczy będzie kosztowało więcej, niż wynika z przeciętnego kosztorysu. Warto je policzyć teraz, zanim pojawią się w fakturach.']
+              : ['Działka z wieloma ograniczeniami','Sporo czynników nakłada się tu na siebie. Poniżej rozdzielone są na te, które da się rozwiązać projektem, i te, których nie da się usunąć.'];
+
+    const list=[...risks].map(r=>RISKS[r]).filter(Boolean);
+    const good=list.filter(r=>r.lvl==='good');
+    const bad=list.filter(r=>r.lvl!=='good')
+      .sort((a,b)=>{const o={critical:0,warning:1,info:2};return (o[a.lvl]??3)-(o[b.lvl]??3);});
+    const nFix=bad.filter(r=>r.kind==='fix').length;
+
+    h+=`<div class="sec"><h2>Twoja działka</h2>
+      <div class="card">
+        <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px">
+          <span style="font-size:34px;font-weight:700;letter-spacing:-.02em">${plot}</span>
+          <span style="font-size:19px;font-weight:650">${tier[0]}</span>
+        </div>
+        <p style="margin:0 0 16px;color:var(--ink-2)">${tier[1]}</p>
+        ${gauge(plot)}
+      </div>`;
+
+    if(conf.length){
+      h+=`<div class="sec" style="margin-top:22px"><h2 style="font-size:20px">Gdzie dom nie zgadza się z działką</h2>
+        <p class="muted" style="margin-top:-6px;margin-bottom:12px">To najważniejsza część tego wyniku — rozbieżność między tym, czego chcesz od domu, a tym, co ta działka może dać.</p>
+        ${conf.map(c=>`<div class="card" style="margin-bottom:10px;border-left:3px solid var(--warning)"><h3>${c.t}</h3><p style="margin:0;color:var(--ink-2)">${c.d}</p></div>`).join('')}
+      </div>`;
+    }
+
+    if(bad.length){
+      h+=`<div class="sec" style="margin-top:22px"><h2 style="font-size:20px">Lista ryzyk</h2>
+        <p class="muted" style="margin-top:-6px;margin-bottom:14px">Każde ryzyko ma etykietę mówiącą, czy da się je usunąć. Decyzja, co z tym zrobić, należy wyłącznie do Ciebie — to jest lista, nie rekomendacja.</p>
+        ${bad.map(r=>`<div class="flag ${r.lvl}">
+          <span class="ico">${r.lvl==='critical'?'!':(r.lvl==='warning'?'·':'i')}</span>
+          <div><h3>${r.t} ${r.kind?`<span class="tag ${KIND[r.kind][1]}">${KIND[r.kind][0]}</span>`:''}</h3><p>${r.d}</p></div>
+        </div>`).join('')}
+      </div>`;
+    }
+    if(good.length){
+      h+=`<div class="sec" style="margin-top:18px">${good.map(r=>`<div class="flag" style="border-color:var(--good)"><span class="ico" style="background:var(--good)">✓</span><div><h3>${r.t}</h3><p>${r.d}</p></div></div>`).join('')}</div>`;
+    }
+    if(!bad.length){
+      h+=`<div class="flag" style="border-color:var(--good)"><span class="ico" style="background:var(--good)">✓</span><div><h3>Nie wyszły żadne istotne ryzyka</h3><p>Twoje odpowiedzi nie uruchomiły ostrzeżeń. Zweryfikuj jeszcze tylko zapisy planu i warunki gruntowe dokumentami — to najtańsze potwierdzenie, jakie można sobie sprawić.</p></div></div>`;
+    }
+
+    if(nFix>=3){
+      h+=`<div class="sec" style="margin-top:24px"><h2 style="font-size:20px">Jeśli chcesz to policzyć</h2>
+        <div class="card"><p style="margin:0 0 12px;color:var(--ink-2)">W Twoim wyniku ${nFix} ograniczenia są oznaczone jako nie do usunięcia — nie da się ich naprawić ani projektem, ani pieniędzmi. To nie znaczy, że ta działka jest zła; znaczy, że dom będzie się do niej dostosowywał, a nie odwrotnie.</p>
+        <p style="margin:0 0 12px;color:var(--ink-2)">Niektórzy w takiej sytuacji porównują dwie liczby. Pierwsza: suma nakładów wymuszonych przez tę działkę — dodatkowe fundamenty, uzbrojenie, niwelacja, projekt indywidualny, plus wartość kompromisów w programie domu. Druga: różnica między wartością tej działki a ceną działki bez tych obciążeń w tej samej okolicy.</p>
+        <p style="margin:0;color:var(--ink-2)">Jeśli druga liczba jest wyraźnie niższa, warto o tym wiedzieć przed wydaniem pieniędzy na projekt. Jeśli działka jest rodzinna albo miejsce ma dla Was znaczenie, ten rachunek i tak nie jest jedynym — i to jest całkowicie uprawnione. Ta ankieta nie ma zdania w tej sprawie; ma tylko pokazać, co jest na stole.</p></div>
+      </div>`;
+    }
+    h+=`</div>`;
+  }
+
+  /* ---- DZIAŁKA: ścieżka „szukam” ---- */
+  if(meta.dz==='szukam'){
+    const needs=PLOT_NEEDS[top.id];
+    const list=[...risks].map(r=>RISKS[r]).filter(Boolean);
+    h+=`<div class="sec"><h2>Czego szukać — dla Twojego profilu domu</h2>
+      <p class="muted" style="margin-top:-6px;margin-bottom:14px">Ta lista nie jest uniwersalna. Wynika z profilu <b>${top.name}</b> — inny profil domu potrzebuje innej działki.</p>
+      <div class="card"><h3 style="margin-bottom:12px">Musi mieć</h3><ol class="steps">${needs.must.map(x=>`<li><span>${x}</span></li>`).join('')}</ol></div>
+      <div class="card" style="margin-top:12px;border-left:3px solid var(--critical)">
+        <h3 style="color:var(--critical)">Czerwone linie — odpuszczaj takie działki</h3>
+        <ul style="margin:8px 0 0;padding-left:20px;color:var(--ink-2)">${needs.avoid.map(x=>`<li style="margin-bottom:5px">${x}</li>`).join('')}</ul>
+      </div>
+    </div>
+
+    <div class="sec"><h2>Kolejność sprawdzania — zanim wpłacisz zadatek</h2>
+      <div class="card"><ol class="steps">
+        <li><span>Plan miejscowy: wypis i wyrys. Sprawdzasz kąt dachu, wysokość, procent zabudowy, powierzchnię biologicznie czynną i linię zabudowy. Kilkadziesiąt złotych, jedno popołudnie.</span></li>
+        <li><span>Księga wieczysta po numerze — właściciel, obciążenia, służebności, hipoteki. Dostępna online, za darmo.</span></li>
+        <li><span>Dostęp do drogi publicznej. Bez tego nie ma pozwolenia na budowę — to jedyny parametr, który blokuje wszystko.</span></li>
+        <li><span>Warunki techniczne od gestorów mediów: woda, prąd, kanalizacja, gaz. Nie wierz opisowi w ogłoszeniu — poproś o dokument i konkretną odległość.</span></li>
+        <li><span>Ekspozycja: stań na działce z kompasem w telefonie i sprawdź, po której stronie wypadnie ogród. Trzy minuty, a decyduje o komforcie na trzydzieści lat.</span></li>
+        <li><span>Plan sąsiednich działek — co może powstać obok. Widok jest Twój tylko wtedy, gdy chroni go zapis.</span></li>
+        <li><span>Badania geotechniczne przed zakupem, jeśli cokolwiek budzi wątpliwości. 800–2 000 zł, typowo około 1 500.</span></li>
+        <li><span>Wizyta o różnych porach: wieczorem, w weekend, po deszczu. Hałas, zapach i przejezdność drogi wyglądają zupełnie inaczej we wtorek o jedenastej.</span></li>
+      </ol></div>
+    </div>`;
+    if(list.length){
+      h+=`<div class="sec"><h2>Uwagi do Twojej sytuacji</h2>
+        ${list.map(r=>`<div class="flag ${r.lvl}"><span class="ico">${r.lvl==='critical'?'!':(r.lvl==='warning'?'·':'i')}</span><div><h3>${r.t}</h3><p>${r.d}</p></div></div>`).join('')}</div>`;
+    }
+    if(meta.projekt==='tak'){
+      h+=`<div class="sec"><div class="card" style="border-left:3px solid var(--warning)"><h3>Masz już wybrany projekt</h3><p style="margin:0;color:var(--ink-2)">To odwraca kolejność: zamiast dobierać dom do działki, będziesz szukał działki pod dom. Da się tak, ale zawęża to pole wyboru bardzo mocno. Wypisz z projektu trzy twarde wymagania — minimalną szerokość działki, wymaganą stronę ogrodu i dopuszczalny kąt dachu — i traktuj je jako filtr, zanim w ogóle pojedziesz oglądać.</p></div></div>`;
+    }
+  }
+
+  h+=`<div class="sec"><h2>Alternatywny profil</h2>
+    <div class="alt"><h3>${alt.name} — ${alt.tag}</h3>
+      <p style="margin:8px 0 0;color:var(--ink-2)">${alt.lead}</p>
+      <p style="margin:10px 0 0;font-size:14.5px;color:var(--muted)">Drugi w kolejności z wynikiem ${pct(ranked[1].s)}%. Jeśli czytając opis głównego profilu miałeś wrażenie, że coś nie pasuje — najprawdopodobniej pasuje ten.</p>
+    </div></div>
+
+  <div class="actions">
+    <button class="btn" onclick="window.print()">Zapisz jako PDF</button>
+    <button class="btn ghost" id="again">Wypełnij jeszcze raz</button>
+  </div>
+
+  <div class="foot">
+    <p><b>Jak czytać ten wynik.</b> Ta ankieta nikogo nie ocenia i nie ma zdania na temat tego, jaki dom jest właściwy. Dom, który ma robić wrażenie, jest równie uprawniony jak dom zbudowany wyłącznie pod codzienność — ludzie budowali też po to, żeby coś o sobie powiedzieć, odkąd w ogóle zaczęli budować. Narzędzie robi jedną rzecz: nazywa motywację i pokazuje jej rachunek, żeby nikt nie odkrywał go dopiero na etapie faktur.</p>
+    <p><b>O części dotyczącej działki.</b> Wynik punktowy nie jest wyceną ani opinią rzeczoznawcy. To uporządkowana lista ryzyk podzielona na te, które da się rozwiązać projektem, i te, których nie da się usunąć. Każdy parametr wymaga potwierdzenia dokumentem: wypisem z planu, księgą wieczystą, warunkami technicznymi od gestorów mediów i badaniami geotechnicznymi.</p>
+    <p><b>Jedna rzecz, która najbardziej podniesie trafność.</b> Niech osoba, z którą będziesz w tym domu mieszkać, wypełni ankietę niezależnie. Rozbieżność profilów sama w sobie nie jest problemem — problemem jest odkrycie jej na etapie wyboru płytek.</p>
+  </div>`;
+
+  el('quiz').hidden=true;
+  const r=el('result'); r.hidden=false; r.innerHTML=h;
+  r.querySelectorAll('.dimtable .r').forEach(x=>x.onclick=()=>x.classList.toggle('open'));
+  el('again').onclick=()=>{ state.i=0; state.ans=[]; r.hidden=true; el('quiz').hidden=false; renderQ(); };
+  window.scrollTo({top:0,behavior:'instant'});
+}
+
+/* ---------- start ---------- */
+el('start').onclick=()=>{ el('intro').hidden=true; el('quiz').hidden=false; state.i=0; renderQ(); };
+el('back').onclick=goBack;
+el('next').onclick=advance;
+document.addEventListener('keydown',e=>{
+  if(el('quiz').hidden) return;
+  if(e.key>='1'&&e.key<='9'){ const b=el('qbody').querySelectorAll('.opt')[+e.key-1]; if(b) b.click(); }
+  if(e.key==='ArrowLeft') goBack();
+  if(e.key==='Enter'&&Q[state.i].type==='multi'&&(state.ans[state.i]||[]).length) advance();
+});
+
+</script>
+
+<footer class="ratio-footer">
+  <div class="ratio-footer-inner">
+    <div class="ratio-footer-grid">
+      <div>
+        <img src="../assets/logo-white.svg" alt="Ratio Logo" />
+        <p style="color:#fff;font-weight:600;">RATIO Zarządzanie Inwestycjami Budowlanymi<br>Bartosz Zapadka-Żydek</p>
+        <p>14-202 Iława, ul. Gdańska 2D/16</p>
+        <p><a href="mailto:bartosz@ratiopro.net">bartosz@ratiopro.net</a></p>
+        <p><a href="tel:+48537913341">+48 537 913 341</a></p>
+      </div>
+      <div class="ratio-footer-nav">
+        <p class="ratio-footer-nav-title">Nawigacja</p>
+        <ul>
+          <li><a href="../index.html">Strona główna</a></li>
+          <li><a href="../index.html#uslugi">Usługi</a></li>
+          <li><a href="../jak-pracujemy.html">Jak pracujemy</a></li>
+          <li><a href="../case-studies.html">Case studies</a></li>
+          <li><a href="../ankiety.html">Ankiety</a></li>
+          <li><a href="../index.html#kontakt">Kontakt</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="ratio-footer-bottom">
+      <p>&copy; 2026 RATIO Zarządzanie Inwestycjami Budowlanymi Bartosz Zapadka-Żydek · NIP 7441843748 · REGON 544820288</p>
+      <div class="legal-links">
+        <a href="../polityka-prywatnosci.html">Polityka prywatności</a>
+        <a href="../regulamin.html">Regulamin</a>
+      </div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

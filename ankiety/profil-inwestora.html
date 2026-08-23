@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profil inwestora — jak powinieneś budować dom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../assets/logo-symbol.svg" />
+<style>
+:root{
+  color-scheme: light;
+  --surface-1:#fcfcfb; --plane:#f4f3ef; --card:#ffffff;
+  --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --hair:rgba(11,11,11,.10);
+  --series-1:#2a78d6; --series-1-soft:rgba(42,120,214,.14);
+  --good:#0ca30c; --warning:#fab219; --critical:#d03b3b;
+  --radius:14px;
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="light"])){
+    color-scheme: dark;
+    --surface-1:#1a1a19; --plane:#0d0d0d; --card:#1a1a19;
+    --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --axis:#383835; --hair:rgba(255,255,255,.10);
+    --series-1:#3987e5; --series-1-soft:rgba(57,135,229,.20);
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--font); background:var(--plane); color:var(--ink);
+  line-height:1.55; -webkit-font-smoothing:antialiased;
+  font-size:16px;
+}
+.wrap{max-width:760px;margin:0 auto;padding:24px 20px 80px}
+h1{font-size:clamp(28px,5vw,42px);line-height:1.12;letter-spacing:-.02em;margin:0 0 16px;font-weight:700}
+h2{font-size:clamp(21px,3.4vw,27px);line-height:1.2;letter-spacing:-.015em;margin:0 0 12px;font-weight:650}
+h3{font-size:17px;margin:0 0 8px;font-weight:650;letter-spacing:-.005em}
+p{margin:0 0 14px}
+.lead{font-size:18px;color:var(--ink-2)}
+.muted{color:var(--muted);font-size:14px}
+.card{background:var(--card);border:1px solid var(--hair);border-radius:var(--radius);padding:22px}
+.btn{
+  font:inherit;font-weight:600;cursor:pointer;border-radius:10px;
+  border:1px solid transparent;padding:13px 22px;background:var(--ink);color:var(--plane);
+  transition:opacity .12s ease, transform .08s ease;
+}
+.btn:hover{opacity:.86}
+.btn:active{transform:translateY(1px)}
+.btn[disabled]{opacity:.32;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink-2);border-color:var(--hair)}
+.btn.ghost:hover{color:var(--ink);border-color:var(--axis)}
+.btn.sm{padding:9px 16px;font-size:14px}
+
+/* ---------- intro ---------- */
+#intro .kv{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:20px 0 4px;font-size:15px}
+#intro .kv dt{color:var(--muted)}
+#intro .kv dd{margin:0;color:var(--ink-2)}
+.dims-preview{display:flex;flex-wrap:wrap;gap:7px;margin:18px 0 6px}
+.chip{font-size:13px;padding:5px 11px;border-radius:100px;border:1px solid var(--hair);color:var(--ink-2);background:var(--surface-1)}
+
+/* ---------- progress ---------- */
+.topbar{position:sticky;top:0;z-index:20;background:var(--plane);padding:14px 0 12px;margin:-24px 0 22px}
+.pbar{height:4px;background:var(--grid);border-radius:100px;overflow:hidden}
+.pbar>i{display:block;height:100%;background:var(--series-1);border-radius:100px;transition:width .28s cubic-bezier(.4,0,.2,1)}
+.pmeta{display:flex;justify-content:space-between;align-items:baseline;margin-top:9px;font-size:13px;color:var(--muted)}
+.pmeta b{color:var(--ink-2);font-weight:600}
+
+/* ---------- question ---------- */
+.sectitle{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--series-1);font-weight:700;margin-bottom:14px}
+.qtext{font-size:clamp(20px,3.2vw,25px);line-height:1.3;letter-spacing:-.015em;font-weight:600;margin:0 0 12px}
+.qhelp{font-size:14.5px;color:var(--ink-2);background:var(--surface-1);border-left:2px solid var(--axis);padding:11px 14px;border-radius:0 8px 8px 0;margin:0 0 22px}
+.opts{display:flex;flex-direction:column;gap:9px;margin-top:20px}
+.opt{
+  display:flex;gap:13px;align-items:flex-start;text-align:left;width:100%;
+  font:inherit;color:var(--ink);cursor:pointer;
+  background:var(--card);border:1px solid var(--hair);border-radius:11px;padding:14px 16px;
+  transition:border-color .12s ease, background .12s ease;
+}
+.opt:hover{border-color:var(--series-1)}
+.opt .mk{
+  flex:0 0 20px;height:20px;margin-top:1px;border-radius:50%;border:1.5px solid var(--axis);
+  display:grid;place-items:center;transition:all .12s ease;
+}
+.opt[data-multi] .mk{border-radius:5px}
+.opt .mk i{width:9px;height:9px;border-radius:50%;background:transparent;display:block}
+.opt[data-multi] .mk i{border-radius:2px}
+.opt.on{border-color:var(--series-1);background:var(--series-1-soft)}
+.opt.on .mk{border-color:var(--series-1);background:var(--series-1)}
+.opt.on .mk i{background:#fff}
+.opt .lbl{flex:1}
+.qnav{display:flex;gap:10px;align-items:center;margin-top:24px}
+.qnav .spacer{flex:1}
+
+/* ---------- result ---------- */
+.hero{background:var(--card);border:1px solid var(--hair);border-radius:18px;padding:28px;margin-bottom:16px}
+.hero .eyebrow{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:10px}
+.hero .pname{font-size:clamp(32px,6vw,46px);line-height:1.05;letter-spacing:-.03em;font-weight:700;margin:0 0 6px}
+.hero .ptag{font-size:17px;color:var(--series-1);font-weight:600;margin:0 0 18px}
+.hero .plead{font-size:18px;line-height:1.5;margin:0 0 14px}
+.matchrow{display:flex;align-items:baseline;gap:10px;margin-top:20px;padding-top:18px;border-top:1px solid var(--hair);font-size:14px;color:var(--muted)}
+.matchrow b{font-size:26px;color:var(--ink);font-weight:700;letter-spacing:-.02em}
+
+.sec{margin:34px 0 0}
+.sec>h2{margin-bottom:14px}
+
+.numgrid{display:grid;gap:1px;background:var(--hair);border:1px solid var(--hair);border-radius:12px;overflow:hidden}
+.numgrid .row{display:grid;grid-template-columns:minmax(140px,38%) 1fr;gap:14px;background:var(--card);padding:13px 16px;font-size:15px}
+.numgrid .row .k{color:var(--muted);font-size:14px}
+.numgrid .row .v{font-weight:600}
+
+ol.steps{margin:0;padding:0;list-style:none;counter-reset:s}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:26px 1fr;gap:13px;padding:13px 0;border-bottom:1px solid var(--hair);font-size:15.5px}
+ol.steps li:last-child{border-bottom:0}
+ol.steps li::before{
+  content:counter(s);font-size:12px;font-weight:700;color:var(--series-1);
+  width:24px;height:24px;border-radius:50%;border:1px solid var(--series-1);
+  display:grid;place-items:center;margin-top:1px;
+}
+
+.flag{display:grid;grid-template-columns:20px 1fr;gap:12px;padding:15px 16px;border-radius:11px;border:1px solid var(--hair);background:var(--card);margin-bottom:9px}
+.flag .ico{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;margin-top:2px}
+.flag.critical .ico{background:var(--critical)}
+.flag.warning .ico{background:var(--warning);color:#3a2a00}
+.flag h3{margin:0 0 4px;font-size:15.5px}
+.flag p{margin:0;font-size:14.5px;color:var(--ink-2)}
+
+.alt{border:1px dashed var(--axis);border-radius:12px;padding:18px;background:transparent}
+
+/* radar */
+.vizwrap{display:grid;grid-template-columns:1fr;gap:22px;align-items:start}
+@media(min-width:700px){.vizwrap{grid-template-columns:360px 1fr}}
+.radar{display:block;width:100%;max-width:380px;margin:0 auto;overflow:visible}
+.dimtable{display:grid;gap:1px;background:var(--hair);border:1px solid var(--hair);border-radius:12px;overflow:hidden}
+.dimtable .r{background:var(--card);padding:10px 14px}
+.dimtable .r .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.dimtable .r .nm{font-size:14.5px;font-weight:600}
+.dimtable .r .vl{font-size:14.5px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
+.dimtable .r .track{height:5px;background:var(--grid);border-radius:100px;margin-top:7px;overflow:hidden}
+.dimtable .r .track>i{display:block;height:100%;background:var(--series-1);border-radius:100px}
+.dimtable .r .ds{font-size:13px;color:var(--muted);margin-top:6px;display:none}
+.dimtable .r.open .ds{display:block}
+
+.foot{margin-top:44px;padding-top:22px;border-top:1px solid var(--hair);font-size:13.5px;color:var(--muted)}
+.foot p{margin:0 0 10px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+
+@media print{
+  body{background:#fff}
+  .topbar,.actions,.btn{display:none!important}
+  .card,.hero,.numgrid,.dimtable{break-inside:avoid}
+}
+
+/* ===================================================================
+   RATIO — nadpisanie tokenów marki.
+   Monochromia inżynierska: jedynym kolorem w całym produkcie są stany
+   (zielony, żółty, czerwony). Dzięki temu kolor coś znaczy, bo jest rzadki.
+   =================================================================== */
+:root{
+  --series-1:#1f2a4f; --series-1-soft:rgba(31,42,79,.10); --accent-text:#1f2a4f;
+  --plane:#ffffff; --card:#ffffff; --surface-1:#fafafa;
+  --ink:#11172a; --ink-2:#3d4459; --muted:#6b7280;
+  --hair:rgba(17,23,42,.10); --grid:#e5e7eb; --axis:#c7c6bf;
+  --good:#16a34a; --warning:#f59e0b; --critical:#dc2626;
+  --radius:10px;
+  --font:'Inter',system-ui,-apple-system,sans-serif;
+  --font-heading:'Zilla Slab',serif;
+  --accent:#ffb719;
+}
+h1,h2,h3{font-family:var(--font-heading)}
+.btn{background:var(--accent);color:#11172a}
+.btn:hover{opacity:1;background:#ffc74c}
+.btn.ghost{background:transparent;color:var(--series-1);border-color:var(--axis)}
+.btn.ghost:hover{color:var(--series-1);border-color:var(--series-1);background:rgba(31,42,79,.05)}
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="light"])){
+    --series-1:#ffffff; --series-1-soft:rgba(255,255,255,.10); --accent-text:#c9c8c1;
+    --plane:#0a0a0a; --card:#131312; --surface-1:#171716;
+    --ink:#ffffff; --ink-2:#c3c2b7; --muted:#8b8a83;
+    --hair:rgba(255,255,255,.14); --grid:#2b2b29; --axis:#3d3d3a;
+    --good:#22c322; --warning:#e0a020; --critical:#ef5350;
+  }
+}
+:root[data-theme="dark"]{
+    --series-1:#ffffff; --series-1-soft:rgba(255,255,255,.10); --accent-text:#c9c8c1;
+    --plane:#0a0a0a; --card:#131312; --surface-1:#171716;
+    --ink:#ffffff; --ink-2:#c3c2b7; --muted:#8b8a83;
+    --hair:rgba(255,255,255,.14); --grid:#2b2b29; --axis:#3d3d3a;
+    --good:#22c322; --warning:#e0a020; --critical:#ef5350;
+}
+
+/* akcent na tekście grafitowy, żeby nie zlewał się z czarnymi nagłówkami */
+.sectitle{color:var(--accent-text)}
+.hero .ptag{color:var(--accent-text);font-weight:550}
+.card h3[style]{color:var(--accent-text)!important}
+ol.steps li::before{color:var(--accent-text);border-color:var(--axis);font-variant-numeric:tabular-nums}
+.tag.proj{background:var(--series-1-soft);color:var(--accent-text)}
+.tag.mit{color:var(--warning);background:rgba(181,116,0,.12)}
+.tag.fix{color:var(--critical);background:rgba(198,40,40,.11)}
+
+/* karty odcięte wyłącznie włoskiem — tło strony i karty są tym samym bielą */
+.card,.hero,.opt,.flag{box-shadow:none}
+.qhelp{background:var(--surface-1);border-left-color:var(--ink)}
+.flag.warning .ico{color:#fff}
+
+/* ===================================================================
+   Jasny motyw jest domyślny — zawsze.
+   Ankieta ma być spójna ze stroną, a nie z ustawieniem systemu klienta.
+   Tryb ciemny włącza się WYŁĄCZNIE, gdy strona ustawi go świadomie:
+       <html data-theme="dark">
+   Jeśli kiedyś dodasz na stronie przełącznik motywu, wystarczy że
+   będzie ustawiał ten atrybut — ankieta pójdzie za nim automatycznie.
+   =================================================================== */
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="dark"])){
+    color-scheme: light;
+    --series-1:#0b0b0b; --series-1-soft:rgba(11,11,11,.07); --accent-text:#3a3937;
+    --plane:#ffffff; --card:#ffffff; --surface-1:#f6f6f4;
+    --ink:#0b0b0b; --ink-2:#46453f; --muted:#77766f;
+    --hair:rgba(11,11,11,.13); --grid:#e4e4e0; --axis:#c7c6bf;
+    --good:#0ca30c; --warning:#b57400; --critical:#c62828;
+  }
+}
+
+/* dyskretny przełącznik do prezentacji — usuń przy osadzaniu na stronie */
+.rp-theme{
+  position:fixed; top:14px; right:14px; z-index:60;
+  font:inherit; font-size:12px; font-weight:600; letter-spacing:.03em;
+  padding:7px 12px; border-radius:100px; cursor:pointer;
+  background:var(--card); color:var(--muted);
+  border:1px solid var(--hair);
+}
+.rp-theme:hover{ color:var(--ink); border-color:var(--axis) }
+@media print{ .rp-theme{ display:none } }
+
+/* ===================================================================
+   RATIO — nawigacja i stopka (spójne z resztą serwisu ratiopro.net)
+   =================================================================== */
+.ratio-nav{
+  position:sticky; top:0; z-index:100; background:rgba(255,255,255,.92);
+  backdrop-filter:blur(6px); border-bottom:1px solid #f3f4f6;
+}
+.ratio-nav-inner{
+  max-width:900px; margin:0 auto; padding:14px 20px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.ratio-nav-inner img{ height:36px; display:block }
+.ratio-nav-links{ display:flex; align-items:center; gap:20px }
+.ratio-nav-links a{
+  font-family:'Inter',sans-serif; font-size:14px; font-weight:600;
+  color:#11172a; text-decoration:none;
+}
+.ratio-nav-links a:hover{ color:#1f2a4f }
+.ratio-nav-links a.cta{
+  background:#1f2a4f; color:#fff; padding:9px 18px; border-radius:999px;
+}
+.ratio-nav-links a.cta:hover{ background:#2d3d74; color:#fff }
+.ratio-nav-links .hide-mobile{ display:none }
+@media (min-width:640px){ .ratio-nav-links .hide-mobile{ display:inline } }
+
+.ratio-footer{
+  background:linear-gradient(160deg,#2d3d74 0%,#1f2a4f 100%);
+  margin-top:48px; font-family:'Inter',sans-serif;
+}
+.ratio-footer-inner{ max-width:900px; margin:0 auto; padding:44px 20px 0; }
+.ratio-footer-grid{ display:grid; grid-template-columns:1fr; gap:32px; }
+@media (min-width:640px){ .ratio-footer-grid{ grid-template-columns:1fr 1fr } }
+.ratio-footer img{ height:40px; margin-bottom:18px }
+.ratio-footer p{ color:#d1d5db; font-size:13px; line-height:1.6; margin:0 0 4px }
+.ratio-footer a{ color:#d1d5db; text-decoration:none }
+.ratio-footer a:hover{ color:#ffb719 }
+.ratio-footer-nav-title{
+  font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+  color:#9ca3af; margin:0 0 14px;
+}
+.ratio-footer-nav ul{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px }
+.ratio-footer-nav a{ font-size:13px }
+.ratio-footer-bottom{
+  border-top:1px solid rgba(255,255,255,.1); margin-top:32px; padding:20px;
+  display:flex; flex-direction:column; gap:10px; align-items:center; justify-content:space-between;
+  font-size:11px; color:#9ca3af; text-align:center;
+}
+@media (min-width:640px){ .ratio-footer-bottom{ flex-direction:row; text-align:left } }
+.ratio-footer-bottom .legal-links{ display:flex; gap:16px }
+</style>
+</head>
+<body>
+<header class="ratio-nav">
+  <div class="ratio-nav-inner">
+    <a href="../index.html"><img src="../assets/logo-black.svg" alt="Ratio Logo" /></a>
+    <nav class="ratio-nav-links">
+      <a href="../jak-pracujemy.html" class="hide-mobile">Jak pracujemy</a>
+      <a href="../case-studies.html" class="hide-mobile">Case studies</a>
+      <a href="../ankiety.html" class="hide-mobile">Ankiety</a>
+      <a href="../index.html#kontakt" class="cta">Kontakt</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+
+<!-- ============ INTRO ============ -->
+<section id="intro">
+  <h1>Jak powinieneś budować swój dom</h1>
+  <p class="lead">Nie ma jednej dobrej metody budowania. Jest metoda, która pasuje do tego, ile masz czasu, ile potrafisz oddać innym i ile jesteś w stanie znieść. Ten test sprawdza to jedno.</p>
+  <p>Większość poradników zakłada, że wybór między budową gospodarczą a generalnym wykonawcą to kwestia budżetu. Nie jest. To kwestia dopasowania procesu do człowieka — bo budowa niedopasowana do właściciela kończy się tak samo, niezależnie od tego, ile kosztowała.</p>
+  <p>Pytania są celowo konkretne. Nie pytamy „czy masz czas”, tylko ile razy w ostatnie cztery tygodnie mogłeś odebrać telefon w środku dnia roboczego. Nie pytamy „czy jesteś asertywny”, tylko co faktycznie zrobiłeś ostatnim razem, gdy usługa wypadła gorzej, niż się umawialiście. Deklaracje kłamią. Zachowania nie.</p>
+
+  <div class="dims-preview">
+    <span class="chip">Czas operacyjny</span><span class="chip">Kompetencje</span><span class="chip">Zaufanie</span>
+    <span class="chip">Potrzeba kontroli</span><span class="chip">Odporność na niepewność</span><span class="chip">Rezerwa</span>
+    <span class="chip">Koszt decyzji</span><span class="chip">Egzekwowanie</span>
+  </div>
+
+  <dl class="kv">
+    <dt>Pytań</dt><dd>39</dd>
+    <dt>Czas</dt><dd>8–10 minut</dd>
+    <dt>Wynik</dt><dd>jeden z ośmiu profilów, konkretny model realizacji i lista rzeczy do zrobienia</dd>
+    <dt>Dane</dt><dd>nic nie jest nigdzie wysyłane — wszystko liczy się w Twojej przeglądarce</dd>
+  </dl>
+
+  <div class="actions">
+    <button class="btn" id="start">Zaczynamy</button>
+  </div>
+
+  <div class="foot">
+    <p><b>Jedna uwaga na start.</b> Odpowiadaj tak, jak jest, a nie tak, jak chciałbyś, żeby było. Nikt tego nie sprawdza i nikt Cię nie ocenia — jedyną osobą, którą można tu oszukać, jesteś Ty sam, a rachunek za to przychodzi mniej więcej w dziewiątym miesiącu budowy.</p>
+  </div>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section id="quiz" hidden>
+  <div class="topbar">
+    <div class="pbar"><i id="pfill" style="width:0%"></i></div>
+    <div class="pmeta"><span id="psec"></span><span>Pytanie <b id="pnum">1</b> z <span id="ptot">39</span></span></div>
+  </div>
+  <div id="qbody"></div>
+  <div class="qnav">
+    <button class="btn ghost sm" id="back">Wstecz</button>
+    <div class="spacer"></div>
+    <button class="btn sm" id="next" hidden>Dalej</button>
+  </div>
+</section>
+
+<!-- ============ RESULT ============ -->
+<section id="result" hidden></section>
+
+</div>
+<script>
+/* ====================================================================
+   PROFIL INWESTORA — dane merytoryczne
+   Wymiary:
+   T = czas operacyjny   K = kompetencje    Z = zaufanie/delegowanie
+   C = potrzeba kontroli N = odporność na niepewność
+   E = rezerwa emocjonalna i finansowa      M = ryzyko maksymalizacji
+   A = asertywność w egzekwowaniu
+   ==================================================================== */
+
+const DIMS = {
+  T: { short: 'Czas', name: 'Czas operacyjny',        desc: 'Ile realnie masz czasu w godzinach, w których działa budowa (pon–pt, 7:00–16:00) i jak szybko podejmujesz decyzje.' },
+  K: { short: 'Kompetencje', name: 'Kompetencje',            desc: 'Twoja realna zdolność do czytania projektu, weryfikacji kosztorysu i zarządzania ekipami.' },
+  Z: { short: 'Zaufanie', name: 'Zaufanie',               desc: 'Gotowość do oddania decyzji w cudze ręce. Skrajnie niskie oznacza kontrolę wszystkiego, skrajnie wysokie — brak zabezpieczeń.' },
+  C: { short: 'Kontrola', name: 'Potrzeba kontroli',      desc: 'Jak bardzo potrzebujesz decydować osobiście. Sama w sobie nie jest wadą — groźna jest tylko wtedy, gdy nie masz czasu jej zaspokoić.' },
+  N: { short: 'Niepewność', name: 'Odporność na niepewność',desc: 'Jak znosisz sytuacje, w których nie wiadomo jeszcze, ile to będzie kosztowało i kiedy się skończy.' },
+  E: { short: 'Rezerwa', name: 'Rezerwa',                desc: 'Zapas emocjonalny, relacyjny i finansowy. To on decyduje, czy przetrwasz trzeci kryzys, a nie pierwszy.' },
+  M: { short: 'Decyzje', name: 'Koszt decyzji',          desc: 'Ile Cię kosztuje jedna decyzja: ile wariantów przeglądasz i jak długo wracasz do wyboru po fakcie. Wysoki wynik = budowa z tysiącem decyzji będzie dla Ciebie wyczerpująca.' },
+  A: { short: 'Egzekucja', name: 'Egzekwowanie',           desc: 'Czy faktycznie upominasz się o poprawki. Na budowie okno na reklamację zamyka się fizycznie — po zalaniu wylewki nie ma o czym rozmawiać.' }
+};
+
+/* --------------------------------------------------------------------
+   PYTANIA (38)
+   s  = punkty przypisane wymiarom (0–100)
+   wt = waga pytania dla danego wymiaru (domyślnie 1)
+   f  = flagi ryzyka wyzwalane przez odpowiedź
+   m  = metadane sterujące rekomendacją
+   -------------------------------------------------------------------- */
+
+const Q = [
+
+/* === SEKCJA 1: TWARDE FAKTY ================================================ */
+{ sec:'Fakty', t:'Zanim zaczniemy o Tobie — kilka liczb',
+  q:'Jak daleko będziesz miał z miejsca, w którym mieszkasz, na budowę?',
+  h:'Odbiory prac zanikających — zbrojenie, izolacje, instalacje przed zakryciem — zdarzają się z dnia na dzień. Przy 18-miesięcznej budowie to ok. 150 przejazdów.',
+  wt:{T:2},
+  o:[
+    { t:'Do 15 minut — praktycznie po drodze',            s:{T:100} },
+    { t:'15–30 minut',                                    s:{T:80}  },
+    { t:'30–60 minut',                                    s:{T:45}  },
+    { t:'Ponad godzinę w jedną stronę',                   s:{T:5},  f:['dystans'] },
+    { t:'Nie mam jeszcze działki',                        s:{T:50}, f:['brak_dzialki'] }
+  ]},
+
+{ sec:'Fakty',
+  q:'Twoja praca w godzinach 7:00–16:00 w dni robocze wygląda tak:',
+  h:'Hurtownie, urzędy, dostawy i ekipy funkcjonują wyłącznie w tych godzinach. Weekendowa dostępność jest na budowie prawie bezużyteczna.',
+  wt:{T:3},
+  o:[
+    { t:'Pracuję elastycznie lub zdalnie — mogę wyjść, kiedy trzeba', s:{T:100} },
+    { t:'Odbieram telefony, raz w tygodniu mogę wyskoczyć na budowę', s:{T:75} },
+    { t:'Odbieram telefony, ale każdy wyjazd to urlop z wyprzedzeniem', s:{T:40} },
+    { t:'Praca zmianowa, delegacje albo brak dostępu do telefonu',    s:{T:5}, f:['zmianowa'] }
+  ]},
+
+{ sec:'Fakty',
+  q:'Jak finansujesz budowę?',
+  h:'Bank uruchamia kolejną transzę dopiero po potwierdzeniu etapu — dokumentacja, zdjęcia, inspekcja rzeczoznawcy. Budowa systemem gospodarczym trwa przeciętnie 43 miesiące, z generalnym wykonawcą ok. 9. To zupełnie inne ryzyko harmonogramowe.',
+  wt:{E:2},
+  o:[
+    { t:'Środki własne, bez terminów narzuconych przez bank',        s:{E:100} },
+    { t:'Kredyt hipoteczny wypłacany w transzach',                    s:{E:45}, f:['transze'] },
+    { t:'Kredyt + sprzedaż obecnego mieszkania w konkretnym terminie',s:{E:10}, f:['transze','sprzedaz'] },
+    { t:'Jeszcze nie mam tego poukładanego',                          s:{E:35}, f:['brak_finansowania'] }
+  ]},
+
+{ sec:'Fakty',
+  q:'Poza kosztorysem masz odłożoną rezerwę w wysokości:',
+  h:'Branżowe minimum to 10–20% budżetu. Bank nie zwiększy kwoty kredytu, gdy kosztorys pęknie — to główny mechanizm powstawania niedokończonych budów.',
+  wt:{E:3},
+  o:[
+    { t:'Nie mam rezerwy albo jest symboliczna',  s:{E:0},   f:['brak_rezerwy'] },
+    { t:'Około 10% kosztorysu',                   s:{E:45} },
+    { t:'15–20% kosztorysu',                      s:{E:80} },
+    { t:'Ponad 20% kosztorysu',                   s:{E:100} }
+  ]},
+
+{ sec:'Fakty',
+  q:'Kiedy musisz się wprowadzić?',
+  h:'Realny czas: generalny wykonawca ok. 9 miesięcy do stanu deweloperskiego, prefabrykat 3–6 miesięcy, system gospodarczy 18–24 miesiące w wariancie optymistycznym.',
+  wt:{},
+  o:[
+    { t:'Nie mam terminu, mogę budować spokojnie kilka lat', s:{N:90,E:85}, m:{horyzont:3} },
+    { t:'Chciałbym w ciągu 2 lat, ale to nie jest sztywne',   s:{N:70,E:65}, m:{horyzont:2} },
+    { t:'W ciągu roku — mam plan i chcę go dotrzymać',        s:{N:40,E:40}, m:{horyzont:1}, f:['deadline'] },
+    { t:'Muszę — kończy mi się wynajem albo sprzedaję mieszkanie', s:{N:20,E:15}, m:{horyzont:1}, f:['deadline','deadline_twardy'] }
+  ]},
+
+{ sec:'Fakty', type:'multi',
+  q:'Zaznacz wszystko, co dotyczy Ciebie w okresie mniej więcej roku przed i po starcie budowy:',
+  h:'Suma jednoczesnych obciążeń życiowych to najprostszy i jeden z najmocniejszych wskaźników ryzyka w całym badaniu. Budowa to przewlekły stresor — nakłada się na to, co już masz.',
+  wt:{E:3},
+  o:[
+    { t:'Małe dziecko albo dziecko w drodze' },
+    { t:'Zmiana pracy lub własna firma w rozruchu' },
+    { t:'Choroba w rodzinie lub opieka nad bliską osobą' },
+    { t:'Wynajem lub mieszkanie kątem podczas budowy' },
+    { t:'Trudny okres w związku' },
+    { t:'Strata bliskiej osoby' },
+    { t:'Nic z powyższych', excl:true }
+  ]},
+
+{ sec:'Fakty',
+  q:'Twoje doświadczenie z budowaniem i remontowaniem:',
+  h:null,
+  wt:{K:3},
+  o:[
+    { t:'Pracuję lub pracowałem w budownictwie albo prowadziłem już budowę', s:{K:100} },
+    { t:'Przeprowadziłem generalny remont i sam koordynowałem ekipy',         s:{K:75} },
+    { t:'Drobne remonty, malowanie, montaże — ogarniam podstawy',             s:{K:45} },
+    { t:'Praktycznie żadne',                                                  s:{K:8} }
+  ]},
+
+/* === SEKCJA 2: CZAS ======================================================== */
+{ sec:'Czas', t:'Czas — ale ten prawdziwy',
+  q:'Cofnij się do ZESZŁEGO tygodnia. Nie typowego — zeszłego. Ile godzin zostało Ci poza pracą, snem, dojazdami i obowiązkami domowymi?',
+  h:'Pytamy o konkretny tydzień, nie o „zwykle”. Ludzie systematycznie zawyżają swoją dostępność, a błąd rośnie wraz z zajętością.',
+  wt:{T:2},
+  o:[
+    { t:'Mniej niż 5 godzin',   s:{T:5} },
+    { t:'5–10 godzin',          s:{T:35} },
+    { t:'10–20 godzin',         s:{T:70} },
+    { t:'Ponad 20 godzin',      s:{T:100} }
+  ]},
+
+{ sec:'Czas',
+  q:'Ile razy w ostatnie 4 tygodnie mogłeś swobodnie rozmawiać przez telefon 10 minut między 9:00 a 15:00 w dzień roboczy?',
+  h:null,
+  wt:{T:2},
+  o:[
+    { t:'Ani razu',              s:{T:0} },
+    { t:'1–3 razy',              s:{T:30} },
+    { t:'4–10 razy',             s:{T:70} },
+    { t:'Praktycznie zawsze mogę', s:{T:100} }
+  ]},
+
+{ sec:'Czas',
+  q:'Ostatnia decyzja o wydatku powyżej 5 000 zł. Ile dni minęło od chwili, gdy miałeś już wszystkie informacje, do momentu decyzji?',
+  h:'To najlepszy pojedynczy predyktor opóźnień na budowie. Ekipa czeka na Twoją decyzję, a przestój jednej ekipy blokuje wejście następnej.',
+  wt:{T:2,M:2},
+  o:[
+    { t:'Tego samego dnia',              s:{T:100,M:5} },
+    { t:'1–3 dni',                       s:{T:85,M:25} },
+    { t:'Do dwóch tygodni',              s:{T:50,M:55} },
+    { t:'Ponad miesiąc',                 s:{T:20,M:85} },
+    { t:'Do dziś nie zdecydowałem',      s:{T:0,M:100} }
+  ]},
+
+{ sec:'Czas',
+  q:'Środa, 10:00. Wykonawca musi mieć decyzję dzisiaj, a Ty siedzisz na spotkaniu. Kto decyduje?',
+  h:null,
+  wt:{T:2,C:2},
+  o:[
+    { t:'Nikt. Wszystko czeka na mnie',                              s:{T:0,C:100} },
+    { t:'Partner — ale i tak najpierw zadzwoni i mnie zapyta',       s:{T:40,C:75} },
+    { t:'Partner, samodzielnie',                                     s:{T:85,C:30,Z:75} },
+    { t:'Kierownik budowy albo inspektor, któremu ufam',             s:{T:100,C:10,Z:95} }
+  ]},
+
+/* === SEKCJA 3: KOMPETENCJE ================================================= */
+{ sec:'Kompetencje', t:'Co realnie potrafisz',
+  q:'Na ile jesteś pewien, że potrafisz przeczytać projekt i wskazać, którędy pobiegną instalacje?',
+  h:'Nie chodzi o to, czy dałbyś radę się nauczyć. Chodzi o to, czy potrafisz to dziś.',
+  wt:{K:2},
+  o:[
+    { t:'Całkowicie pewien',   s:{K:100} },
+    { t:'W dużym stopniu',     s:{K:70} },
+    { t:'Trochę',              s:{K:35} },
+    { t:'Wcale',               s:{K:0} }
+  ]},
+
+{ sec:'Kompetencje',
+  q:'Na ile jesteś pewien, że potrafisz zweryfikować kosztorys wykonawcy i wskazać palcem zawyżoną pozycję?',
+  h:null,
+  wt:{K:2},
+  o:[
+    { t:'Całkowicie pewien',   s:{K:100} },
+    { t:'W dużym stopniu',     s:{K:70} },
+    { t:'Trochę',              s:{K:35} },
+    { t:'Wcale',               s:{K:0} }
+  ]},
+
+{ sec:'Kompetencje',
+  q:'Ekipa schodzi z budowy w środku etapu. Na ile jesteś pewien, że zorganizujesz zastępstwo w dwa tygodnie?',
+  h:'Najlepsze ekipy dekarskie, tynkarskie i posadzkarskie mają kalendarze zapełnione nawet dwa lata naprzód. Ekipa „wolna od zaraz” to sygnał ostrzegawczy.',
+  wt:{K:2,N:1},
+  o:[
+    { t:'Całkowicie pewien — mam kontakty',   s:{K:100,N:85} },
+    { t:'W dużym stopniu',                    s:{K:70,N:65} },
+    { t:'Trochę',                             s:{K:30,N:40} },
+    { t:'Nie mam pojęcia, jak bym to zrobił', s:{K:0,N:15} }
+  ]},
+
+{ sec:'Kompetencje',
+  q:'Czy zdarzało Ci się zawodowo koordynować kilka osób lub podwykonawców naraz i rozliczać ich z terminów?',
+  h:null,
+  wt:{K:2},
+  o:[
+    { t:'Tak, to moja codzienność',   s:{K:100} },
+    { t:'Zdarzało się regularnie',    s:{K:70} },
+    { t:'Raz czy dwa',                s:{K:35} },
+    { t:'Nigdy',                      s:{K:0} }
+  ]},
+
+/* === SEKCJA 4: ZAUFANIE ==================================================== */
+{ sec:'Zaufanie', t:'Ile jesteś w stanie oddać',
+  q:'„Większość fachowców uczciwie wykonuje swoją pracę, także wtedy, gdy nikt nie patrzy.”',
+  h:null,
+  wt:{Z:2},
+  o:[
+    { t:'Zdecydowanie się zgadzam',  s:{Z:100} },
+    { t:'Raczej się zgadzam',        s:{Z:72} },
+    { t:'Trudno powiedzieć',         s:{Z:50} },
+    { t:'Raczej się nie zgadzam',    s:{Z:25} },
+    { t:'Zdecydowanie się nie zgadzam', s:{Z:0} }
+  ]},
+
+{ sec:'Zaufanie',
+  q:'„Nawet nie znając drugiej strony, wychodzę na tym lepiej, zakładając jej dobrą wolę.”',
+  h:null,
+  wt:{Z:2},
+  o:[
+    { t:'Zdecydowanie się zgadzam',  s:{Z:100} },
+    { t:'Raczej się zgadzam',        s:{Z:72} },
+    { t:'Trudno powiedzieć',         s:{Z:50} },
+    { t:'Raczej się nie zgadzam',    s:{Z:25} },
+    { t:'Zdecydowanie się nie zgadzam', s:{Z:0} }
+  ]},
+
+{ sec:'Zaufanie',
+  q:'Wybierasz wykonawcę na zlecenie warte kilkadziesiąt tysięcy złotych. Co faktycznie robisz?',
+  h:null,
+  wt:{Z:2,A:2},
+  o:[
+    { t:'Biorę polecenie od znajomego i nie drążę dalej',                     s:{Z:100,A:15,K:20} },
+    { t:'Proszę o dwie–trzy oferty i wybieram najrozsądniejszą',              s:{Z:70,A:45} },
+    { t:'Zbieram oferty i dzwonię do poprzednich klientów',                   s:{Z:45,A:75} },
+    { t:'Oglądam realizacje osobiście, sprawdzam KRS, polisę OC i wzór umowy',s:{Z:12,A:100,C:80} }
+  ]},
+
+{ sec:'Zaufanie',
+  q:'Wykonawca prosi o 30% zaliczki na materiały przed startem. Umowa ma jedną stronę. Co robisz?',
+  h:'Rynkowy standard zaliczki to 10–20%. Żądanie wyższej bez rozpisanego harmonogramu płatności jest jednym z klasycznych sygnałów ostrzegawczych.',
+  wt:{Z:2,A:2},
+  o:[
+    { t:'Płacę — skoro tak się umawialiśmy',                                  s:{Z:100,A:0} },
+    { t:'Płacę mniej i proszę o fakturę',                                     s:{Z:72,A:40} },
+    { t:'Proszę o rozpisanie płatności na etapy',                             s:{Z:45,A:78} },
+    { t:'Nie płacę nic bez pełnej umowy z harmonogramem, karami i polisą',    s:{Z:10,A:100} }
+  ]},
+
+{ sec:'Zaufanie',
+  q:'Jak myślisz — końcowy rachunek za budowę wypadnie:',
+  h:null,
+  wt:{Z:1,N:2},
+  o:[
+    { t:'Blisko kosztorysu, jeśli dobrze się przygotuję',  s:{Z:90,N:30} },
+    { t:'Wyżej o kilka procent',                            s:{Z:68,N:75} },
+    { t:'Wyżej o 10–20% — i to normalne',                   s:{Z:45,N:100} },
+    { t:'Znacznie wyżej, tego się po prostu nie da przewidzieć', s:{Z:20,N:55} }
+  ]},
+
+/* === SEKCJA 5: KONTROLA ==================================================== */
+{ sec:'Kontrola', t:'Ile musisz trzymać w rękach',
+  q:'„Wolę zdecydować sam, niż zdać się na kogoś, kto zna się na tym lepiej ode mnie.”',
+  h:'Wysoka potrzeba kontroli sama w sobie nie jest problemem. Problemem jest wysoka potrzeba kontroli u kogoś, kto fizycznie nie ma jak jej zaspokoić.',
+  wt:{C:2},
+  o:[
+    { t:'Zdecydowanie się zgadzam',  s:{C:100} },
+    { t:'Raczej się zgadzam',        s:{C:74} },
+    { t:'Trudno powiedzieć',         s:{C:50} },
+    { t:'Raczej się nie zgadzam',    s:{C:26} },
+    { t:'Zdecydowanie się nie zgadzam', s:{C:0} }
+  ]},
+
+{ sec:'Kontrola',
+  q:'Ostatnie większe zlecenie u wykonawcy (powyżej 10 tys. zł). Jak często się z nim kontaktowałeś?',
+  h:null,
+  wt:{C:2},
+  o:[
+    { t:'Wtedy, gdy sam się odezwał',   s:{C:8} },
+    { t:'Mniej więcej raz w tygodniu',  s:{C:35} },
+    { t:'Dwa–trzy razy w tygodniu',     s:{C:68} },
+    { t:'Codziennie albo częściej',     s:{C:100} },
+    { t:'Nie miałem takiego zlecenia',  s:{C:50} }
+  ]},
+
+{ sec:'Kontrola',
+  q:'Ekipa podjęła sensowną decyzję techniczną, nie pytając Cię o zdanie. Twoja pierwsza reakcja to:',
+  h:null,
+  wt:{C:2},
+  o:[
+    { t:'Ulga — dobrze, że nie musiałem się tym zajmować', s:{C:0,Z:90} },
+    { t:'W porządku, byle mnie potem poinformowali',        s:{C:30,Z:70} },
+    { t:'Lekka irytacja — wolałbym wiedzieć wcześniej',     s:{C:68,Z:40} },
+    { t:'To niedopuszczalne, mam być pytany o wszystko',    s:{C:100,Z:10} }
+  ]},
+
+{ sec:'Kontrola',
+  q:'Gdyby dom miał sto detali do wyboru — od klamek po odcień fugi — ile z nich chcesz wybrać osobiście?',
+  h:null,
+  wt:{C:2,M:2},
+  o:[
+    { t:'Kilkanaście najważniejszych, reszta niech się dzieje', s:{C:22,M:12} },
+    { t:'Mniej więcej połowę',                                   s:{C:52,M:45} },
+    { t:'Zdecydowaną większość',                                 s:{C:82,M:78} },
+    { t:'Wszystkie co do jednego',                               s:{C:100,M:100} }
+  ]},
+
+/* === SEKCJA 6: NIEPEWNOŚĆ ================================================== */
+{ sec:'Niepewność', t:'Jak znosisz to, czego nie da się przewidzieć',
+  q:'„Nieprzewidziane zdarzenia mocno wytrącają mnie z równowagi.”',
+  h:null,
+  wt:{N:2},
+  o:[
+    { t:'Zdecydowanie się zgadzam',  s:{N:0} },
+    { t:'Raczej się zgadzam',        s:{N:26} },
+    { t:'Trudno powiedzieć',         s:{N:50} },
+    { t:'Raczej się nie zgadzam',    s:{N:74} },
+    { t:'Zdecydowanie się nie zgadzam', s:{N:100} }
+  ]},
+
+{ sec:'Niepewność',
+  q:'Ekipa odkopuje fundament i mówi: „grunt jest inny niż w badaniach, wrócę z ceną za trzy dni”. Co robisz przez te trzy dni?',
+  h:null,
+  wt:{N:3},
+  o:[
+    { t:'Czekam spokojnie, zajmuję się swoimi sprawami',            s:{N:100,E:85} },
+    { t:'Czytam i szukam informacji na własną rękę',                s:{N:72,C:70} },
+    { t:'Dzwonię do wykonawcy codziennie',                          s:{N:28,C:92} },
+    { t:'Równolegle szukam innego wykonawcy do wyceny',             s:{N:35,Z:12,M:88} },
+    { t:'Nie mogę spać, wracam do tego myślami przez cały dzień',   s:{N:0,E:12} }
+  ]},
+
+{ sec:'Niepewność',
+  q:'„Wolę mieć wszystko ustalone na starcie i już tego nie zmieniać — nawet gdyby po drodze pojawiło się lepsze rozwiązanie.”',
+  h:'Na budowie rzeczywistość wymusza rewizje. Sztywne trzymanie się pierwotnej decyzji generuje najdroższe konflikty.',
+  wt:{N:2},
+  o:[
+    { t:'Zdecydowanie się zgadzam',  s:{N:15,M:35} },
+    { t:'Raczej się zgadzam',        s:{N:40,M:30} },
+    { t:'Trudno powiedzieć',         s:{N:58,M:45} },
+    { t:'Raczej się nie zgadzam',    s:{N:78,M:62} },
+    { t:'Zdecydowanie się nie zgadzam', s:{N:95,M:85} }
+  ]},
+
+{ sec:'Niepewność',
+  q:'Harmonogram przesuwa się o dwa miesiące, bo od listopada nie da się prowadzić prac mokrych. Twoja reakcja:',
+  h:'Zaprawy, tynki i wylewki wymagają minimum +5°C, wykończeniówka +15°C. Trzy–cztery miesiące w roku po prostu wypadają.',
+  wt:{N:2,A:1},
+  o:[
+    { t:'Trudno, tak bywa — przestawiam się',                        s:{N:100,E:88,A:40} },
+    { t:'Irytacja, ale przekładam plany',                            s:{N:72,E:62,A:55} },
+    { t:'Szukam winnego i rozliczam z kar umownych',                 s:{N:42,A:95} },
+    { t:'To rozwala mi wszystko — mam sztywne terminy',              s:{N:12,E:22,A:60} }
+  ]},
+
+/* === SEKCJA 7: REZERWA ===================================================== */
+{ sec:'Rezerwa', t:'Ile masz zapasu',
+  q:'Jak często w ostatnim miesiącu czułeś, że nie panujesz nad ważnymi sprawami w swoim życiu?',
+  h:null,
+  wt:{E:2},
+  o:[
+    { t:'Nigdy',          s:{E:100} },
+    { t:'Prawie nigdy',   s:{E:78} },
+    { t:'Czasami',        s:{E:52} },
+    { t:'Dość często',    s:{E:24} },
+    { t:'Bardzo często',  s:{E:0} }
+  ]},
+
+{ sec:'Rezerwa',
+  q:'Jak często w ostatnim miesiącu czułeś, że trudności piętrzą się tak, że nie dasz rady ich pokonać?',
+  h:null,
+  wt:{E:2},
+  o:[
+    { t:'Nigdy',          s:{E:100} },
+    { t:'Prawie nigdy',   s:{E:78} },
+    { t:'Czasami',        s:{E:52} },
+    { t:'Dość często',    s:{E:24} },
+    { t:'Bardzo często',  s:{E:0} }
+  ]},
+
+{ sec:'Rezerwa',
+  q:'Gdy coś idzie nie po Twojej myśli, najczęściej:',
+  h:null,
+  wt:{E:2,A:1},
+  o:[
+    { t:'Zmieniam sposób patrzenia na sytuację i szukam wyjścia',  s:{E:100,A:60} },
+    { t:'Rozmawiam z kimś bliskim i to mi realnie pomaga',         s:{E:85,A:50} },
+    { t:'Nie okazuję emocji, trzymam to w sobie',                  s:{E:28,A:18} },
+    { t:'Wybucham, a potem tego żałuję',                           s:{E:18,A:85} }
+  ]},
+
+{ sec:'Rezerwa',
+  q:'„Gdy mam poważny kłopot, moja druga połowa traktuje to jak nasz wspólny problem, a nie jak mój.”',
+  h:'Wspólne radzenie sobie ze stresem jest najlepiej udokumentowanym czynnikiem chroniącym związek przed przewlekłym stresorem. A budowa jest podręcznikowym przewlekłym stresorem.',
+  wt:{E:2},
+  o:[
+    { t:'Zdecydowanie tak',            s:{E:100} },
+    { t:'Raczej tak',                  s:{E:75} },
+    { t:'Raczej nie',                  s:{E:32} },
+    { t:'Zdecydowanie nie',            s:{E:8} },
+    { t:'Buduję sam — to mnie nie dotyczy', s:{E:60} }
+  ]},
+
+{ sec:'Rezerwa',
+  q:'Osoba, z którą będziesz w tym domu mieszkać, w sprawie sposobu budowania:',
+  h:null,
+  wt:{E:2},
+  o:[
+    { t:'Chce dokładnie tego samego co ja i aktywnie się angażuje',  s:{E:100} },
+    { t:'Zgadza się, ale to nie jest jej temat',                      s:{E:62} },
+    { t:'Nie zablokowała, ale ma poważne wątpliwości',                s:{E:28}, f:['partner_watpliwosci'] },
+    { t:'Mamy wyraźnie różne zdania',                                 s:{E:0},  f:['partner_konflikt'] },
+    { t:'Buduję sam',                                                 s:{E:62} }
+  ]},
+
+/* === SEKCJA 8: DECYZJE I PRACE WŁASNE ====================================== */
+{ sec:'Decyzje', t:'Jak podejmujesz decyzje',
+  q:'Ostatni zakup powyżej 3 000 zł. Ile wariantów przejrzałeś, zanim wybrałeś?',
+  h:'Budowa to nie jedna decyzja, tylko kilka tysięcy mikrodecyzji. To, ile Cię kosztuje jedna, mnoży się przez tę liczbę.',
+  wt:{M:2},
+  o:[
+    { t:'Jeden–dwa',            s:{M:0} },
+    { t:'Trzy–pięć',            s:{M:28} },
+    { t:'Sześć–piętnaście',     s:{M:62} },
+    { t:'Ponad piętnaście',     s:{M:88} },
+    { t:'Straciłem rachubę',    s:{M:100} }
+  ]},
+
+{ sec:'Decyzje',
+  q:'Po tym zakupie sprawdzałeś, czy gdzie indziej nie było lepiej albo taniej?',
+  h:null,
+  wt:{M:2},
+  o:[
+    { t:'Nigdy — kupione, temat zamknięty', s:{M:0} },
+    { t:'Raz zerknąłem',                     s:{M:32} },
+    { t:'Kilka razy',                        s:{M:68} },
+    { t:'Wielokrotnie, do dziś o tym myślę', s:{M:100} }
+  ]},
+
+{ sec:'Decyzje',
+  q:'Ostatnia sytuacja, gdy usługa wypadła gorzej, niż się umawialiście. Co FAKTYCZNIE zrobiłeś?',
+  h:'Nie „co bym zrobił” — co się faktycznie wydarzyło. Na budowie okno na reklamację zamyka się fizycznie: po zakryciu ściany albo zalaniu wylewki nie ma już o czym rozmawiać.',
+  wt:{A:3},
+  o:[
+    { t:'Zapłaciłem i nic nie powiedziałem',                    s:{A:0} },
+    { t:'Powiedziałem, że jest OK, ale już nie skorzystałem',   s:{A:20} },
+    { t:'Zwróciłem uwagę delikatnie i przyjąłem tłumaczenie',   s:{A:45} },
+    { t:'Zażądałem poprawki i dopilnowałem, aż została zrobiona', s:{A:88} },
+    { t:'Odmówiłem zapłaty albo poszedłem w spór',              s:{A:100,E:45} }
+  ]},
+
+{ sec:'Decyzje',
+  q:'Ile procent prac na budowie planujesz wykonać własnymi rękami?',
+  h:null,
+  wt:{},
+  o:[
+    { t:'Zero — od tego są fachowcy',   s:{}, m:{wlasne:0} },
+    { t:'Do 10% — drobiazgi',           s:{K:55}, m:{wlasne:10} },
+    { t:'10–30%',                       s:{K:70}, m:{wlasne:30} },
+    { t:'Ponad 30% — chcę zrobić dużo sam', s:{K:80}, m:{wlasne:50} }
+  ]},
+
+{ sec:'Decyzje',
+  q:'Ile rzeczy typu „zrobię to sam” zacząłeś w ostatnich trzech latach i NIE dokończyłeś w planowanym terminie?',
+  h:'Satysfakcja z własnoręcznej pracy pojawia się wyłącznie wtedy, gdy zadanie zostanie ukończone. Rozgrzebana elewacja przez pięć lat nie daje żadnej premii — daje tylko koszt.',
+  wt:{E:1,K:1},
+  o:[
+    { t:'Żadnej',                   s:{E:95,K:85} },
+    { t:'Jedną',                    s:{E:70,K:60} },
+    { t:'Dwie–trzy',                s:{E:38,K:32}, f:['niedokonczone'] },
+    { t:'Więcej, wolę nie liczyć',  s:{E:12,K:10}, f:['niedokonczone'] }
+  ]},
+
+{ sec:'Decyzje',
+  q:'Musisz wybrać jedno. Co jest dla Ciebie najważniejsze?',
+  h:'Nie da się mieć wszystkich czterech naraz — i to jest najuczciwsza rzecz, jaką można powiedzieć przed budową.',
+  wt:{},
+  o:[
+    { t:'Najniższy koszt',                          s:{}, m:{prio:'koszt'} },
+    { t:'Najkrótszy czas',                          s:{}, m:{prio:'czas'} },
+    { t:'Najwyższa jakość i dopracowany detal',     s:{}, m:{prio:'jakosc'} },
+    { t:'Mój spokój i minimum zaangażowania',       s:{}, m:{prio:'spokoj'} }
+  ]}
+];
+
+/* --------------------------------------------------------------------
+   PROFILE
+   -------------------------------------------------------------------- */
+
+const PROFILES = [
+{
+  id:'gospodarz',
+  name:'Gospodarz',
+  tag:'Budowa systemem gospodarczym — w pełnym zakresie',
+  proto:{T:90,K:90,Z:30,C:85,N:78,E:80,M:22,A:88},
+  w:    {T:3, K:3, Z:1, C:2, N:2, E:2, M:2, A:2},
+  lead:'Masz czas, kompetencje i nerwy. Metoda gospodarcza jest dla Ciebie nie kompromisem, tylko naturalnym wyborem.',
+  body:'Należysz do wąskiej grupy, dla której samodzielne prowadzenie budowy naprawdę się opłaca — bo masz jednocześnie trzy rzeczy, które rzadko występują razem: realną dostępność w godzinach pracy budowy, umiejętność oceny, czy robota jest zrobiona dobrze, oraz zapas psychiczny na to, żeby przez dwa lata żyć w trybie projektowym. Twoje ryzyko nie leży w tym, że sobie nie poradzisz. Leży w tym, że nie docenisz, ile życia to zabierze.',
+  model:'System gospodarczy: sam zatrudniasz i koordynujesz poszczególne ekipy, sam kupujesz materiały, część prostych prac wykonujesz osobiście.',
+  liczby:[
+    ['Realna oszczędność','8–15% budżetu netto (deklarowane 10–25% minus różnica VAT)'],
+    ['Czas do wprowadzenia','18–24 mies. w wariancie optymistycznym; średnia rynkowa 43 mies.'],
+    ['Twoje zaangażowanie','1 pełna wizyta na budowie tygodniowo + 5–10 h/tydz. na zakupy, telefony i harmonogram'],
+    ['Rezerwa','minimum 15% kosztorysu, poza kredytem']
+  ],
+  kroki:[
+    'Zakontraktuj ekipę na stan surowy minimum 6 miesięcy przed startem — najlepsi dekarze i tynkarze mają zajęte kalendarze na 2 lata naprzód.',
+    'Policz różnicę VAT zanim zdecydujesz o samodzielnych zakupach: usługa z materiałem wykonawcy to 8%, materiał kupiony przez Ciebie to 23%. Przy materiałach stanowiących 40–60% budżetu to 6–9% całości.',
+    'Zbuduj harmonogram od przerw technologicznych, nie od dostępności ekip: 21 dni dojrzewania betonu, 3–4 tygodnie schnięcia wylewek, prace mokre tylko powyżej +5°C.',
+    'Umów z kierownikiem budowy zakres szerszy niż ryczałtowy. Standardowy pakiet to 8–12 wizyt na całej budowie — przy Twoim modelu to za mało.',
+    'Ustal z góry limit czasu na decyzję: 48 godzin od kompletu informacji. Bez tego Twoja własna dokładność stanie się wąskim gardłem.'
+  ],
+  ryzyko:'Największe ryzyko Twojego profilu to nie błąd techniczny, tylko wypalenie w 18. miesiącu. Zaplanuj przerwę w harmonogramie tak samo poważnie, jak planujesz stropy.'
+},
+{
+  id:'dyrygent',
+  name:'Dyrygent',
+  tag:'System kontraktowy — koordynujesz, nie murujesz',
+  proto:{T:80,K:55,Z:52,C:80,N:70,E:72,M:35,A:80},
+  w:    {T:3, K:2, Z:2, C:3, N:2, E:2, M:2, A:2},
+  lead:'Chcesz trzymać rękę na sterze, ale nie musisz jej mieć w zaprawie. Twoim narzędziem jest telefon i harmonogram, nie kielnia.',
+  body:'Masz dostępność i głowę do organizacji, ale nie masz — i nie potrzebujesz — kompetencji wykonawczych. To najczęściej mylony model: ludzie nazywają go „gospodarczym”, choć w rzeczywistości jest to system kontraktowy, w którym pełnisz funkcję menedżera budowy. Zatrudniasz wyspecjalizowane ekipy na kolejne etapy, ale sam nie pracujesz fizycznie. Oszczędność jest mniejsza niż w pełnym systemie gospodarczym, za to ryzyko techniczne dużo niższe.',
+  model:'System kontraktowy: osobne umowy z ekipami na poszczególne etapy, Ty jesteś jedynym punktem koordynacji. Wzmocniony kierownik budowy jako Twoje przedłużenie techniczne.',
+  liczby:[
+    ['Realna oszczędność','5–10% wobec generalnego wykonawcy'],
+    ['Czas do wprowadzenia','14–20 miesięcy'],
+    ['Twoje zaangażowanie','5–8 h tygodniowo, głównie telefonicznie, w godzinach 7:00–16:00'],
+    ['Kierownik budowy w rozszerzonym zakresie','1 600–4 000 zł/mies. lub 200–500 zł za wizytę']
+  ],
+  kroki:[
+    'Nie oszczędzaj na kierowniku budowy — to Twoje jedyne oko techniczne. Ryczałt na 8–12 wizyt Ci nie wystarczy; umów przynajmniej dwie wizyty w tygodniu w okresie stanu surowego.',
+    'Rozpisz harmonogram z buforami między ekipami. Nieobecność jednej ekipy blokuje wejście następnej — efekt domina to główny mechanizm poślizgu w tym modelu.',
+    'Zapisz w każdej umowie klauzulę, że zakrycie robót bez zgłoszenia następuje na ryzyko wykonawcy, z obowiązkiem odkrycia na jego koszt.',
+    'Zbieraj pisemne oświadczenia podwykonawców o uregulowaniu płatności — przy solidarnej odpowiedzialności inwestora możesz zapłacić dwa razy za tę samą pracę.',
+    'Zbuduj jedną tabelę: etap, ekipa, termin, kwota, status odbioru. Bez niej po dziewiątym miesiącu przestaniesz panować nad rozliczeniami.'
+  ],
+  ryzyko:'Przy braku jednego wykonawcy odpowiedzialnego za całość, wada na styku etapów — np. przemarzanie między ociepleniem a stolarką — nie ma adresata. To Ty będziesz tym adresatem.'
+},
+{
+  id:'etapowiec',
+  name:'Etapowiec',
+  tag:'Firma stawia stan surowy, Ty wykańczasz',
+  proto:{T:52,K:66,Z:60,C:50,N:62,E:56,M:38,A:56},
+  w:    {T:2, K:3, Z:2, C:3, N:2, E:2, M:2, A:2},
+  lead:'Najrozsądniejszy kompromis dla kogoś, kto chce oszczędzić, ale nie chce ryzykować konstrukcją.',
+  body:'Twoje zasoby są średnie w każdym wymiarze i to jest dobra wiadomość — nie masz żadnego skrajnego deficytu, ale też nie masz zapasu, który pozwalałby wziąć na siebie całość. Podział jest naturalny: stan surowy to największa pojedyncza pozycja budżetu (30–37%) i jedyny etap, w którym błąd jest praktycznie nieodwracalny. Wykończenie jest podzielne, mało ryzykowne i doskonale znosi rozłożenie w czasie — a przy okazji tu właśnie zapada większość decyzji, które i tak chcesz podjąć sam.',
+  model:'Stan surowy otwarty lub zamknięty powierzony jednej firmie z referencjami. Wykończenie prowadzone samodzielnie, we własnym tempie, etapami.',
+  liczby:[
+    ['Realna oszczędność','5–10%, przy zdjętym ryzyku konstrukcyjnym'],
+    ['Podział wartości','firma robi 45–57% budżetu, Ty koordynujesz resztę'],
+    ['Czas do stanu surowego zamkniętego','5–8 miesięcy'],
+    ['Wykończenie','elastycznie — możesz wprowadzić się i kończyć etapami']
+  ],
+  kroki:[
+    'Powierz stan surowy jednej firmie z rekomendacjami i obejrzanymi realizacjami. To nie jest etap, na którym się oszczędza.',
+    'Wynagrodzenie ryczałtowe, nie kosztorysowe — ryzyko wzrostu kosztów zostaje wtedy po stronie wykonawcy.',
+    'Kary umowne 0,1–1% wartości umowy za każdy dzień zwłoki, wpisane wprost.',
+    'Ostatnia rata (ok. 30%) płatna po usunięciu usterek z protokołu odbioru — to Twoja jedyna realna dźwignia.',
+    'Zamów okna z minimum kilkutygodniowym wyprzedzeniem — to najczęstsze wąskie gardło przed zamknięciem stanu surowego.'
+  ],
+  ryzyko:'Wykończenie prowadzone „we własnym tempie” ma tendencję do zamieniania się w brak tempa. Wyznacz sobie twardą datę zakończenia elewacji i tarasu — to najczęściej porzucane pozycje.'
+},
+{
+  id:'nadzorca',
+  name:'Nadzorca',
+  tag:'Generalny wykonawca + niezależny inspektor nadzoru',
+  proto:{T:28,K:45,Z:22,C:92,N:45,E:55,M:60,A:70},
+  w:    {T:3, K:2, Z:3, C:3, N:2, E:2, M:2, A:2},
+  lead:'Chcesz kontrolować wszystko, a nie masz jak. To najbardziej wybuchowa kombinacja na budowie — i da się ją rozbroić, kupując sobie kontrolę zamiast jej wykonywać.',
+  body:'Twój profil to wysoka potrzeba kontroli przy niskiej realnej dostępności i ograniczonym zaufaniu. To konfiguracja, która bez interwencji kończy się mikrozarządzaniem na odległość: codziennymi telefonami, kwestionowaniem decyzji, blokowaniem postępu prac wymogiem konsultacji każdego detalu — przy jednoczesnym braku fizycznej możliwości bycia na budowie. Rozwiązanie nie polega na tym, żebyś „nauczył się odpuszczać”. Polega na tym, żeby kupić sobie zastępczą parę oczu, której ufasz bardziej niż wykonawcy — bo ona pracuje dla Ciebie.',
+  model:'Generalny wykonawca ze szczegółową umową plus niezależny inspektor nadzoru inwestorskiego, opłacany przez Ciebie i wyłącznie Twój. Przy większym budżecie: inwestor zastępczy działający na podstawie art. 18 Prawa budowlanego.',
+  liczby:[
+    ['Koszt niezależnego nadzoru','200–500 zł za wizytę lub 1 600–4 000 zł miesięcznie'],
+    ['Czas do stanu deweloperskiego','ok. 9 miesięcy'],
+    ['Koszt modelu','+10–25% wobec systemu gospodarczego'],
+    ['Twoje zaangażowanie','1 rozmowa tygodniowo z inspektorem, nie z wykonawcą']
+  ],
+  kroki:[
+    'Sprawdź, kto zapewnia kierownika budowy. Jeśli jest to człowiek wykonawcy, niezależny inspektor przestaje być opcją, a staje się koniecznością — bez tego nie masz w ogóle swojego przedstawiciela na budowie.',
+    'Ustal jeden kanał kontaktu: inspektor. Twoje telefony do wykonawcy mają wartość ujemną — kosztują czas i budują konflikt, a nie dają informacji.',
+    'Wynegocjuj raport z każdego odbioru: protokół plus dokumentacja fotograficzna, przed każdą płatnością etapową.',
+    'Umowa z wynagrodzeniem ryczałtowym, harmonogram płatności etapowy (10 / 20 / 20 / 20 / 30%), kary umowne za zwłokę, polisa OC wykonawcy minimum 500 tys. zł jako załącznik.',
+    'Zdefiniuj z góry listę decyzji, które są Twoje, i tych, które są inspektora. Wszystko, co nie jest na Twojej liście, nie wraca do Ciebie.'
+  ],
+  ryzyko:'Twoje pieniądze najprawdopodobniej wypłyną nie przez oszustwo, tylko przez zmiany w trakcie. Zamroź projekt wykonawczy przed startem i wprowadź zasadę: żadnej zmiany bez wyceny na piśmie.'
+},
+{
+  id:'zleceniodawca',
+  name:'Zleceniodawca',
+  tag:'Generalny wykonawca — budowa pod klucz',
+  proto:{T:28,K:28,Z:88,C:22,N:72,E:72,M:22,A:48},
+  w:    {T:3, K:2, Z:3, C:3, N:2, E:2, M:2, A:2},
+  lead:'Nie masz czasu i — co ważniejsze — nie masz z tym problemu. Umiesz oddać robotę komuś, kto się na niej zna.',
+  body:'To rzadka i bardzo wygodna konfiguracja: brak dostępności przy jednoczesnym wysokim zaufaniu i niskiej potrzebie mikrokontroli. Twoja budowa najprawdopodobniej pójdzie gładko, bo nie będziesz jej blokował. Twoje ryzyko jest dokładnie odwrotne niż u większości: nie przekontrolujesz, tylko niedokontrolujesz. Konkretnie — zaakceptujesz „drobne” dopłaty, przyjmiesz zamiennik materiałowy, żeby nie robić problemu, i nie zgłosisz usterki przy odbiorze, bo wykonawca jest sympatyczny.',
+  model:'Jeden generalny wykonawca, jedna umowa, jedna odpowiedzialność. Realistycznie do stanu deweloperskiego — większość rzetelnych firm w Polsce nie bierze na siebie także wykończenia.',
+  liczby:[
+    ['Koszt, stan deweloperski','5 000–6 500 zł/m², średnio ok. 5 800 zł/m²'],
+    ['Koszt, pod klucz','6 000–9 000 zł/m²'],
+    ['Czas do stanu deweloperskiego','8–9 miesięcy'],
+    ['Twoje zaangażowanie','wizyta raz na 2–3 tygodnie i obecność przy odbiorach etapowych']
+  ],
+  kroki:[
+    'Uwaga na semantykę: „pod klucz” w Polsce zwykle oznacza stan deweloperski. Zapytaj wprost, gdzie kończy się zakres, i miej gotowy plan na wykończenie.',
+    'Trzy oferty porównawcze, obowiązkowo. Cena niższa o ponad 25% od pozostałych to sygnał ostrzegawczy, nie okazja.',
+    'Rękojmia i gwarancja muszą być wpisane do umowy wprost, z terminem. Nie zakładaj, że „to się rozumie samo przez się” — praktyka rynkowa jest tu rozbieżna.',
+    'Jedna rzecz, której nie możesz oddać: obecność przy odbiorach robót zanikających. Zbrojenie, izolacje przeciwwilgociowe, instalacje przed zakryciem. Wpisz te terminy do kalendarza jak spotkania zarządu.',
+    'Ostatnia rata 30% wypłacana po usunięciu usterek. Jeśli zgodzisz się zapłacić wszystko przy odbiorze, tracisz jedyny instrument nacisku.'
+  ],
+  ryzyko:'Największe zagrożenie: kumulacja „drobnych” ustępstw. Wyznacz z góry kwotę, powyżej której każda dopłata wymaga pisemnej wyceny i Twojej zgody — i trzymaj się jej, nawet gdy będzie niezręcznie.'
+},
+{
+  id:'spokoj',
+  name:'Architekt spokoju',
+  tag:'Zamknięty pakiet — prefabrykat, moduł lub ryczałt pod klucz',
+  proto:{T:26,K:24,Z:60,C:28,N:22,E:28,M:35,A:30},
+  w:    {T:2, K:2, Z:2, C:2, N:3, E:3, M:2, A:2},
+  lead:'Twoim najcenniejszym zasobem nie są pieniądze ani czas, tylko spokój. Kupuj przewidywalność, nawet gdy kosztuje.',
+  body:'Wynik pokazuje niską odporność na niepewność przy ograniczonej rezerwie — emocjonalnej, relacyjnej albo finansowej. To nie jest słabość, to informacja operacyjna: budowa rozciągnięta na dwa lata, z otwartym kosztorysem i comiesięcznymi niespodziankami, będzie Cię kosztowała nieproporcjonalnie dużo. Nie w złotówkach. Twój model to taki, w którym liczba otwartych pytań jest najmniejsza, a cena znana z góry.',
+  model:'Zamknięty pakiet z ceną ryczałtową: dom prefabrykowany, modułowy albo katalogowy pod klucz. Ograniczona liczba wariantów wykończenia. Jeden wykonawca, jedna umowa, jedna data.',
+  liczby:[
+    ['Prefabrykat, stan deweloperski','3 900–5 800 zł/m²'],
+    ['Prefabrykat, pod klucz','5 500–7 500 zł/m²'],
+    ['Czas montażu i realizacji','3–6 miesięcy'],
+    ['Poza pakietem','+150–200 tys. zł na fundamenty, przyłącza i przygotowanie terenu'],
+    ['Gwarancja producenta','nawet do 25 lat']
+  ],
+  kroki:[
+    'Prefabrykat nie jest tańszy — jest przewidywalny. Jeśli ktoś sprzedaje Ci go jako oszczędność, sprzedaje Ci nie ten argument. Kupujesz czas i brak niespodzianek.',
+    'Bezwzględnie sprawdź, co NIE wchodzi w pakiet: fundamenty, źródło ciepła, wentylacja mechaniczna i przyłącza zwykle są poza ceną.',
+    'Wybierz projekt z prostą bryłą i dachem dwuspadowym. Dach wielospadowy to 20–60 tys. zł różnicy i wielokrotnie więcej punktów, w których coś może pójść nie tak.',
+    'Ogranicz liczbę decyzji świadomie: wybierz gotowy pakiet wykończeniowy zamiast komponować własny. Mniej wariantów to dla Ciebie realna korzyść, nie kompromis.',
+    'Zapewnij sobie stabilne mieszkanie na cały okres budowy. Mieszkanie kątem u rodziny „na chwilę” jest przy Twoim profilu najkosztowniejszą pozycją całego projektu.'
+  ],
+  ryzyko:'Nie zaczynaj budowy w roku, w którym dzieje się coś jeszcze — przeprowadzka, zmiana pracy, dziecko. Twój profil nie ma rezerwy na dwa równoległe kryzysy.'
+},
+{
+  id:'kurator',
+  name:'Kurator detalu',
+  tag:'Generalny wykonawca po zamrożeniu projektu wykonawczego',
+  proto:{T:58,K:50,Z:40,C:86,N:45,E:55,M:92,A:70},
+  w:    {T:2, K:2, Z:2, C:3, N:2, E:2, M:3, A:2},
+  lead:'Zależy Ci na detalu bardziej niż większości ludzi. To zasób — pod warunkiem, że zamkniesz decyzje przed startem, a nie w trakcie.',
+  body:'Twój wynik pokazuje wysoki koszt decyzji: przeglądasz wiele wariantów, długo wybierasz i wracasz do wyboru po fakcie. Przy jednym zakupie to nieszkodliwe. Przy budowie, w której podejmuje się kilka tysięcy mikrodecyzji, ten sam mechanizm zamienia się w opóźnienia, zmiany po zamówieniu materiału i — co najważniejsze — w trwałe niezadowolenie z efektu. Punktem odniesienia nie będzie dla Ciebie gotowy dom, tylko wariant, którego nie wybrałeś. To jest przewidywalne i da się temu przeciwdziałać, ale tylko przed startem.',
+  model:'Generalny wykonawca, poprzedzony długą i świadomie kosztowną fazą przygotowawczą. Projekt wykonawczy zamknięty i zamrożony przed wbiciem pierwszej łopaty.',
+  liczby:[
+    ['Faza przygotowawcza','3–6 miesięcy przed startem — zaplanuj ją jako etap, nie jako czekanie'],
+    ['Budżet na zmiany w trakcie','zero. Każda zmiana po starcie: wycena na piśmie plus czas'],
+    ['Rezerwa','15–20% — u Ciebie głównie na zmiany, nie na awarie'],
+    ['Czas realizacji','9–12 miesięcy, jeśli projekt jest zamknięty']
+  ],
+  kroki:[
+    'Zamknij projekt wykonawczy z pełnym rozrysowaniem instalacji, oświetlenia, gniazd i zabudowy — zanim ruszy budowa. Każda decyzja podjęta przed startem kosztuje ułamek tej samej decyzji podjętej w trakcie.',
+    'Wprowadź budżet decyzyjny: zamknięta lista dostawców i twarda zasada „poniżej 2 000 zł wybieram w 24 godziny, bez przeglądania alternatyw”. Twój czas jest wart więcej niż różnica.',
+    'Zatrudnij architekta wnętrz do zamknięcia decyzji materiałowych. Nie po to, żeby wybrał lepiej niż Ty — po to, żeby zamknąć listę i przestać ją otwierać.',
+    'Zakaz sprawdzania cen po zakupie. To nie jest rada psychologiczna, to zasada operacyjna: każde takie sprawdzenie kosztuje Cię satysfakcję z gotowego domu i nic nie zmienia.',
+    'Ustal z wykonawcą sztywną procedurę zmian: pisemny wniosek, wycena, akceptacja, dopiero potem realizacja. Chroni Was oboje.'
+  ],
+  ryzyko:'Twoje realne ryzyko to nie przekroczenie budżetu, tylko to, że wprowadzisz się do obiektywnie świetnego domu i nie będziesz z niego zadowolony. Zdecyduj z góry, kiedy uznajesz budowę za skończoną.'
+},
+{
+  id:'solista',
+  name:'Solista',
+  tag:'Zawężony zakres prac własnych + firma na ścieżce krytycznej',
+  proto:{T:30,K:78,Z:28,C:90,N:55,E:45,M:45,A:72},
+  w:    {T:3, K:3, Z:2, C:3, N:2, E:2, M:1, A:2},
+  lead:'Umiesz i chcesz zrobić dużo sam. Problem w tym, że Twój kalendarz mówi co innego niż Twoje ambicje.',
+  body:'Masz kompetencje i chęć do samodzielnej pracy, ale nie masz dostępności, która by je uniosła. To najczęstsza droga do budowy, która stoi: prace, które miałeś zrobić sam, blokują wejście kolejnej ekipy, harmonogram się rozjeżdża, a wykonawcy przechodzą na inne budowy. Satysfakcja z własnoręcznej pracy pojawia się wyłącznie po ukończeniu — nieukończony fragment nie daje żadnej premii, generuje wyłącznie koszt i napięcie w domu. Rozwiązanie nie brzmi „nie rób nic sam”. Brzmi: rób wyłącznie to, co nikogo nie blokuje.',
+  model:'Firma na ścieżce krytycznej — wszystko, co warunkuje wejście następnej ekipy. Twoje prace własne wyłącznie w zadaniach odwracalnych, poza harmonogramem, możliwych do skończenia w jednym bloku weekendowym.',
+  liczby:[
+    ['Prace własne — bezpieczny zakres','malowanie, ogród, taras, zabudowa meblowa, montaż osprzętu'],
+    ['Prace własne — zakazane','wszystko na ścieżce krytycznej i wszystko, co się zakrywa'],
+    ['Realistyczny udział prac własnych','do 10% wartości, nie 30%'],
+    ['Czas','firma 9 miesięcy, Twoje prace po wprowadzeniu']
+  ],
+  kroki:[
+    'Zrób listę prac, które chcesz wykonać sam, i przy każdej odpowiedz na jedno pytanie: czy jeśli tego nie skończę w terminie, ktoś na mnie czeka? Wszystko z odpowiedzią „tak” wypada z listy.',
+    'Przelicz swoją godzinę. Porównaj stawkę fachowca z tym, ile zarabiasz w godzinie własnej pracy zawodowej — i z tym, ile kosztuje tydzień przestoju budowy.',
+    'Prace własne zaplanuj po wprowadzeniu, nie przed. Dom, w którym już mieszkasz, znosi niedokończony taras. Budowa nie znosi niedokończonego etapu.',
+    'Zakontraktuj firmę na cały stan surowy i instalacje. To są etapy, w których Twoja nieobecność kosztuje najwięcej.',
+    'Powiedz to wprost drugiej stronie: ile weekendów przez ile miesięcy. Niewypowiedziana wersja tego planu jest głównym źródłem konfliktu w tym profilu.'
+  ],
+  ryzyko:'Historia niedokończonych projektów w połączeniu z ambitnym zakresem prac własnych to najlepiej udokumentowany sposób na budowę, która trwa pięć lat. Zawęź zakres teraz, dobrowolnie — będzie to tańsze niż zawężanie go później, pod presją.'
+}
+];
+
+/* --------------------------------------------------------------------
+   FLAGI RYZYKA
+   -------------------------------------------------------------------- */
+
+const FLAGS = {
+  dystans:      { lvl:'critical', t:'Ponad godzina drogi na budowę',
+    d:'Odbiory prac zanikających zdarzają się z dnia na dzień, a kierownik budowy w pakiecie ryczałtowym pojawia się 8–12 razy na całej budowie. Przy tej odległości samodzielne prowadzenie budowy oznacza ok. 150 przejazdów po 2 godziny. To 300 godzin w samochodzie.' },
+  zmianowa:     { lvl:'critical', t:'Brak dostępności w godzinach 7:00–16:00',
+    d:'Hurtownie, urzędy, dostawy i ekipy działają wyłącznie w tych godzinach. Weekendowa dostępność nie jest użytecznym czasem budowlanym — to najczęściej mylona rzecz przy planowaniu.' },
+  transze:      { lvl:'warning',  t:'Kredyt wypłacany w transzach',
+    d:'Bank uruchamia kolejną transzę po potwierdzeniu etapu: dokumentacja, zdjęcia, inspekcja rzeczoznawcy. Generalny wykonawca kończy stan deweloperski w ok. 9 miesięcy, system gospodarczy — przeciętnie w 43. Ryzyko niedotrzymania harmonogramu banku jest przy modelu gospodarczym wielokrotnie wyższe.' },
+  sprzedaz:     { lvl:'critical', t:'Termin wymuszony sprzedażą mieszkania',
+    d:'Masz sztywną datę, której nie kontrolujesz. Każdy model o nieprzewidywalnym czasie realizacji jest przy tym warunku wykluczony.' },
+  brak_rezerwy: { lvl:'critical', t:'Brak rezerwy budżetowej',
+    d:'Branżowe minimum to 10–20% kosztorysu. Bank nie zwiększy kwoty kredytu, gdy budżet pęknie — to główny i najlepiej udokumentowany mechanizm powstawania niedokończonych budów. Znane przypadki przekroczeń sięgają +54% pierwotnego kosztorysu.' },
+  deadline:     { lvl:'warning',  t:'Termin poniżej realnego czasu budowy',
+    d:'Realny czas: prefabrykat 3–6 mies., generalny wykonawca ok. 9 mies. do stanu deweloperskiego, system gospodarczy 18–24 mies. w wariancie optymistycznym.' },
+  deadline_twardy:{ lvl:'critical', t:'Termin twardy, nienegocjowalny',
+    d:'Przy nienegocjowalnej dacie jedyne bezpieczne modele to te z ceną i terminem ustalonymi ryczałtowo z jednym wykonawcą.' },
+  brak_rezerwy_stres:{ lvl:'warning', t:'Kumulacja obciążeń życiowych',
+    d:'Trzy lub więcej równoczesnych obciążeń w okresie okołobudowlanym to najmocniejszy pojedynczy wskaźnik ryzyka w tym badaniu. Budowa jest przewlekłym stresorem — nakłada się na to, co już masz, i nie czeka na lepszy moment.' },
+  partner_watpliwosci:{ lvl:'warning', t:'Druga strona nie zablokowała, ale ma wątpliwości',
+    d:'„Nie zablokowała” to nie to samo co „zgadza się”. Konflikty o pieniądze są bardziej powtarzalne, dłuższe i rzadziej rozwiązywane niż konflikty o inne tematy — a budowa to konflikt o pieniądze rozłożony na dwa lata.' },
+  partner_konflikt:{ lvl:'critical', t:'Rozbieżność co do sposobu budowania',
+    d:'To trzeba domknąć przed startem, nie w trakcie. Najprostszy test: niech każde z Was niezależnie zapisze docelowy budżet, akceptowalne przekroczenie i czas trwania. Rozbieżność powyżej 20% jest twardym sygnałem ryzyka.' },
+  niedokonczone:{ lvl:'warning',  t:'Historia niedokończonych projektów własnych',
+    d:'Satysfakcja z własnoręcznej pracy pojawia się wyłącznie po ukończeniu zadania. Rozgrzebana elewacja przez pięć lat nie daje żadnej premii do wartości — generuje stały koszt psychiczny i napięcie w domu.' },
+  brak_dzialki: { lvl:'warning',  t:'Brak działki',
+    d:'Gminy muszą uchwalić plany ogólne do 30 czerwca 2026. Działki poza planami mogą stracić status budowlanych, a uzyskanie decyzji o warunkach zabudowy stanie się znacząco trudniejsze. Sprawdź status planistyczny, zanim kupisz.' },
+  brak_finansowania:{ lvl:'warning', t:'Finansowanie nieustalone',
+    d:'Model realizacji i sposób finansowania trzeba wybrać razem, nie po kolei. Bank ocenia kosztorys, harmonogram i etapowanie — one wynikają wprost z wybranego modelu.' },
+  kontrola_bez_czasu:{ lvl:'critical', t:'Wysoka potrzeba kontroli przy braku czasu',
+    d:'To najbardziej wybuchowa kombinacja na budowie. Utrata kontroli u osoby o silnej potrzebie kontroli generuje nieproporcjonalnie duży stres i opór — w praktyce mikrozarządzanie na odległość, codzienne telefony i blokowanie postępu prac. Rozwiązaniem nie jest „odpuszczenie”, tylko kupienie sobie kontroli w postaci niezależnego inspektora nadzoru.' },
+  zaufanie_bez_egzekucji:{ lvl:'critical', t:'Wysokie zaufanie przy niskiej gotowości do egzekwowania',
+    d:'Ta kombinacja jest najkosztowniejsza finansowo. Nie kończy się oszustwem, tylko kumulacją drobnych ustępstw: dopłata za „nieprzewidziane”, zamiennik materiałowy, przesunięcie terminu bez konsekwencji. Sumarycznie to zwykle największa pojedyncza pozycja przekroczenia budżetu.' },
+  unikanie_konfliktu:{ lvl:'critical', t:'Unikanie konfrontacji przy pracach zanikających',
+    d:'W większości sytuacji odpuszczenie drobiazgu jest rozsądne. Na budowie jest katastrofalne, bo okno na reklamację zamyka się fizycznie: usterka niezgłoszona przed zalaniem wylewki albo zasypaniem wykopu staje się nienegocjowalna i wielokrotnie droższa.' },
+  ambicja_bez_zasobu:{ lvl:'critical', t:'Plan prac własnych przekracza dostępny czas',
+    d:'Prace własne na ścieżce krytycznej blokują wejście kolejnej ekipy. Ekipy nie czekają — przechodzą na inną budowę i wracają, gdy będą miały wolne. To najczęstszy mechanizm budowy, która stoi.' },
+  maksymalizacja:{ lvl:'warning', t:'Wysoki koszt pojedynczej decyzji',
+    d:'Budowa to kilka tysięcy mikrodecyzji. Przy Twoim stylu decydowania każda z nich będzie kosztowała nieproporcjonalnie dużo czasu, a punktem odniesienia dla gotowego domu stanie się wariant, którego nie wybrałeś. Zamknij decyzje przed startem i wprowadź budżet decyzyjny.' }
+};
+/* ====================================================================
+   SILNIK: punktacja, dopasowanie profilu, render
+   ==================================================================== */
+
+const DIM_ORDER = ['T','K','Z','C','N','E','M','A'];
+const state = { i:0, ans:new Array(Q.length).fill(null) };
+
+/* ---------- punktacja ---------- */
+function computeDims(ans){
+  const sum={}, wts={}; DIM_ORDER.forEach(d=>{sum[d]=0;wts[d]=0;});
+  const flags=new Set(); const meta={ horyzont:2, wlasne:0, prio:null };
+
+  Q.forEach((q,i)=>{
+    const a = ans[i];
+    if(a===null || a===undefined) return;
+
+    if(q.type==='multi'){
+      const noneIdx = q.o.findIndex(o=>o.excl);
+      const cnt = (a||[]).filter(x=>x!==noneIdx).length;
+      const w = (q.wt && q.wt.E) || 1;
+      sum.E += Math.max(0, 100 - 24*cnt) * w; wts.E += w;
+      if(cnt>=3) flags.add('brak_rezerwy_stres');
+      return;
+    }
+
+    const opt = q.o[a];
+    if(opt.f) opt.f.forEach(f=>flags.add(f));
+    if(opt.m) Object.assign(meta, opt.m);
+
+    // dimensions touched anywhere in this question -> stable denominators
+    const touched = new Set();
+    q.o.forEach(o=>Object.keys(o.s||{}).forEach(d=>touched.add(d)));
+    touched.forEach(d=>{
+      const w = (q.wt && q.wt[d]) || 1;
+      const v = (opt.s && opt.s[d] !== undefined) ? opt.s[d] : 50;
+      sum[d] += v*w; wts[d] += w;
+    });
+  });
+
+  const dim={};
+  DIM_ORDER.forEach(d=>{ dim[d] = wts[d] ? Math.round(sum[d]/wts[d]) : 50; });
+
+  /* --- flagi interakcyjne: cała wartość diagnostyczna leży w koniunkcjach --- */
+  if(dim.C>=68 && dim.T<=45)                 flags.add('kontrola_bez_czasu');
+  if(dim.Z>=70 && dim.A<=38)                 flags.add('zaufanie_bez_egzekucji');
+  if(dim.A<=28)                              flags.add('unikanie_konfliktu');
+  if(meta.wlasne>=30 && dim.T<=50)           flags.add('ambicja_bez_zasobu');
+  if(dim.M>=72)                              flags.add('maksymalizacja');
+
+  return { dim, flags, meta };
+}
+
+/* ---------- dopasowanie profilu ---------- */
+const HARD_TIME = ['dystans','zmianowa','deadline_twardy','sprzedaz'];
+
+function matchProfiles(dim, flags, meta){
+  const hardTime = HARD_TIME.some(f=>flags.has(f));
+  const noReserve = flags.has('brak_rezerwy');
+
+  const scored = PROFILES.map(p=>{
+    let num=0, den=0;
+    DIM_ORDER.forEach(d=>{
+      const w=p.w[d]||1;
+      num += w * Math.abs(p.proto[d]-dim[d]);
+      den += w;
+    });
+    let s = 100 - (num/den);
+
+    // bramki i modyfikatory
+    if(p.id==='gospodarz'){
+      if(hardTime) s-=45;
+      if(noReserve) s-=22;
+      if(dim.T<55||dim.K<55||dim.E<45) s-=26;
+      if(meta.horyzont<2) s-=20;
+      if(meta.wlasne<10) s-=12;
+      if(dim.K>=72 && dim.T>=62 && meta.wlasne>=10 && !hardTime) s+=10;
+    }
+    if(p.id==='dyrygent'){
+      if(hardTime) s-=38;
+      if(dim.T<45||dim.E<40) s-=20;
+      if(meta.horyzont<2) s-=12;
+      if(dim.T>=58 && dim.C>=64 && dim.K<74) s+=10;
+    }
+    if(p.id==='etapowiec'){
+      if(flags.has('zmianowa')) s-=22;
+      if(dim.T<30) s-=18;
+      if(meta.prio==='koszt') s+=5;
+      if(dim.C>=72) s-=12;
+    }
+    if(p.id==='solista'){
+      if(meta.wlasne<30) s-=34;
+      else if(dim.T<=50) s+=11;
+      if(flags.has('niedokonczone') && meta.wlasne>=30) s+=6;
+    }
+    if(p.id==='kurator'){
+      if(dim.M<62) s-=26; else if(dim.M>=80) s+=8;
+    }
+    if(p.id==='spokoj'){
+      if(dim.N<=38 || dim.E<=38) s+=9;
+      if(flags.has('deadline_twardy')||flags.has('sprzedaz')) s+=7;
+      if(meta.prio==='spokoj') s+=5;
+      if(dim.N>=68 && dim.E>=65) s-=14;
+    }
+    if(p.id==='nadzorca'){
+      if(flags.has('kontrola_bez_czasu')) s+=12;
+      if(dim.C<55) s-=16;
+    }
+    if(p.id==='zleceniodawca'){
+      if(dim.C>=70) s-=18;
+      if(meta.prio==='czas') s+=4;
+      if(hardTime) s+=6;
+    }
+    return { p, s };
+  });
+
+  scored.sort((a,b)=>b.s-a.s);
+  return scored;
+}
+
+const pct = s => Math.max(41, Math.min(97, Math.round(s)));
+
+/* ---------- radar ---------- */
+function radar(dim){
+  const R=104, cx=200, cy=156, n=DIM_ORDER.length;
+  const ang = i => (-Math.PI/2) + i*2*Math.PI/n;
+  const pt  = (i,r) => [cx + Math.cos(ang(i))*r, cy + Math.sin(ang(i))*r];
+  let s = `<svg class="radar" viewBox="0 0 400 322" role="img" aria-label="Profil ośmiu wymiarów">`;
+
+  [0.25,0.5,0.75,1].forEach(f=>{
+    const d = DIM_ORDER.map((_,i)=>pt(i,R*f).map(v=>v.toFixed(1)).join(',')).join(' ');
+    s += `<polygon points="${d}" fill="none" stroke="var(--grid)" stroke-width="1"/>`;
+  });
+  DIM_ORDER.forEach((_,i)=>{
+    const [x,y]=pt(i,R);
+    s += `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="var(--grid)" stroke-width="1"/>`;
+  });
+
+  const poly = DIM_ORDER.map((d,i)=>pt(i, R*Math.max(dim[d],3)/100).map(v=>v.toFixed(1)).join(',')).join(' ');
+  s += `<polygon points="${poly}" fill="var(--series-1-soft)" stroke="var(--series-1)" stroke-width="2" stroke-linejoin="round"/>`;
+  DIM_ORDER.forEach((d,i)=>{
+    const [x,y]=pt(i, R*Math.max(dim[d],3)/100);
+    s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4.5" fill="var(--series-1)" stroke="var(--surface-1)" stroke-width="2"/>`;
+  });
+
+  DIM_ORDER.forEach((d,i)=>{
+    const [x,y]=pt(i, R+25);
+    const anc = Math.abs(x-cx)<6 ? 'middle' : (x>cx?'start':'end');
+    const short = DIMS[d].short;
+    s += `<text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="${anc}" font-size="11.5" fill="var(--muted)" font-family="var(--font)">${short}</text>`;
+    s += `<text x="${x.toFixed(1)}" y="${(y+17).toFixed(1)}" text-anchor="${anc}" font-size="12" font-weight="700" fill="var(--ink-2)" font-family="var(--font)">${dim[d]}</text>`;
+  });
+  return s + `</svg>`;
+}
+
+/* ---------- render pytania ---------- */
+const el = id => document.getElementById(id);
+
+function renderQ(){
+  const q = Q[state.i];
+  const a = state.ans[state.i];
+  const multi = q.type==='multi';
+
+  el('pfill').style.width = ((state.i)/Q.length*100).toFixed(1)+'%';
+  el('pnum').textContent = state.i+1; el('ptot').textContent = Q.length;
+  el('psec').textContent = q.sec;
+  el('back').disabled = state.i===0;
+  el('next').hidden = !multi;
+  if(multi) el('next').disabled = !(a && a.length);
+
+  let h = '';
+  if(q.t) h += `<div class="sectitle">${q.t}</div>`;
+  h += `<p class="qtext">${q.q}</p>`;
+  if(q.h) h += `<div class="qhelp">${q.h}</div>`;
+  if(multi) h += `<p class="muted" style="margin:-8px 0 0">Możesz zaznaczyć kilka odpowiedzi.</p>`;
+  h += `<div class="opts">`;
+  q.o.forEach((o,i)=>{
+    const on = multi ? (a||[]).includes(i) : a===i;
+    h += `<button class="opt${on?' on':''}" ${multi?'data-multi':''} data-i="${i}">
+            <span class="mk"><i></i></span><span class="lbl">${o.t}</span>
+          </button>`;
+  });
+  h += `</div>`;
+  el('qbody').innerHTML = h;
+
+  el('qbody').querySelectorAll('.opt').forEach(b=>{
+    b.onclick = () => {
+      const i = +b.dataset.i;
+      if(multi){
+        let cur = state.ans[state.i] || [];
+        const noneIdx = q.o.findIndex(o=>o.excl);
+        if(i===noneIdx) cur = cur.includes(i) ? [] : [i];
+        else cur = cur.includes(i) ? cur.filter(x=>x!==i) : cur.filter(x=>x!==noneIdx).concat(i);
+        state.ans[state.i] = cur;
+        renderQ();
+      } else {
+        state.ans[state.i] = i;
+        setTimeout(advance, 150);
+      }
+    };
+  });
+  window.scrollTo({top:0,behavior:'instant'});
+}
+
+function advance(){
+  if(state.i < Q.length-1){ state.i++; renderQ(); }
+  else showResult();
+}
+
+/* ---------- render wyniku ---------- */
+function showResult(){
+  const { dim, flags, meta } = computeDims(state.ans);
+  const ranked = matchProfiles(dim, flags, meta);
+  const top = ranked[0].p, alt = ranked[1].p;
+
+  const fl = [...flags].map(f=>FLAGS[f]).filter(Boolean)
+    .sort((a,b)=> (a.lvl==='critical'?0:1)-(b.lvl==='critical'?0:1));
+
+  const prioTxt = {
+    koszt:'Zadeklarowałeś, że najważniejszy jest koszt. Uczciwie: przy każdym modelu realna oszczędność ma sufit — a przy metodzie gospodarczej połowę deklarowanych 10–25% zjada różnica VAT (8% na usłudze z materiałem wykonawcy wobec 23% na materiale kupionym samodzielnie).',
+    czas:'Zadeklarowałeś, że najważniejszy jest czas. To zawęża pole: prefabrykat 3–6 miesięcy, generalny wykonawca ok. 9 miesięcy do stanu deweloperskiego, system gospodarczy przeciętnie 43 miesiące.',
+    jakosc:'Zadeklarowałeś, że najważniejsza jest jakość i detal. To najdroższy z czterech priorytetów — i jedyny, który wymaga od Ciebie obecności przy odbiorach robót zanikających, niezależnie od wybranego modelu.',
+    spokoj:'Zadeklarowałeś, że najważniejszy jest spokój. To całkowicie zasadny priorytet i warto go traktować jako twarde kryterium wyboru, a nie jako luksus.'
+  }[meta.prio];
+
+  let h = `
+  <div class="hero">
+    <div class="eyebrow">Twój profil</div>
+    <p class="pname">${top.name}</p>
+    <p class="ptag">${top.tag}</p>
+    <p class="plead">${top.lead}</p>
+    <p style="color:var(--ink-2)">${top.body}</p>
+    <div class="matchrow"><b>${pct(ranked[0].s)}%</b><span>dopasowania do profilu · drugi w kolejności: ${alt.name} (${pct(ranked[1].s)}%)</span></div>
+  </div>
+
+  <div class="sec">
+    <h2>Rekomendowany model realizacji</h2>
+    <div class="card"><p style="margin:0;font-size:16.5px">${top.model}</p></div>
+    <div class="numgrid" style="margin-top:14px">
+      ${top.liczby.map(([k,v])=>`<div class="row"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('')}
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>Co masz zrobić — konkretnie</h2>
+    <div class="card"><ol class="steps">${top.kroki.map(k=>`<li><span>${k}</span></li>`).join('')}</ol></div>
+    <div class="card" style="margin-top:12px;border-left:3px solid var(--series-1)">
+      <h3 style="color:var(--series-1)">Największe ryzyko Twojego profilu</h3>
+      <p style="margin:0;color:var(--ink-2)">${top.ryzyko}</p>
+    </div>
+  </div>`;
+
+  if(fl.length){
+    h += `<div class="sec">
+      <h2>Czerwone flagi</h2>
+      <p class="muted" style="margin-top:-6px;margin-bottom:14px">Te punkty wynikają z Twoich odpowiedzi niezależnie od profilu. Każdy z nich da się rozbroić — ale tylko przed startem.</p>
+      ${fl.map(f=>`<div class="flag ${f.lvl}">
+        <span class="ico">${f.lvl==='critical'?'!':'·'}</span>
+        <div><h3>${f.t}</h3><p>${f.d}</p></div>
+      </div>`).join('')}
+    </div>`;
+  } else {
+    h += `<div class="sec"><h2>Czerwone flagi</h2>
+      <div class="flag" style="border-color:var(--good)">
+        <span class="ico" style="background:var(--good)">✓</span>
+        <div><h3>Brak twardych przeciwwskazań</h3><p>Żadna z Twoich odpowiedzi nie uruchomiła sygnału ostrzegawczego. To rzadkie — trzymaj rezerwę i harmonogram tak, jak je dziś masz.</p></div>
+      </div></div>`;
+  }
+
+  h += `<div class="sec">
+    <h2>Twój profil w ośmiu wymiarach</h2>
+    <div class="vizwrap">
+      ${radar(dim)}
+      <div class="dimtable">
+        ${DIM_ORDER.map(d=>`<div class="r" data-d="${d}">
+          <div class="top"><span class="nm">${DIMS[d].name}</span><span class="vl">${dim[d]}</span></div>
+          <div class="track"><i style="width:${dim[d]}%"></i></div>
+          <div class="ds">${DIMS[d].desc}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+    <p class="muted" style="margin-top:12px">Kliknij wymiar, żeby zobaczyć, co oznacza. Żaden z nich nie jest „dobry” ani „zły” sam w sobie — znaczenie ma dopiero ich kombinacja. Wysoka potrzeba kontroli u kogoś, kto ma czas, to zasób. U kogoś, kto go nie ma — najdroższy problem na budowie.</p>
+  </div>
+
+  <div class="sec">
+    <h2>Alternatywa, jeśli coś się zmieni</h2>
+    <div class="alt">
+      <h3>${alt.name} — ${alt.tag}</h3>
+      <p style="margin:8px 0 0;color:var(--ink-2)">${alt.lead}</p>
+      <p style="margin:10px 0 0;font-size:14.5px;color:var(--muted)">Ten profil był drugi w kolejności z wynikiem ${pct(ranked[1].s)}%. Wróć do niego, jeśli zmieni się Twoja dostępność, termin albo sytuacja finansowa — to trzy rzeczy, które przesuwają wynik najmocniej.</p>
+    </div>
+  </div>`;
+
+  if(prioTxt){
+    h += `<div class="sec"><h2>Twój priorytet</h2>
+      <div class="card"><p style="margin:0;color:var(--ink-2)">${prioTxt}</p></div></div>`;
+  }
+
+  h += `
+  <div class="sec">
+    <h2>Trzy liczby, o których warto pamiętać</h2>
+    <div class="numgrid">
+      <div class="row"><span class="k">9 vs 43 miesiące</span><span class="v">realna różnica czasu między generalnym wykonawcą a systemem gospodarczym</span></div>
+      <div class="row"><span class="k">8–15%</span><span class="v">realna oszczędność metody gospodarczej po uwzględnieniu różnicy VAT (deklarowana: 10–25%)</span></div>
+      <div class="row"><span class="k">10–20%</span><span class="v">branżowe minimum rezerwy budżetowej — i bank tej rezerwy nie sfinansuje</span></div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn" onclick="window.print()">Zapisz jako PDF</button>
+    <button class="btn ghost" id="again">Wypełnij jeszcze raz</button>
+  </div>
+
+  <div class="foot">
+    <p><b>Jak czytać ten wynik.</b> To nie jest diagnoza ani test psychologiczny w sensie klinicznym. To narzędzie doradcze zbudowane na dorobku psychologii różnic indywidualnych — poczuciu umiejscowienia kontroli, skłonności do zaufania, nietolerancji niepewności, stylu decyzyjnym maksymalizatora i satysfakcjonisty, stylach radzenia sobie z konfliktem — oraz na twardych realiach polskiego rynku budowlanego. Nazwy profilów są skrótem komunikacyjnym; realny wynik to osiem ciągłych wymiarów i ich kombinacja.</p>
+    <p><b>Jedna rzecz, która podniesie trafność najbardziej.</b> Niech osoba, z którą będziesz w tym domu mieszkać, wypełni test niezależnie od Ciebie. Potem porównajcie trzy liczby zapisane osobno i bez podglądania: docelowy budżet, akceptowalne przekroczenie i czas trwania budowy. Rozbieżność powyżej 20% jest twardym sygnałem ryzyka i warto ją domknąć przed pierwszą łopatą, a nie przy stanie surowym.</p>
+  </div>`;
+
+  el('quiz').hidden = true;
+  const r = el('result');
+  r.hidden = false;
+  r.innerHTML = h;
+  r.querySelectorAll('.dimtable .r').forEach(x=> x.onclick = ()=> x.classList.toggle('open'));
+  el('again').onclick = ()=>{ state.i=0; state.ans=new Array(Q.length).fill(null); r.hidden=true; el('quiz').hidden=false; renderQ(); };
+  window.scrollTo({top:0,behavior:'instant'});
+}
+
+/* ---------- start ---------- */
+el('start').onclick = ()=>{ el('intro').hidden=true; el('quiz').hidden=false; renderQ(); };
+el('back').onclick = ()=>{ if(state.i>0){ state.i--; renderQ(); } };
+el('next').onclick = advance;
+document.addEventListener('keydown', e=>{
+  if(el('quiz').hidden) return;
+  const q=Q[state.i];
+  if(e.key>='1' && e.key<='9'){
+    const i=+e.key-1;
+    const b=el('qbody').querySelectorAll('.opt')[i];
+    if(b) b.click();
+  }
+  if(e.key==='ArrowLeft' && state.i>0){ state.i--; renderQ(); }
+  if(e.key==='Enter' && q.type==='multi' && (state.ans[state.i]||[]).length) advance();
+});
+
+</script>
+
+<footer class="ratio-footer">
+  <div class="ratio-footer-inner">
+    <div class="ratio-footer-grid">
+      <div>
+        <img src="../assets/logo-white.svg" alt="Ratio Logo" />
+        <p style="color:#fff;font-weight:600;">RATIO Zarządzanie Inwestycjami Budowlanymi<br>Bartosz Zapadka-Żydek</p>
+        <p>14-202 Iława, ul. Gdańska 2D/16</p>
+        <p><a href="mailto:bartosz@ratiopro.net">bartosz@ratiopro.net</a></p>
+        <p><a href="tel:+48537913341">+48 537 913 341</a></p>
+      </div>
+      <div class="ratio-footer-nav">
+        <p class="ratio-footer-nav-title">Nawigacja</p>
+        <ul>
+          <li><a href="../index.html">Strona główna</a></li>
+          <li><a href="../index.html#uslugi">Usługi</a></li>
+          <li><a href="../jak-pracujemy.html">Jak pracujemy</a></li>
+          <li><a href="../case-studies.html">Case studies</a></li>
+          <li><a href="../ankiety.html">Ankiety</a></li>
+          <li><a href="../index.html#kontakt">Kontakt</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="ratio-footer-bottom">
+      <p>&copy; 2026 RATIO Zarządzanie Inwestycjami Budowlanymi Bartosz Zapadka-Żydek · NIP 7441843748 · REGON 544820288</p>
+      <div class="legal-links">
+        <a href="../polityka-prywatnosci.html">Polityka prywatności</a>
+        <a href="../regulamin.html">Regulamin</a>
+      </div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

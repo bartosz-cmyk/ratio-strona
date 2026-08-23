@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MVP — Pokrycie kosztorysu ofertami</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, 'Inter', system-ui, sans-serif;
+    background: #f4f5f7;
+    color: #11172a;
+    margin: 0;
+    padding: 24px 16px 80px;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: #6b7280; font-size: 13px; margin: 0 0 24px; }
+  .project-name {
+    font-size: 22px; font-weight: 700; border: none; background: transparent;
+    padding: 4px 0; width: 100%; margin-bottom: 4px; color: #11172a;
+  }
+  .project-name:focus { outline: none; border-bottom: 2px solid #ffb719; }
+  .tabs { display: flex; gap: 6px; margin: 20px 0 16px; border-bottom: 1px solid #e5e7eb; flex-wrap: wrap; }
+  .tab { padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; color: #6b7280; border-bottom: 2px solid transparent; }
+  .tab.active { color: #1f2a4f; border-bottom-color: #ffb719; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 12px; margin: 0 0 20px; }
+  .card { background: white; border-radius: 12px; padding: 16px; border: 1px solid #e5e7eb; }
+  .card .label { font-size: 12px; color: #6b7280; margin: 0 0 4px; }
+  .card .value { font-size: 22px; font-weight: 700; margin: 0; }
+  .value.danger { color: #dc2626; }
+  .value.success { color: #16a34a; }
+  .section { background: white; border-radius: 12px; border: 1px solid #e5e7eb; padding: 20px; margin-bottom: 16px; }
+  .section h2 { font-size: 15px; margin: 0 0 14px; }
+  .line-item { border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+  .line-item-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .line-item-name { font-weight: 600; font-size: 14px; flex: 1; min-width: 140px; border: none; background: transparent; }
+  .line-item-name:focus { outline: none; }
+  .line-item-name.readonly { pointer-events: none; }
+  input[type="number"], input[type="text"], input[type="month"], select {
+    border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 10px; font-size: 13px; width: 100%;
+    font-family: inherit;
+  }
+  .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr)); gap: 8px; margin-top: 10px; }
+  .field label { display: block; font-size: 11px; color: #6b7280; margin-bottom: 3px; }
+  .scope-box { margin-top: 10px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 12px; }
+  .scope-box-header { font-size: 11px; color: #92400e; font-weight: 600; margin-bottom: 8px; }
+  .scope-item-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+  .scope-item-row input[type="text"] { flex: 1; background: white; }
+  .scope-add-row { display: flex; gap: 6px; margin-top: 6px; }
+  .scope-add-row input { flex: 1; }
+  .tiny-btn { background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 14px; padding: 2px 6px; }
+  .tiny-btn:hover { color: #dc2626; }
+  .badge { font-size: 11px; padding: 3px 8px; border-radius: 999px; font-weight: 600; white-space: nowrap; }
+  .badge.ok { background: #dcfce7; color: #166534; }
+  .badge.warn { background: #fef3c7; color: #92400e; }
+  .badge.empty { background: #f3f4f6; color: #6b7280; }
+  .remove-btn { background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 12px; }
+  .remove-btn:hover { color: #dc2626; }
+  .add-form { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .add-form input { flex: 1; min-width: 120px; }
+  button.primary {
+    background: #ffb719; border: none; border-radius: 8px; padding: 8px 16px;
+    font-weight: 700; font-size: 13px; cursor: pointer; color: #11172a;
+  }
+  button.primary:hover { background: #ffc74c; }
+  button.secondary {
+    background: white; border: 1px solid #d1d5db; border-radius: 8px; padding: 6px 12px;
+    font-weight: 600; font-size: 12px; cursor: pointer; color: #374151;
+  }
+  button.secondary:hover { border-color: #9ca3af; }
+  .progress-bar { height: 8px; border-radius: 4px; background: #e5e7eb; overflow: hidden; margin-top: 8px; }
+  .progress-fill { height: 100%; background: #1f2a4f; }
+  .status-line { font-size: 12px; color: #6b7280; margin-top: 6px; }
+  .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .save-indicator { font-size: 12px; color: #16a34a; opacity: 0; transition: opacity 0.3s; }
+  .save-indicator.show { opacity: 1; }
+  .reset-btn { background: none; border: 1px solid #d1d5db; border-radius: 8px; padding: 6px 12px; font-size: 12px; cursor: pointer; color: #6b7280; }
+  .reset-btn.confirming { border-color: #dc2626; color: #dc2626; background: #fef2f2; }
+  .empty-state { text-align: center; color: #9ca3af; font-size: 13px; padding: 20px; }
+  .offers-list { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .offer-row { border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; background: #fafafa; }
+  .offer-row.selected { border-color: #1f2a4f; background: #eef1f8; }
+  .offer-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .select-offer-btn { font-size: 11px; padding: 4px 10px; border-radius: 999px; border: 1px solid #1f2a4f; background: white; color: #1f2a4f; cursor: pointer; font-weight: 600; }
+  .select-offer-btn.is-selected { background: #1f2a4f; color: white; }
+  .scope-ribbon { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 10px; padding: 10px; background: white; border: 1px solid #e5e7eb; border-radius: 6px; }
+  .scope-check-label { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #374151; white-space: nowrap; }
+  .scope-check-label input { width: auto; margin: 0; }
+  .coverage-badge { font-size: 11px; padding: 3px 8px; border-radius: 999px; font-weight: 600; }
+  .coverage-full { background: #dcfce7; color: #166534; }
+  .coverage-partial { background: #fef3c7; color: #92400e; }
+  .coverage-none { background: #f3f4f6; color: #6b7280; }
+  .month-group { border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+  .month-group h3 { font-size: 14px; margin: 0 0 8px; }
+  .month-item-row { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; border-top: 1px solid #f0f0f0; }
+  .month-item-row:first-child { border-top: none; }
+  .risk-flag { font-size: 11px; color: #92400e; background: #fef3c7; padding: 2px 8px; border-radius: 999px; margin-left: 6px; }
+  .gantt-wrap { overflow-x: auto; }
+  .gantt-table { border-collapse: collapse; width: 100%; font-size: 12px; min-width: 480px; }
+  .gantt-table th, .gantt-table td { border: 1px solid #e5e7eb; padding: 8px 10px; text-align: left; white-space: nowrap; }
+  .gantt-table th { background: #f9fafb; font-weight: 600; color: #374151; }
+  .gantt-table td.task-name { font-weight: 600; white-space: normal; min-width: 160px; }
+  .gantt-bar { background: #1f2a4f; color: white; border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: 600; text-align: center; }
+  .gantt-bar.has-offer { background: #16a34a; }
+  .gantt-empty-cell { background: #fafafa; }
+  .gantt-footer-row td { background: #f3f4f6; font-weight: 700; }
+  .gantt-footer-row.offers td { background: #eef1f8; }
+  .gantt-legend { display: flex; gap: 16px; margin-top: 10px; font-size: 11px; color: #6b7280; }
+  .gantt-legend-item { display: flex; align-items: center; gap: 5px; }
+  .gantt-legend-swatch { width: 12px; height: 12px; border-radius: 3px; }
+  .ref-line { font-size: 12px; color: #6b7280; margin: 0 0 10px; }
+  .date-field { display: flex; align-items: center; gap: 6px; }
+  .date-text-input { flex: 1; }
+  .date-icon-wrap {
+    position: relative; width: 32px; height: 32px; min-width: 32px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid #d1d5db; border-radius: 6px; cursor: default;
+    font-size: 15px; color: #9ca3af; user-select: none;
+  }
+  .date-icon-wrap:hover { border-color: #1f2a4f; color: #1f2a4f; background: #f0f2f7; }
+  .calendar-popup {
+    display: none; position: absolute; top: 100%; left: 0; padding-top: 6px;
+    z-index: 50; width: 220px;
+  }
+  .calendar-popup-inner {
+    background: white; border: 1px solid #d1d5db; border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12); padding: 10px;
+  }
+  .date-icon-wrap:hover .calendar-popup { display: block; }
+  .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 12px; font-weight: 700; color: #11172a; }
+  .cal-nav-btn { cursor: pointer; padding: 2px 8px; border-radius: 4px; font-size: 14px; }
+  .cal-nav-btn:hover { background: #f0f2f7; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; font-size: 11px; text-align: center; }
+  .cal-day { padding: 5px 0; cursor: pointer; border-radius: 4px; }
+  .cal-day:hover { background: #eef1f8; }
+  .cal-day.selected { background: #1f2a4f; color: white; }
+  .cal-day.weekday-label { font-weight: 700; color: #9ca3af; cursor: default; }
+  .cal-day.empty { cursor: default; }
+  .date-hint { font-size: 10px; color: #9ca3af; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="toolbar">
+    <div>
+      <h1>MVP — Pokrycie kosztorysu ofertami</h1>
+      <p class="sub">Prototyp roboczy. Dane zapisują się automatycznie w tej przeglądarce.</p>
+    </div>
+    <span class="save-indicator" id="save-indicator">✓ Zapisano</span>
+  </div>
+
+  <input type="text" class="project-name" id="project-name" placeholder="Nazwa projektu (np. Budowa domu — ul. Polna 12)" />
+
+  <div class="tabs">
+    <div class="tab active" data-tab="kosztorys" onclick="switchTab('kosztorys')">Kosztorys</div>
+    <div class="tab" data-tab="oferty" onclick="switchTab('oferty')">Oferty i analiza</div>
+    <div class="tab" data-tab="harmonogram" onclick="switchTab('harmonogram')">Harmonogram</div>
+  </div>
+
+  <!-- ZAKŁADKA: KOSZTORYS -->
+  <div class="tab-panel active" id="panel-kosztorys">
+    <div class="section">
+      <h2>Pozycje kosztorysu</h2>
+      <p class="ref-line">Nazwa, kwota z kosztorysu, zakres oferty i planowany termin realizacji.</p>
+      <div id="line-items-kosztorys"></div>
+      <div class="empty-state" id="empty-state-kosztorys">Brak pozycji. Dodaj pierwszą pozycję kosztorysu poniżej.</div>
+
+      <div class="add-form">
+        <input type="text" id="new-item-name" placeholder="Nazwa pozycji (np. Fundamenty)" />
+        <input type="number" id="new-item-planned" placeholder="Kwota z kosztorysu (zł)" />
+        <button class="primary" onclick="addLineItem()">Dodaj pozycję</button>
+      </div>
+    </div>
+
+    <button class="reset-btn" id="reset-btn" onclick="handleResetClick()">Wyczyść wszystkie dane</button>
+  </div>
+
+  <!-- ZAKŁADKA: OFERTY I ANALIZA -->
+  <div class="tab-panel" id="panel-oferty">
+    <div class="cards" id="summary-cards"></div>
+
+    <div class="section">
+      <h2>Postęp pokrycia ofertami</h2>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      <p class="status-line" id="progress-status"></p>
+    </div>
+
+    <div class="section">
+      <h2>Oferty wg pozycji kosztorysu</h2>
+      <div id="line-items-oferty"></div>
+      <div class="empty-state" id="empty-state-oferty">Brak pozycji kosztorysu. Dodaj je w zakładce "Kosztorys".</div>
+    </div>
+  </div>
+
+  <!-- ZAKŁADKA: HARMONOGRAM -->
+  <div class="tab-panel" id="panel-harmonogram">
+    <div class="section">
+      <h2>Harmonogram rzeczowo-finansowy</h2>
+      <p class="status-line" style="margin-bottom:14px;">
+        Uzupełnij zakres dat "od-do" przy pozycjach kosztorysu (zakładka "Kosztorys"),
+        żeby zobaczyć tutaj rozkład kosztów w czasie.
+      </p>
+      <div id="harmonogram-content"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let state = { projectName: '', lineItems: [] };
+let resetConfirming = false;
+let resetTimeout = null;
+const STORAGE_KEY = 'mvp-pokrycie-ofertami:main-v3';
+
+const SCOPE_SUGGESTIONS = [
+  { match: 'fundament', items: ['Wykopy', 'Ławy fundamentowe', 'Ściany fundamentowe', 'Izolacja pozioma i pionowa', 'Zbrojenie i beton', 'Zasypki'] },
+  { match: 'konstrukc', items: ['Ściany nośne', 'Stropy', 'Wieńce', 'Nadproża', 'Zbrojenie i beton', 'Więźba (jeśli dotyczy)'] },
+  { match: 'dach', items: ['Więźba dachowa', 'Łacenie', 'Pokrycie dachowe', 'Obróbki blacharskie', 'Rynny i rury spustowe', 'Izolacja termiczna'] },
+  { match: 'elektr', items: ['Rozdzielnica', 'Okablowanie', 'Gniazda i włączniki', 'Oświetlenie', 'Instalacja odgromowa'] },
+  { match: 'sanitar', items: ['Instalacja wodna', 'Instalacja kanalizacyjna', 'Ogrzewanie', 'Biały montaż', 'Podłączenia do przyłączy'] },
+  { match: 'instalac', items: ['Rozprowadzenie instalacji', 'Podejścia', 'Próby szczelności', 'Podłączenia do przyłączy zewnętrznych'] },
+  { match: 'tynk', items: ['Tynki wewnętrzne', 'Gładzie', 'Materiał', 'Robocizna'] },
+  { match: 'elewac', items: ['Ocieplenie', 'Tynk elewacyjny', 'Obróbki', 'Parapety zewnętrzne', 'Rusztowanie'] },
+  { match: 'stolark', items: ['Okna', 'Drzwi zewnętrzne', 'Drzwi wewnętrzne', 'Montaż', 'Parapety wewnętrzne'] },
+  { match: 'okna', items: ['Dostawa okien', 'Montaż', 'Parapety', 'Uszczelnienie', 'Regulacja'] },
+  { match: 'teren', items: ['Utwardzenie terenu', 'Ogrodzenie', 'Nawierzchnie', 'Mała architektura', 'Zieleń'] },
+  { match: 'wykończen', items: ['Malowanie', 'Podłogi', 'Płytki', 'Biały montaż', 'Listwy przypodłogowe'] }
+];
+
+function suggestScopeItems(name) {
+  const lower = name.toLowerCase();
+  const found = SCOPE_SUGGESTIONS.find(s => lower.includes(s.match));
+  const list = found ? found.items : ['Uzupełnij zakres oferty wg potrzeb'];
+  return list.map((text, idx) => ({ id: 'scope-' + Date.now() + '-' + idx, text }));
+}
+
+function fmt(n) {
+  return new Intl.NumberFormat('pl-PL').format(Math.round(n)) + ' zł';
+}
+
+function isoToDisplay(iso) {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  return d + ':' + m + ':' + y;
+}
+
+function displayToIso(text) {
+  const match = text.trim().match(/^(\d{1,2})[:.\-\/](\d{1,2})[:.\-\/](\d{4})$/);
+  if (!match) return null;
+  const [, d, m, y] = match;
+  const dd = d.padStart(2, '0');
+  const mm = m.padStart(2, '0');
+  if (Number(mm) < 1 || Number(mm) > 12 || Number(dd) < 1 || Number(dd) > 31) return null;
+  return y + '-' + mm + '-' + dd;
+}
+
+let calendarViewState = {};
+
+function calKey(itemId, field) {
+  return itemId + '::' + field;
+}
+
+function getViewMonth(itemId, field, isoValue) {
+  const key = calKey(itemId, field);
+  if (!calendarViewState[key]) {
+    let y, m;
+    if (isoValue) {
+      const parts = isoValue.split('-').map(Number);
+      y = parts[0]; m = parts[1];
+    } else {
+      const today = new Date();
+      y = today.getFullYear(); m = today.getMonth() + 1;
+    }
+    calendarViewState[key] = { year: y, month: m };
+  }
+  return calendarViewState[key];
+}
+
+function buildCalendarInner(itemId, field, isoValue) {
+  const view = getViewMonth(itemId, field, isoValue);
+  const monthNames = ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
+  const daysInMonth = new Date(view.year, view.month, 0).getDate();
+  const firstDow = (new Date(view.year, view.month - 1, 1).getDay() + 6) % 7;
+  const weekdayLabels = ['Pn','Wt','Śr','Cz','Pt','So','Nd'];
+
+  let html = `<div class="cal-header">
+    <span class="cal-nav-btn" onclick="navigateCalendar('${itemId}','${field}',-1,'${isoValue || ''}')">‹</span>
+    <span>${monthNames[view.month - 1]} ${view.year}</span>
+    <span class="cal-nav-btn" onclick="navigateCalendar('${itemId}','${field}',1,'${isoValue || ''}')">›</span>
+  </div>
+  <div class="cal-grid">`;
+
+  weekdayLabels.forEach(w => { html += `<div class="cal-day weekday-label">${w}</div>`; });
+  for (let i = 0; i < firstDow; i++) html += '<div class="cal-day empty"></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const thisIso = view.year + '-' + String(view.month).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    const isSelected = isoValue === thisIso;
+    html += `<div class="cal-day${isSelected ? ' selected' : ''}" onclick="pickCalendarDate('${itemId}','${field}','${thisIso}')">${d}</div>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function navigateCalendar(itemId, field, direction, isoValue) {
+  const view = getViewMonth(itemId, field, isoValue);
+  view.month += direction;
+  if (view.month < 1) { view.month = 12; view.year--; }
+  if (view.month > 12) { view.month = 1; view.year++; }
+  const popup = document.getElementById('calpopup-' + itemId + '-' + field);
+  const inner = popup ? popup.querySelector('.calendar-popup-inner') : null;
+  if (inner) inner.innerHTML = buildCalendarInner(itemId, field, isoValue);
+}
+
+function pickCalendarDate(itemId, field, isoValue) {
+  const item = state.lineItems.find(i => i.id === itemId);
+  if (!item) return;
+  item[field] = isoValue;
+  delete calendarViewState[calKey(itemId, field)];
+  render();
+  saveState();
+}
+
+function dateFieldHtml(itemId, field, isoValue) {
+  const displayValue = isoToDisplay(isoValue);
+  const popupId = 'calpopup-' + itemId + '-' + field;
+  return `
+    <div class="date-field">
+      <input type="text" class="date-text-input" value="${displayValue}" placeholder="DD:MM:RRRR"
+        onchange="handleDateTextChange(this, '${itemId}', '${field}')" />
+      <div class="date-icon-wrap" title="Najedź, aby zobaczyć kalendarz">
+        📅
+        <div class="calendar-popup" id="${popupId}"><div class="calendar-popup-inner">${buildCalendarInner(itemId, field, isoValue)}</div></div>
+      </div>
+    </div>
+  `;
+}
+
+function handleDateTextChange(inputEl, itemId, field) {
+  const text = inputEl.value;
+  const item = state.lineItems.find(i => i.id === itemId);
+  if (!item) return;
+
+  if (text.trim() === '') {
+    item[field] = '';
+    inputEl.style.borderColor = '';
+    render();
+    saveState();
+    return;
+  }
+
+  const iso = displayToIso(text);
+  if (!iso) {
+    inputEl.style.borderColor = '#dc2626';
+    inputEl.title = 'Nieprawidłowy format. Użyj DD:MM:RRRR (np. 15:03:2026)';
+    return;
+  }
+  inputEl.style.borderColor = '';
+  inputEl.title = '';
+  item[field] = iso;
+  render();
+  saveState();
+}
+
+
+
+const SATISFACTION_LABELS = {
+  1: '1 — nie spełnia oczekiwań',
+  2: '2 — słabo',
+  3: '3 — średnio',
+  4: '4 — dobrze',
+  5: '5 — bardzo dobrze'
+};
+
+async function loadState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      state = JSON.parse(saved);
+    }
+  } catch (e) {
+    console.log('Brak zapisanych danych, zaczynamy od nowa.');
+  }
+  document.getElementById('project-name').value = state.projectName || '';
+  render();
+}
+
+async function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    const indicator = document.getElementById('save-indicator');
+    indicator.classList.add('show');
+    setTimeout(() => indicator.classList.remove('show'), 1200);
+  } catch (e) {
+    console.error('Błąd zapisu:', e);
+  }
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.getElementById('panel-kosztorys').classList.toggle('active', tab === 'kosztorys');
+  document.getElementById('panel-oferty').classList.toggle('active', tab === 'oferty');
+  document.getElementById('panel-harmonogram').classList.toggle('active', tab === 'harmonogram');
+  if (tab === 'harmonogram') renderHarmonogram();
+}
+
+function addLineItem() {
+  const nameInput = document.getElementById('new-item-name');
+  const plannedInput = document.getElementById('new-item-planned');
+  const name = nameInput.value.trim();
+  const planned = parseFloat(plannedInput.value);
+  if (!name || isNaN(planned) || planned <= 0) return;
+
+  state.lineItems.push({
+    id: 'item-' + Date.now(),
+    name: name,
+    planned: planned,
+    scopeItems: suggestScopeItems(name),
+    monthFrom: '',
+    monthTo: '',
+    offers: []
+  });
+
+  nameInput.value = '';
+  plannedInput.value = '';
+  render();
+  saveState();
+}
+
+function updateItemField(id, field, value) {
+  const item = state.lineItems.find(i => i.id === id);
+  if (!item) return;
+  item[field] = (field === 'planned') ? (parseFloat(value) || 0) : value;
+  render();
+  saveState();
+}
+
+function removeItem(id) {
+  state.lineItems = state.lineItems.filter(i => i.id !== id);
+  render();
+  saveState();
+}
+
+function addScopeItem(itemId) {
+  const input = document.getElementById('new-scope-' + itemId);
+  const text = input.value.trim();
+  if (!text) return;
+  const item = state.lineItems.find(i => i.id === itemId);
+  if (!item) return;
+  item.scopeItems.push({ id: 'scope-' + Date.now(), text });
+  input.value = '';
+  render();
+  saveState();
+}
+
+function updateScopeItemText(itemId, scopeId, value) {
+  const item = state.lineItems.find(i => i.id === itemId);
+  if (!item) return;
+  const scope = item.scopeItems.find(s => s.id === scopeId);
+  if (!scope) return;
+  scope.text = value;
+  render();
+  saveState();
+}
+
+function removeScopeItem(itemId, scopeId) {
+  const item = state.lineItems.find(i => i.id === itemId);
+  if (!item) return;
+  item.scopeItems = item.scopeItems.filter(s => s.id !== scopeId);
+  item.offers.forEach(o => {
+    o.coveredScopeIds = (o.coveredScopeIds || []).filter(id => id !== scopeId);
+  });
+  render();
+  saveState();
+}
+
+function addOffer(itemId) {
+  const item = state.lineItems.find(i => i.id === itemId);
+  if (!item) return;
+  item.offers.push({
+    id: 'offer-' + Date.now(),
+    price: null,
+    contractor: '',
+    satisfaction: null,
+    availability: '',
+    selected: false,
+    coveredScopeIds: []
+  });
+  render();
+  saveState();
+}
+
+function updateOfferField(itemId, offerId, field, value) {
+  const item = state.lineItems.find(i => i.id === itemId);
+  if (!item) return;
+  const offer = item.offers.find(o => o.id === offerId);
+  if (!offer) return;
+  if (field === 'price' || field === 'satisfaction') {
+    offer[field] = value === '' ? null : parseFloat(value);
+  } else {
+    offer[field] = value;
+  }
+  render();
+  saveState();
+}
+
+function toggleScopeCoverage(itemId, offerId, scopeId, checked) {
+  const item = state.lineItems.find(i => i.id === itemId);
+  if (!item) return;
+  const offer = item.offers.find(o => o.id === offerId);
+  if (!offer) return;
+  if (!offer.coveredScopeIds) offer.coveredScopeIds = [];
+  if (checked) {
+    if (!offer.coveredScopeIds.includes(scopeId)) offer.coveredScopeIds.push(scopeId);
+  } else {
+    offer.coveredScopeIds = offer.coveredScopeIds.filter(id => id !== scopeId);
+  }
+  render();
+  saveState();
+}
+
+function selectOffer(itemId, offerId) {
+  const item = state.lineItems.find(i => i.id === itemId);
+  if (!item) return;
+  const offer = item.offers.find(o => o.id === offerId);
+  if (!offer) return;
+  const wasSelected = offer.selected;
+  item.offers.forEach(o => { o.selected = false; });
+  offer.selected = !wasSelected;
+  render();
+  saveState();
+}
+
+function removeOffer(itemId, offerId) {
+  const item = state.lineItems.find(i => i.id === itemId);
+  if (!item) return;
+  item.offers = item.offers.filter(o => o.id !== offerId);
+  render();
+  saveState();
+}
+
+function handleResetClick() {
+  const btn = document.getElementById('reset-btn');
+  if (!resetConfirming) {
+    resetConfirming = true;
+    btn.textContent = 'Kliknij ponownie, aby potwierdzić';
+    btn.classList.add('confirming');
+    resetTimeout = setTimeout(() => {
+      resetConfirming = false;
+      btn.textContent = 'Wyczyść wszystkie dane';
+      btn.classList.remove('confirming');
+    }, 4000);
+  } else {
+    clearTimeout(resetTimeout);
+    resetConfirming = false;
+    state = { projectName: '', lineItems: [] };
+    document.getElementById('project-name').value = '';
+    btn.textContent = 'Wyczyść wszystkie dane';
+    btn.classList.remove('confirming');
+    render();
+    saveState();
+  }
+}
+
+function getSelectedOffer(item) {
+  return item.offers.find(o => o.selected && o.price !== null && o.price !== undefined);
+}
+
+function render() {
+  renderKosztorysTab();
+  renderOfertyTab();
+}
+
+function renderKosztorysTab() {
+  const container = document.getElementById('line-items-kosztorys');
+  const emptyState = document.getElementById('empty-state-kosztorys');
+
+  if (state.lineItems.length === 0) {
+    container.innerHTML = '';
+    emptyState.style.display = 'block';
+    return;
+  }
+  emptyState.style.display = 'none';
+
+  container.innerHTML = state.lineItems.map(item => {
+    const scopeItemsHtml = item.scopeItems.map(scope => `
+      <div class="scope-item-row">
+        <input type="text" value="${scope.text}"
+          onchange="updateScopeItemText('${item.id}', '${scope.id}', this.value)" />
+        <button class="tiny-btn" onclick="removeScopeItem('${item.id}', '${scope.id}')">✕</button>
+      </div>
+    `).join('');
+
+    return `
+      <div class="line-item">
+        <div class="line-item-header">
+          <input type="text" class="line-item-name" value="${item.name}"
+            onchange="updateItemField('${item.id}', 'name', this.value)" />
+          <button class="remove-btn" onclick="removeItem('${item.id}')">Usuń pozycję</button>
+        </div>
+
+        <div class="row" style="margin-top:8px;">
+          <div class="field">
+            <label>Kwota z kosztorysu (zł)</label>
+            <input type="number" value="${item.planned}"
+              onchange="updateItemField('${item.id}', 'planned', this.value)" />
+          </div>
+          <div class="field">
+            <label>Realizacja od</label>
+            ${dateFieldHtml(item.id, 'monthFrom', item.monthFrom)}
+          </div>
+          <div class="field">
+            <label>Realizacja do</label>
+            ${dateFieldHtml(item.id, 'monthTo', item.monthTo)}
+          </div>
+        </div>
+        <p class="date-hint">Format: DD:MM:RRRR — albo najedź na ikonę 📅, żeby zobaczyć kalendarz i kliknąć dzień.</p>
+
+        <div class="scope-box">
+          <div class="scope-box-header">Sugerowany zakres oferty (edytuj, dodaj lub usuń punkty)</div>
+          ${scopeItemsHtml}
+          <div class="scope-add-row">
+            <input type="text" id="new-scope-${item.id}" placeholder="Dodaj punkt zakresu..." />
+            <button class="secondary" onclick="addScopeItem('${item.id}')">Dodaj</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderOfertyTab() {
+  const totalPlanned = state.lineItems.reduce((sum, i) => sum + i.planned, 0);
+  const itemsWithSelected = state.lineItems.filter(i => getSelectedOffer(i));
+  const totalSelected = itemsWithSelected.reduce((sum, i) => sum + getSelectedOffer(i).price, 0);
+  const totalPlannedSelected = itemsWithSelected.reduce((sum, i) => sum + i.planned, 0);
+  const bilans = totalSelected - totalPlannedSelected;
+  const coveragePct = state.lineItems.length > 0
+    ? Math.round((itemsWithSelected.length / state.lineItems.length) * 100)
+    : 0;
+
+  document.getElementById('summary-cards').innerHTML = `
+    <div class="card">
+      <p class="label">Kosztorys (plan)</p>
+      <p class="value">${fmt(totalPlanned)}</p>
+    </div>
+    <div class="card">
+      <p class="label">Pokryte wybranymi ofertami</p>
+      <p class="value">${coveragePct}%</p>
+    </div>
+    <div class="card">
+      <p class="label">Bilans wybranych ofert vs plan</p>
+      <p class="value ${bilans > 0 ? 'danger' : bilans < 0 ? 'success' : ''}">
+        ${bilans > 0 ? '+' : ''}${fmt(bilans)}
+      </p>
+    </div>
+  `;
+
+  document.getElementById('progress-fill').style.width = coveragePct + '%';
+  document.getElementById('progress-status').textContent =
+    state.lineItems.length === 0
+      ? 'Dodaj pierwszą pozycję kosztorysu w zakładce "Kosztorys", żeby zacząć śledzić pokrycie.'
+      : `${itemsWithSelected.length} z ${state.lineItems.length} pozycji ma wybraną ofertę.`;
+
+  const container = document.getElementById('line-items-oferty');
+  const emptyState = document.getElementById('empty-state-oferty');
+
+  if (state.lineItems.length === 0) {
+    container.innerHTML = '';
+    emptyState.style.display = 'block';
+    return;
+  }
+  emptyState.style.display = 'none';
+
+  container.innerHTML = state.lineItems.map(item => {
+    const selectedOffer = getSelectedOffer(item);
+    let badge = '<span class="badge empty">Brak ofert</span>';
+    if (item.offers.length > 0 && !selectedOffer) badge = '<span class="badge warn">Brak wybranej oferty</span>';
+    if (selectedOffer) badge = '<span class="badge ok">Wybrano ofertę</span>';
+
+    const offersHtml = item.offers.map(offer => {
+      const isIncomplete = offer.price !== null && (!offer.contractor || !offer.satisfaction);
+      const coveredIds = offer.coveredScopeIds || [];
+      const totalScope = item.scopeItems.length;
+      const coveredCount = item.scopeItems.filter(s => coveredIds.includes(s.id)).length;
+      let coverageClass = 'coverage-none';
+      if (totalScope > 0 && coveredCount === totalScope) coverageClass = 'coverage-full';
+      else if (coveredCount > 0) coverageClass = 'coverage-partial';
+
+      const scopeRibbon = item.scopeItems.length > 0 ? `
+        <div class="scope-ribbon">
+          ${item.scopeItems.map(scope => `
+            <label class="scope-check-label">
+              <input type="checkbox" ${coveredIds.includes(scope.id) ? 'checked' : ''}
+                onchange="toggleScopeCoverage('${item.id}', '${offer.id}', '${scope.id}', this.checked)" />
+              ${scope.text}
+            </label>
+          `).join('')}
+        </div>
+      ` : '';
+
+      return `
+        <div class="offer-row ${offer.selected ? 'selected' : ''}">
+          <div class="offer-top">
+            <button class="select-offer-btn ${offer.selected ? 'is-selected' : ''}"
+              onclick="selectOffer('${item.id}', '${offer.id}')">
+              ${offer.selected ? '✓ Wybrana' : 'Wybierz'}
+            </button>
+            <span class="coverage-badge ${coverageClass}">Zakres: ${coveredCount}/${totalScope}</span>
+            ${isIncomplete ? '<span class="badge warn">Uzupełnij dane</span>' : ''}
+            <button class="remove-btn" onclick="removeOffer('${item.id}', '${offer.id}')" style="margin-left:auto;">Usuń ofertę</button>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>Cena oferty (zł)</label>
+              <input type="number" value="${offer.price ?? ''}" placeholder="wpisz cenę"
+                onchange="updateOfferField('${item.id}', '${offer.id}', 'price', this.value)" />
+            </div>
+            <div class="field">
+              <label>Wykonawca (opcjonalnie)</label>
+              <input type="text" value="${offer.contractor || ''}" placeholder="nazwa firmy"
+                onchange="updateOfferField('${item.id}', '${offer.id}', 'contractor', this.value)" />
+            </div>
+            <div class="field">
+              <label>Stopień satysfakcji</label>
+              <select onchange="updateOfferField('${item.id}', '${offer.id}', 'satisfaction', this.value)">
+                <option value="">— wybierz —</option>
+                ${Object.entries(SATISFACTION_LABELS).map(([val, label]) =>
+                  `<option value="${val}" ${offer.satisfaction == val ? 'selected' : ''}>${label}</option>`
+                ).join('')}
+              </select>
+            </div>
+            <div class="field">
+              <label>Dostępność firmy</label>
+              <input type="text" value="${offer.availability || ''}" placeholder="np. od maja 2026"
+                onchange="updateOfferField('${item.id}', '${offer.id}', 'availability', this.value)" />
+            </div>
+          </div>
+          ${scopeRibbon}
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="line-item">
+        <div class="line-item-header">
+          <input type="text" class="line-item-name readonly" value="${item.name}" readonly />
+          <span style="font-size:13px; color:#6b7280;">Plan: ${fmt(item.planned)}</span>
+          ${badge}
+        </div>
+        <div class="offers-list">${offersHtml}</div>
+        <button class="secondary" style="margin-top:8px;" onclick="addOffer('${item.id}')">+ Dodaj kontrofertę</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function generateMonthRange(fromStr, toStr) {
+  const [fy, fm] = fromStr.split('-').map(Number);
+  const [ty, tm] = toStr.split('-').map(Number);
+  const months = [];
+  let y = fy, m = fm;
+  while (y < ty || (y === ty && m <= tm)) {
+    months.push(y + '-' + String(m).padStart(2, '0'));
+    m++;
+    if (m > 12) { m = 1; y++; }
+  }
+  return months;
+}
+
+function renderHarmonogram() {
+  const container = document.getElementById('harmonogram-content');
+  const itemsWithMonth = state.lineItems.filter(i => i.monthFrom);
+  const itemsWithoutMonth = state.lineItems.filter(i => !i.monthFrom);
+
+  if (state.lineItems.length === 0) {
+    container.innerHTML = '<div class="empty-state">Brak pozycji kosztorysu. Dodaj je w zakładce "Kosztorys".</div>';
+    return;
+  }
+
+  if (itemsWithMonth.length === 0) {
+    container.innerHTML = '<div class="empty-state">Uzupełnij zakres dat "od-do" przy pozycjach kosztorysu, żeby zobaczyć harmonogram rzeczowo-finansowy.</div>';
+    return;
+  }
+
+  const monthNames = ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
+  const monthLabel = (month) => {
+    const [year, m] = month.split('-');
+    return monthNames[parseInt(m, 10) - 1] + ' ' + year;
+  };
+
+  const normalized = itemsWithMonth.map(item => {
+    const from = item.monthFrom.slice(0, 7);
+    const toFull = item.monthTo && item.monthTo >= item.monthFrom ? item.monthTo : item.monthFrom;
+    const to = toFull.slice(0, 7);
+    return { item, from, to, span: generateMonthRange(from, to) };
+  });
+
+  const allMonths = new Set();
+  normalized.forEach(n => n.span.forEach(m => allMonths.add(m)));
+  const sortedAll = [...allMonths].sort();
+  const sortedMonths = generateMonthRange(sortedAll[0], sortedAll[sortedAll.length - 1]);
+
+  let html = '<div class="gantt-wrap"><table class="gantt-table"><thead><tr><th>Pozycja</th>';
+  sortedMonths.forEach(month => { html += `<th>${monthLabel(month)}</th>`; });
+  html += '</tr></thead><tbody>';
+
+  normalized.forEach(({ item, from, span }) => {
+    const sel = getSelectedOffer(item);
+    const startIdx = sortedMonths.indexOf(from);
+    const colspan = span.length;
+
+    html += `<tr><td class="task-name">${item.name}${sel && !sel.availability ? '<span class="risk-flag">brak dostępności</span>' : ''}</td>`;
+
+    for (let i = 0; i < startIdx; i++) html += '<td class="gantt-empty-cell"></td>';
+
+    const barClass = sel ? 'gantt-bar has-offer' : 'gantt-bar';
+    const label = sel ? fmt(sel.price) : fmt(item.planned) + ' (plan)';
+    html += `<td colspan="${colspan}"><div class="${barClass}">${label}</div></td>`;
+
+    for (let i = startIdx + colspan; i < sortedMonths.length; i++) html += '<td class="gantt-empty-cell"></td>';
+
+    html += '</tr>';
+  });
+
+  html += '<tr class="gantt-footer-row"><td>Suma — plan</td>';
+  sortedMonths.forEach(month => {
+    let sum = 0;
+    normalized.forEach(({ item, span }) => {
+      if (span.includes(month)) sum += item.planned / span.length;
+    });
+    html += `<td>${fmt(sum)}</td>`;
+  });
+  html += '</tr>';
+
+  html += '<tr class="gantt-footer-row offers"><td>Suma — wybrane oferty</td>';
+  sortedMonths.forEach(month => {
+    let sum = 0;
+    normalized.forEach(({ item, span }) => {
+      const sel = getSelectedOffer(item);
+      if (sel && span.includes(month)) sum += sel.price / span.length;
+    });
+    html += `<td>${sum > 0 ? fmt(sum) : '—'}</td>`;
+  });
+  html += '</tr>';
+
+  html += '</tbody></table></div>';
+
+  html += `
+    <p class="status-line" style="margin-top:8px;">
+      Koszty pozycji rozciągniętych na kilka miesięcy są rozkładane równo na cały okres realizacji.
+    </p>
+    <div class="gantt-legend">
+      <div class="gantt-legend-item"><div class="gantt-legend-swatch" style="background:#1f2a4f;"></div>Kwota planowana (brak wybranej oferty)</div>
+      <div class="gantt-legend-item"><div class="gantt-legend-swatch" style="background:#16a34a;"></div>Wybrana oferta</div>
+    </div>
+  `;
+
+  if (itemsWithoutMonth.length > 0) {
+    html += `
+      <div class="month-group" style="margin-top:16px;">
+        <h3>Bez przypisanego okresu realizacji</h3>
+        ${itemsWithoutMonth.map(i => `
+          <div class="month-item-row">
+            <span>${i.name}</span>
+            <span>${fmt(i.planned)}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+}
+
+document.getElementById('project-name').addEventListener('change', function() {
+  state.projectName = this.value;
+  saveState();
+});
+
+loadState();
+</script>
+
+</body>
+</html>
