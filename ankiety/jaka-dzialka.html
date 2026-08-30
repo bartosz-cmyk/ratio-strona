@@ -1451,17 +1451,18 @@ function showResult(){
   const ranked=matchProfiles(dim);
   const top=ranked[0].p, alt=ranked[1].p;
 
-  let h=`
+  const heroHtml = `
   <div class="hero">
-    <div class="eyebrow">Twój profil domu</div>
+    <div class="eyebrow">Twój profil poszukiwacza</div>
     <p class="pname">${top.name}</p>
     <p class="ptag">${top.tag}</p>
     <p class="plead">${top.lead}</p>
-    <p style="color:var(--ink-2)">${top.body}</p>
     <div class="matchrow"><b>${pct(ranked[0].s)}%</b><span>dopasowania · drugi w kolejności: ${alt.name} (${pct(ranked[1].s)}%)</span></div>
-  </div>
+  </div>`;
 
+  let h=`
   <div class="sec"><h2>Co to znaczy dla projektu</h2>
+    <p style="color:var(--ink-2);margin-bottom:14px">${top.body}</p>
     <div class="card"><ol class="steps">${top.reko.map(k=>`<li><span>${k}</span></li>`).join('')}</ol></div>
     <div class="card" style="margin-top:12px;border-left:3px solid var(--series-1)">
       <h3 style="color:var(--series-1)">Rzecz, którą warto wiedzieć zawczasu</h3>
@@ -1583,9 +1584,32 @@ function showResult(){
   <div class="print-footer">Raport wygenerowany na ratiopro.net · ${new Date().toLocaleDateString('pl-PL')}</div>`;
 
   el('quiz').hidden=true;
-  const r=el('result'); r.hidden=false; r.innerHTML=h;
-  r.querySelectorAll('.dimtable .r').forEach(x=>x.onclick=()=>x.classList.toggle('open'));
-  el('again').onclick=()=>{ state.i=0; state.ans=[]; r.hidden=true; el('quiz').hidden=false; renderQ(); };
+  const r=el('result'); r.hidden=false;
+
+  const paywallHtml = `
+  <div class="sec print-hide" id="paywall">
+    <div class="card" style="text-align:center;padding:32px 20px;border:2px dashed var(--series-1)">
+      <p style="font-size:15px;font-weight:700;margin:0 0 8px">🔒 To dopiero początek Twojego wyniku</p>
+      <p style="color:var(--ink-2);margin:0 0 18px">Pełny raport zawiera pełne uzasadnienie, konkretne rekomendacje, checklistę, pytania do sprzedającego/agenta, czerwoną flagę i szczegółowy rozkład na ${DIM_ORDER.length} wymiarach — a jeśli masz już działkę, także jej pełny audyt.</p>
+      <button class="btn" id="unlock-btn">Odblokuj pełny dostęp</button>
+      <p class="muted" style="margin-top:10px;font-size:12px">Tryb testowy — kod odblokowujący: 1111</p>
+    </div>
+  </div>`;
+
+  r.innerHTML = heroHtml + paywallHtml;
+
+  document.getElementById('unlock-btn').onclick = () => {
+    const code = prompt('Wpisz kod dostępu:');
+    if(code === null) return;
+    if(code.trim() === '1111'){
+      document.getElementById('paywall').outerHTML = h;
+      r.querySelectorAll('.dimtable .r').forEach(x=>x.onclick=()=>x.classList.toggle('open'));
+      el('again').onclick=()=>{ state.i=0; state.ans=[]; r.hidden=true; el('quiz').hidden=false; renderQ(); };
+    } else {
+      alert('Nieprawidłowy kod. Spróbuj ponownie.');
+    }
+  };
+
   window.scrollTo({top:0,behavior:'instant'});
 
   try {
