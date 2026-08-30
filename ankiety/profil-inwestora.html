@@ -148,25 +148,33 @@ ol.steps li::before{
 .foot p{margin:0 0 10px}
 .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
 
-@media print{{
-  body{{background:#fff}}
-  .ratio-nav,.ratio-footer,.topbar,.actions,.btn{{display:none!important}}
-  .card,.hero,.numgrid,.dimtable,.sec,.flag,.alt{{break-inside:avoid;page-break-inside:avoid}}
-  h1,h2,h3{{break-after:avoid;page-break-after:avoid}}
-  .wrap{{max-width:100%!important;padding:0 8px!important}}
-  .print-header{{display:flex!important}}
-  .print-footer{{display:block!important}}
-}}
-.print-header{{
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
+  body{background:#fff;font-size:12.5px}
+  .ratio-nav,.ratio-footer,.topbar,.actions,.btn{display:none!important}
+  .card,.hero,.numgrid,.dimtable,.sec,.flag,.alt{break-inside:avoid;page-break-inside:avoid}
+  h1,h2,h3{break-after:avoid;page-break-after:avoid}
+  .wrap{max-width:100%!important;padding:0!important}
+  .print-header{display:flex!important}
+  .print-footer{display:block!important}
+  .print-hide{display:none!important}
+  .card,.flag{border-radius:4px!important;border-width:1px!important}
+  .hero{border-radius:0!important;border:none!important;border-bottom:3px solid var(--series-1)!important;
+    padding:0 0 22px!important;margin-bottom:26px!important;text-align:center}
+  .sec{margin-bottom:20px!important}
+  .sec>h2{border-bottom:1px solid var(--hair);padding-bottom:6px;font-size:16px!important}
+  a[href]{color:inherit!important;text-decoration:none!important}
+}
+.print-header{
   display:none; align-items:center; justify-content:space-between;
   border-bottom:2px solid var(--series-1); padding-bottom:14px; margin-bottom:24px;
-}}
-.print-header .ph-brand{{font-family:var(--font-heading);font-weight:700;font-size:20px;color:var(--series-1)}}
-.print-header .ph-doc{{font-size:12px;color:var(--muted);text-align:right}}
-.print-footer{{
+}
+.print-header .ph-brand{font-family:var(--font-heading);font-weight:700;font-size:20px;color:var(--series-1)}
+.print-header .ph-doc{font-size:12px;color:var(--muted);text-align:right}
+.print-footer{
   display:none; margin-top:32px; padding-top:12px; border-top:1px solid var(--hair);
   font-size:11px;color:var(--muted);text-align:center;
-}}
+}
 
 /* ===================================================================
    RATIO — nadpisanie tokenów marki.
