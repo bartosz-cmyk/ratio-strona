@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Czy dom i działka pasują do siebie? | Ratio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../assets/logo-symbol.svg" />
+
+<style>
+:root{
+  --series-1:#1f2a4f; --series-1-soft:rgba(31,42,79,.10); --accent-text:#1f2a4f;
+  --plane:#ffffff; --card:#ffffff; --surface-1:#fafafa;
+  --ink:#11172a; --ink-2:#3d4459; --muted:#6b7280;
+  --hair:rgba(17,23,42,.10); --grid:#e5e7eb; --axis:#c7c6bf;
+  --good:#0ca30c; --warning:#fab219; --critical:#d03b3b;
+  --radius:10px;
+  --font:'Inter',system-ui,-apple-system,sans-serif;
+  --font-heading:'Zilla Slab',serif;
+  --accent:#ffb719;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);font-family:var(--font);line-height:1.55}
+h1,h2,h3{font-family:var(--font-heading)}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 80px}
+h1{font-size:26px;margin:0 0 10px}
+.lead{color:var(--ink-2);font-size:16px;margin:0 0 28px}
+.card{background:var(--card);border:1px solid var(--hair);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px}
+.card h3{margin:0 0 6px;font-size:16px}
+.card p{margin:0;color:var(--ink-2);font-size:14.5px}
+.card.warning{border-left:3px solid var(--warning)}
+.card.good{border-left:3px solid var(--good)}
+.card.missing{border-left:3px solid var(--muted);text-align:center}
+.btn{display:inline-block;background:var(--accent);color:#11172a;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:999px;font-size:14.5px}
+.btn:hover{opacity:.9}
+.btn.ghost{background:transparent;border:1px solid var(--axis);color:var(--series-1)}
+.profiles-summary{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:26px}
+.profile-chip{background:var(--surface-1);border:1px solid var(--hair);border-radius:999px;padding:8px 16px;font-size:13.5px;color:var(--ink-2)}
+.profile-chip b{color:var(--ink)}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+
+.ratio-nav{
+  position:sticky; top:0; z-index:100; background:rgba(255,255,255,.92);
+  backdrop-filter:blur(6px); border-bottom:1px solid #f3f4f6;
+}
+.ratio-nav-inner{
+  max-width:900px; margin:0 auto; padding:14px 20px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.ratio-nav-inner img{ height:36px; display:block }
+.ratio-nav-links{ display:flex; align-items:center; gap:20px }
+.ratio-nav-links a{
+  font-family:'Inter',sans-serif; font-size:14px; font-weight:600;
+  color:#11172a; text-decoration:none;
+}
+.ratio-nav-links a:hover{ color:#1f2a4f }
+.ratio-nav-links a.cta{
+  background:#1f2a4f; color:#fff; padding:9px 18px; border-radius:999px;
+}
+.ratio-nav-links a.cta:hover{ background:#2d3d74; color:#fff }
+.ratio-nav-links .hide-mobile{ display:none }
+@media (min-width:640px){ .ratio-nav-links .hide-mobile{ display:inline } }
+
+.ratio-footer{
+  background:linear-gradient(160deg,#2d3d74 0%,#1f2a4f 100%);
+  margin-top:48px; font-family:'Inter',sans-serif;
+}
+.ratio-footer-inner{ max-width:900px; margin:0 auto; padding:44px 20px 0; }
+.ratio-footer-grid{ display:grid; grid-template-columns:1fr; gap:32px; }
+@media (min-width:640px){ .ratio-footer-grid{ grid-template-columns:1fr 1fr } }
+.ratio-footer img{ height:40px; margin-bottom:18px }
+.ratio-footer p{ color:#d1d5db; font-size:13px; line-height:1.6; margin:0 0 4px }
+.ratio-footer a{ color:#d1d5db; text-decoration:none }
+.ratio-footer a:hover{ color:#ffb719 }
+.ratio-footer-nav-title{
+  font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+  color:#9ca3af; margin:0 0 14px;
+}
+.ratio-footer-nav ul{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px }
+.ratio-footer-nav a{ font-size:13px }
+.ratio-footer-bottom{
+  border-top:1px solid rgba(255,255,255,.1); margin-top:32px; padding:20px;
+  display:flex; flex-direction:column; gap:10px; align-items:center; justify-content:space-between;
+  font-size:11px; color:#9ca3af; text-align:center;
+}
+@media (min-width:640px){ .ratio-footer-bottom{ flex-direction:row; text-align:left } }
+.ratio-footer-bottom .legal-links{ display:flex; gap:16px }
+</style>
+</head>
+<body>
+<header class="ratio-nav">
+  <div class="ratio-nav-inner">
+    <a href="../index.html"><img src="../assets/logo-black.svg" alt="Ratio Logo" /></a>
+    <nav class="ratio-nav-links">
+      <a href="../jak-pracujemy.html" class="hide-mobile">Jak pracujemy</a>
+      <a href="../case-studies.html" class="hide-mobile">Case studies</a>
+      <a href="../ankiety.html" class="hide-mobile">Ankiety</a>
+      <a href="../index.html#kontakt" class="cta">Kontakt</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <h1>Czy Twój dom i działka pasują do siebie?</h1>
+  <p class="lead">To porównanie odczytuje wyniki z ankiet "Jaki dom" i "Jaka działka", zapisane lokalnie w tej przeglądarce, i sprawdza, gdzie to, czego chcesz od domu, kłóci się z tym, co daje Twoja działka.</p>
+
+  <div id="content"></div>
+</div>
+
+<footer class="ratio-footer">
+  <div class="ratio-footer-inner">
+    <div class="ratio-footer-grid">
+      <div>
+        <img src="../assets/logo-white.svg" alt="Ratio Logo" />
+        <p style="color:#fff;font-weight:600;">RATIO Zarządzanie Inwestycjami Budowlanymi<br>Bartosz Zapadka-Żydek</p>
+        <p>14-202 Iława, ul. Gdańska 2D/16</p>
+        <p><a href="mailto:bartosz@ratiopro.net">bartosz@ratiopro.net</a></p>
+        <p><a href="tel:+48537913341">+48 537 913 341</a></p>
+      </div>
+      <div class="ratio-footer-nav">
+        <p class="ratio-footer-nav-title">Nawigacja</p>
+        <ul>
+          <li><a href="../index.html">Strona główna</a></li>
+          <li><a href="../jak-pracujemy.html">Jak pracujemy</a></li>
+          <li><a href="../case-studies.html">Case studies</a></li>
+          <li><a href="../ankiety.html">Ankiety</a></li>
+          <li><a href="../index.html#kontakt">Kontakt</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="ratio-footer-bottom">
+      <p>&copy; 2026 RATIO Zarządzanie Inwestycjami Budowlanymi Bartosz Zapadka-Żydek · NIP 7441843748 · REGON 544820288</p>
+      <div class="legal-links">
+        <a href="../polityka-prywatnosci.html">Polityka prywatności</a>
+        <a href="../regulamin.html">Regulamin</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+const DOM_PROFILE_NAMES = {
+  witryna:'Witryna', gniazdo:'Gniazdo', autor:'Autor', maszyna:'Maszyna',
+  azyl:'Azyl', rachmistrz:'Rachmistrz', salon:'Salon i zaplecze'
+};
+const DZIALKA_PROFILE_NAMES = {
+  'pewny-gracz':'Pewny gracz', 'lowca-okazji':'Łowca okazji', 'odkrywca':'Odkrywca charakteru',
+  'osiedleniec':'Osiedleniec', 'poszukiwacz-ciszy':'Poszukiwacz ciszy',
+  'strateg-cenowy':'Strateg cenowy', 'pragmatyczny-srodek':'Pragmatyczny środek'
+};
+
+/* ---------- konflikt dom × działka (identyczna logika co w jaki-dom-i-gdzie) ---------- */
+function conflicts(profileId, risks, dim){
+  const out=[];
+  const has=r=>risks.has(r);
+  const wideNeed = ['witryna','azyl','salon'].includes(profileId);
+
+  if(has('ekspozycja_zla') && (dim.D>=65 || profileId==='witryna' || profileId==='salon'))
+    out.push({t:'Duże przeszklenia kontra ogród od północy',
+      d:'Twój profil domu opiera się na świetle i otwarciu na ogród, a działka ma stronę ogrodową skierowaną na północ. To najpoważniejsza rozbieżność, jaka wyszła w tym badaniu, bo dotyczy rzeczy, której nie da się kupić ani zaprojektować. Możliwe kierunki: przesunąć dom maksymalnie do granicy północnej i zbudować ogród od południa przed domem, otworzyć strefę dzienną na zachód zamiast na południe, albo zaprojektować wewnętrzny dziedziniec doświetlany od góry. Każde z tych rozwiązań jest wykonalne i każde kosztuje — warto je wycenić przed wyborem projektu.'});
+
+  if((has('waska')||has('waska_bardzo')) && wideNeed)
+    out.push({t:'Program domu kontra szerokość działki',
+      d:'Twój profil domu potrzebuje rozmachu w poziomie — szerokiej elewacji ogrodowej, dystansu od sąsiadów albo rozłożystego parteru. Szerokość działki na to nie pozwala. Realne kierunki: dom piętrowy zamiast parterowego, układ w kształcie litery L zamknięty na własne podwórze, garaż wbudowany zamiast wolnostojącego. Warto zlecić architektowi analizę chłonności działki, zanim wybierzesz projekt — to koszt rzędu kilkuset złotych i najlepiej wydane pieniądze na tym etapie.'});
+
+  if(dim.Y>=70 && (has('halas_droga')||has('halas_kolej')||has('mpzp_linia')))
+    out.push({t:'Potrzeba prywatności kontra otoczenie działki',
+      d:'Prywatność i spokój są u Ciebie wysoko, a działka ma cechy, które temu przeczą. Da się to złagodzić układem — sypialnie i strefa wypoczynkowa po przeciwnej stronie, wał ziemny z gęstą zielenią, stolarka o podwyższonej izolacyjności akustycznej — ale nie da się tego usunąć. Warto pojechać tam wieczorem i w weekend, zanim zapadnie decyzja projektowa.'});
+
+  if(profileId==='maszyna' && has('ekspozycja_zla'))
+    out.push({t:'Efektywność energetyczna kontra ekspozycja',
+      d:'Przy Twoim nastawieniu na sprawność energetyczną orientacja działki jest parametrem pierwszej klasy: to ona decyduje o zyskach słonecznych i o sensowności fotowoltaiki. Sprawdź, czy dach da się zorientować korzystniej niż bryłę, i policz wariant z panelami na osobnej konstrukcji w ogrodzie.'});
+
+  if(profileId==='rachmistrz' && (has('skarpa')||has('grunt_slaby')||has('przylacza_bardzo_dalekie')||has('rolna')))
+    out.push({t:'Nastawienie na wartość kontra koszty ukryte działki',
+      d:'Przy Twoim profilu każda złotówka powinna być odzyskiwalna przy sprzedaży, a ta działka wymaga nakładów, których rynek nie wycenia: fundamenty, uzbrojenie, niwelacja albo procedury. Policz łączną kwotę tych nakładów i zestaw ją z różnicą w cenie działki bez tych obciążeń — to jedyny rachunek, który tu ma znaczenie.'});
+
+  if(dim.R>=75 && has('dojazd_dlugi'))
+    out.push({t:'Dom rodzinny kontra długi dojazd',
+      d:'Budujesz dom pod wspólne życie rodziny, a dojazd zabiera z niego kilkanaście godzin tygodniowo. To najczęściej niedoszacowany koszt w całym procesie — do dojazdu, w odróżnieniu od domu, ludzie się nie przyzwyczajają. Warto policzyć to w godzinach obecności w domu, a nie w kilometrach.'});
+
+  return out;
+}
+
+function render(){
+  const content = document.getElementById('content');
+  let domData=null, dzialkaData=null;
+  try { const raw=localStorage.getItem('ratio-dom-wynik'); if(raw) domData=JSON.parse(raw); } catch(e){}
+  try { const raw=localStorage.getItem('ratio-dzialka-wynik'); if(raw) dzialkaData=JSON.parse(raw); } catch(e){}
+
+  if(!domData || !dzialkaData){
+    const missing = !domData && !dzialkaData ? 'obu ankiet' : (!domData ? 'ankiety "Jaki dom"' : 'ankiety "Jaka działka"');
+    content.innerHTML = `
+      <div class="card missing">
+        <h3>Brakuje wyniku ${missing}</h3>
+        <p style="margin:10px 0 16px">To porównanie potrzebuje wyników obu ankiet, zapisanych w tej samej przeglądarce.</p>
+        <div class="actions" style="justify-content:center">
+          ${!domData ? '<a class="btn" href="jaki-dom.html">Wypełnij "Jaki dom"</a>' : ''}
+          ${!dzialkaData ? '<a class="btn" href="jaka-dzialka.html">Wypełnij "Jaka działka"</a>' : ''}
+        </div>
+      </div>`;
+    return;
+  }
+
+  const domName = DOM_PROFILE_NAMES[domData.profileId] || domData.profileId;
+  const dzialkaName = DZIALKA_PROFILE_NAMES[dzialkaData.profileId] || dzialkaData.profileId;
+  const risksSet = new Set(dzialkaData.risks || []);
+  const conf = conflicts(domData.profileId, risksSet, domData.dim || {});
+
+  let html = `
+    <div class="profiles-summary">
+      <span class="profile-chip">Profil domu: <b>${domName}</b></span>
+      <span class="profile-chip">Profil poszukiwacza działki: <b>${dzialkaName}</b></span>
+    </div>`;
+
+  if(conf.length){
+    html += conf.map(c => `<div class="card warning"><h3>${c.t}</h3><p>${c.d}</p></div>`).join('');
+  } else {
+    html += `<div class="card good"><h3>Nie wyszły żadne wyraźne rozbieżności</h3><p>Na podstawie zapisanych odpowiedzi Twój profil domu i wynik audytu działki nie generują żadnego z rozpoznawanych konfliktów. To nie zastępuje projektu — tylko pokazuje, że nie ma tu oczywistego zgrzytu na starcie.</p></div>`;
+  }
+
+  html += `
+    <div class="actions">
+      <a class="btn ghost" href="jaki-dom.html">Wypełnij ponownie "Jaki dom"</a>
+      <a class="btn ghost" href="jaka-dzialka.html">Wypełnij ponownie "Jaka działka"</a>
+    </div>`;
+
+  content.innerHTML = html;
+}
+
+render();
+</script>
+</body>
+</html>

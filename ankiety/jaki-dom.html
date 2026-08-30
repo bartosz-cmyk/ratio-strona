@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jaki dom — profil motywacji</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../assets/logo-symbol.svg" />
+<style>
+:root{
+  color-scheme: light;
+  --surface-1:#fcfcfb; --plane:#f4f3ef; --card:#ffffff;
+  --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --hair:rgba(11,11,11,.10);
+  --series-1:#2a78d6; --series-1-soft:rgba(42,120,214,.14);
+  --good:#0ca30c; --warning:#fab219; --critical:#d03b3b;
+  --radius:14px;
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="light"])){
+    color-scheme: dark;
+    --surface-1:#1a1a19; --plane:#0d0d0d; --card:#1a1a19;
+    --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --axis:#383835; --hair:rgba(255,255,255,.10);
+    --series-1:#3987e5; --series-1-soft:rgba(57,135,229,.20);
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--font); background:var(--plane); color:var(--ink);
+  line-height:1.55; -webkit-font-smoothing:antialiased;
+  font-size:16px;
+}
+.wrap{max-width:760px;margin:0 auto;padding:24px 20px 80px}
+h1{font-size:clamp(28px,5vw,42px);line-height:1.12;letter-spacing:-.02em;margin:0 0 16px;font-weight:700}
+h2{font-size:clamp(21px,3.4vw,27px);line-height:1.2;letter-spacing:-.015em;margin:0 0 12px;font-weight:650}
+h3{font-size:17px;margin:0 0 8px;font-weight:650;letter-spacing:-.005em}
+p{margin:0 0 14px}
+.lead{font-size:18px;color:var(--ink-2)}
+.muted{color:var(--muted);font-size:14px}
+.card{background:var(--card);border:1px solid var(--hair);border-radius:var(--radius);padding:22px}
+.btn{
+  font:inherit;font-weight:600;cursor:pointer;border-radius:10px;
+  border:1px solid transparent;padding:13px 22px;background:var(--ink);color:var(--plane);
+  transition:opacity .12s ease, transform .08s ease;
+}
+.btn:hover{opacity:.86}
+.btn:active{transform:translateY(1px)}
+.btn[disabled]{opacity:.32;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink-2);border-color:var(--hair)}
+.btn.ghost:hover{color:var(--ink);border-color:var(--axis)}
+.btn.sm{padding:9px 16px;font-size:14px}
+
+/* ---------- intro ---------- */
+#intro .kv{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:20px 0 4px;font-size:15px}
+#intro .kv dt{color:var(--muted)}
+#intro .kv dd{margin:0;color:var(--ink-2)}
+.dims-preview{display:flex;flex-wrap:wrap;gap:7px;margin:18px 0 6px}
+.chip{font-size:13px;padding:5px 11px;border-radius:100px;border:1px solid var(--hair);color:var(--ink-2);background:var(--surface-1)}
+
+/* ---------- progress ---------- */
+.topbar{position:sticky;top:0;z-index:20;background:var(--plane);padding:14px 0 12px;margin:-24px 0 22px}
+.pbar{height:4px;background:var(--grid);border-radius:100px;overflow:hidden}
+.pbar>i{display:block;height:100%;background:var(--series-1);border-radius:100px;transition:width .28s cubic-bezier(.4,0,.2,1)}
+.pmeta{display:flex;justify-content:space-between;align-items:baseline;margin-top:9px;font-size:13px;color:var(--muted)}
+.pmeta b{color:var(--ink-2);font-weight:600}
+
+/* ---------- question ---------- */
+.sectitle{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--series-1);font-weight:700;margin-bottom:14px}
+.qtext{font-size:clamp(20px,3.2vw,25px);line-height:1.3;letter-spacing:-.015em;font-weight:600;margin:0 0 12px}
+.qhelp{font-size:14.5px;color:var(--ink-2);background:var(--surface-1);border-left:2px solid var(--axis);padding:11px 14px;border-radius:0 8px 8px 0;margin:0 0 22px}
+.opts{display:flex;flex-direction:column;gap:9px;margin-top:20px}
+.opt{
+  display:flex;gap:13px;align-items:flex-start;text-align:left;width:100%;
+  font:inherit;color:var(--ink);cursor:pointer;
+  background:var(--card);border:1px solid var(--hair);border-radius:11px;padding:14px 16px;
+  transition:border-color .12s ease, background .12s ease;
+}
+.opt:hover{border-color:var(--series-1)}
+.opt .mk{
+  flex:0 0 20px;height:20px;margin-top:1px;border-radius:50%;border:1.5px solid var(--axis);
+  display:grid;place-items:center;transition:all .12s ease;
+}
+.opt[data-multi] .mk{border-radius:5px}
+.opt .mk i{width:9px;height:9px;border-radius:50%;background:transparent;display:block}
+.opt[data-multi] .mk i{border-radius:2px}
+.opt.on{border-color:var(--series-1);background:var(--series-1-soft)}
+.opt.on .mk{border-color:var(--series-1);background:var(--series-1)}
+.opt.on .mk i{background:#fff}
+.opt .lbl{flex:1}
+.qnav{display:flex;gap:10px;align-items:center;margin-top:24px}
+.qnav .spacer{flex:1}
+
+/* ---------- result ---------- */
+.hero{background:var(--card);border:1px solid var(--hair);border-radius:18px;padding:28px;margin-bottom:16px}
+.hero .eyebrow{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:10px}
+.hero .pname{font-size:clamp(32px,6vw,46px);line-height:1.05;letter-spacing:-.03em;font-weight:700;margin:0 0 6px}
+.hero .ptag{font-size:17px;color:var(--series-1);font-weight:600;margin:0 0 18px}
+.hero .plead{font-size:18px;line-height:1.5;margin:0 0 14px}
+.matchrow{display:flex;align-items:baseline;gap:10px;margin-top:20px;padding-top:18px;border-top:1px solid var(--hair);font-size:14px;color:var(--muted)}
+.matchrow b{font-size:26px;color:var(--ink);font-weight:700;letter-spacing:-.02em}
+
+.sec{margin:34px 0 0}
+.sec>h2{margin-bottom:14px}
+
+.numgrid{display:grid;gap:1px;background:var(--hair);border:1px solid var(--hair);border-radius:12px;overflow:hidden}
+.numgrid .row{display:grid;grid-template-columns:minmax(140px,38%) 1fr;gap:14px;background:var(--card);padding:13px 16px;font-size:15px}
+.numgrid .row .k{color:var(--muted);font-size:14px}
+.numgrid .row .v{font-weight:600}
+
+ol.steps{margin:0;padding:0;list-style:none;counter-reset:s}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:26px 1fr;gap:13px;padding:13px 0;border-bottom:1px solid var(--hair);font-size:15.5px}
+ol.steps li:last-child{border-bottom:0}
+ol.steps li::before{
+  content:counter(s);font-size:12px;font-weight:700;color:var(--series-1);
+  width:24px;height:24px;border-radius:50%;border:1px solid var(--series-1);
+  display:grid;place-items:center;margin-top:1px;
+}
+
+.flag{display:grid;grid-template-columns:20px 1fr;gap:12px;padding:15px 16px;border-radius:11px;border:1px solid var(--hair);background:var(--card);margin-bottom:9px}
+.flag .ico{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;margin-top:2px}
+.flag.critical .ico{background:var(--critical)}
+.flag.warning .ico{background:var(--warning);color:#3a2a00}
+.flag h3{margin:0 0 4px;font-size:15.5px}
+.flag p{margin:0;font-size:14.5px;color:var(--ink-2)}
+
+.alt{border:1px dashed var(--axis);border-radius:12px;padding:18px;background:transparent}
+
+/* radar */
+.vizwrap{display:grid;grid-template-columns:1fr;gap:22px;align-items:start}
+@media(min-width:700px){.vizwrap{grid-template-columns:360px 1fr}}
+.radar{display:block;width:100%;max-width:380px;margin:0 auto;overflow:visible}
+.dimtable{display:grid;gap:1px;background:var(--hair);border:1px solid var(--hair);border-radius:12px;overflow:hidden}
+.dimtable .r{background:var(--card);padding:10px 14px}
+.dimtable .r .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.dimtable .r .nm{font-size:14.5px;font-weight:600}
+.dimtable .r .vl{font-size:14.5px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
+.dimtable .r .track{height:5px;background:var(--grid);border-radius:100px;margin-top:7px;overflow:hidden}
+.dimtable .r .track>i{display:block;height:100%;background:var(--series-1);border-radius:100px}
+.dimtable .r .ds{font-size:13px;color:var(--muted);margin-top:6px;display:none}
+.dimtable .r.open .ds{display:block}
+
+.foot{margin-top:44px;padding-top:22px;border-top:1px solid var(--hair);font-size:13.5px;color:var(--muted)}
+.foot p{margin:0 0 10px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:5px;vertical-align:middle;margin-left:6px;white-space:nowrap}
+.tag.fix{background:rgba(208,59,59,.12);color:var(--critical)}
+.tag.proj{background:var(--series-1-soft);color:var(--series-1)}
+.tag.mit{background:rgba(250,178,25,.16);color:#8a5d00}
+@media (prefers-color-scheme: dark){:root:where(:not([data-theme="light"])) .tag.mit{color:var(--warning)}}
+.flag.info .ico{background:var(--muted)}
+.gauge{margin-top:4px}
+.gtrack{position:relative;height:10px;background:var(--grid);border-radius:100px;overflow:hidden}
+.gtrack>i{display:block;height:100%;background:var(--series-1);border-radius:100px}
+.gtick{position:absolute;top:0;bottom:0;width:2px;background:var(--surface-1)}
+.glabels{display:flex;justify-content:space-between;margin-top:7px;font-size:11.5px;color:var(--muted)}
+@media print{
+  body{background:#fff}
+  .topbar,.actions,.btn{display:none!important}
+  .card,.hero,.numgrid,.dimtable{break-inside:avoid}
+}
+
+/* ===================================================================
+   RATIO — nadpisanie tokenów marki.
+   Monochromia inżynierska: jedynym kolorem w całym produkcie są stany
+   (zielony, żółty, czerwony). Dzięki temu kolor coś znaczy, bo jest rzadki.
+   =================================================================== */
+:root{
+  --series-1:#1f2a4f; --series-1-soft:rgba(31,42,79,.10); --accent-text:#1f2a4f;
+  --plane:#ffffff; --card:#ffffff; --surface-1:#fafafa;
+  --ink:#11172a; --ink-2:#3d4459; --muted:#6b7280;
+  --hair:rgba(17,23,42,.10); --grid:#e5e7eb; --axis:#c7c6bf;
+  --good:#16a34a; --warning:#f59e0b; --critical:#dc2626;
+  --radius:10px;
+  --font:'Inter',system-ui,-apple-system,sans-serif;
+  --font-heading:'Zilla Slab',serif;
+  --accent:#ffb719;
+}
+h1,h2,h3{font-family:var(--font-heading)}
+.btn{background:var(--accent);color:#11172a}
+.btn:hover{opacity:1;background:#ffc74c}
+.btn.ghost{background:transparent;color:var(--series-1);border-color:var(--axis)}
+.btn.ghost:hover{color:var(--series-1);border-color:var(--series-1);background:rgba(31,42,79,.05)}
+.consent-row{
+  display:flex; gap:10px; align-items:flex-start; margin:18px 0 4px;
+  font-size:13px; color:var(--ink-2); line-height:1.5;
+}
+.consent-row input[type="checkbox"]{ margin-top:3px; flex-shrink:0; width:16px; height:16px; }
+.consent-row a{ color:var(--series-1); text-decoration:underline; }
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="light"])){
+    --series-1:#ffffff; --series-1-soft:rgba(255,255,255,.10); --accent-text:#c9c8c1;
+    --plane:#0a0a0a; --card:#131312; --surface-1:#171716;
+    --ink:#ffffff; --ink-2:#c3c2b7; --muted:#8b8a83;
+    --hair:rgba(255,255,255,.14); --grid:#2b2b29; --axis:#3d3d3a;
+    --good:#22c322; --warning:#e0a020; --critical:#ef5350;
+  }
+}
+:root[data-theme="dark"]{
+    --series-1:#ffffff; --series-1-soft:rgba(255,255,255,.10); --accent-text:#c9c8c1;
+    --plane:#0a0a0a; --card:#131312; --surface-1:#171716;
+    --ink:#ffffff; --ink-2:#c3c2b7; --muted:#8b8a83;
+    --hair:rgba(255,255,255,.14); --grid:#2b2b29; --axis:#3d3d3a;
+    --good:#22c322; --warning:#e0a020; --critical:#ef5350;
+}
+
+/* akcent na tekście grafitowy, żeby nie zlewał się z czarnymi nagłówkami */
+.sectitle{color:var(--accent-text)}
+.hero .ptag{color:var(--accent-text);font-weight:550}
+.card h3[style]{color:var(--accent-text)!important}
+ol.steps li::before{color:var(--accent-text);border-color:var(--axis);font-variant-numeric:tabular-nums}
+.tag.proj{background:var(--series-1-soft);color:var(--accent-text)}
+.tag.mit{color:var(--warning);background:rgba(181,116,0,.12)}
+.tag.fix{color:var(--critical);background:rgba(198,40,40,.11)}
+
+/* karty odcięte wyłącznie włoskiem — tło strony i karty są tym samym bielą */
+.card,.hero,.opt,.flag{box-shadow:none}
+.qhelp{background:var(--surface-1);border-left-color:var(--ink)}
+.flag.warning .ico{color:#fff}
+
+/* ===================================================================
+   Jasny motyw jest domyślny — zawsze.
+   Ankieta ma być spójna ze stroną, a nie z ustawieniem systemu klienta.
+   Tryb ciemny włącza się WYŁĄCZNIE, gdy strona ustawi go świadomie:
+       <html data-theme="dark">
+   Jeśli kiedyś dodasz na stronie przełącznik motywu, wystarczy że
+   będzie ustawiał ten atrybut — ankieta pójdzie za nim automatycznie.
+   =================================================================== */
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="dark"])){
+    color-scheme: light;
+    --series-1:#0b0b0b; --series-1-soft:rgba(11,11,11,.07); --accent-text:#3a3937;
+    --plane:#ffffff; --card:#ffffff; --surface-1:#f6f6f4;
+    --ink:#0b0b0b; --ink-2:#46453f; --muted:#77766f;
+    --hair:rgba(11,11,11,.13); --grid:#e4e4e0; --axis:#c7c6bf;
+    --good:#0ca30c; --warning:#b57400; --critical:#c62828;
+  }
+}
+
+/* dyskretny przełącznik do prezentacji — usuń przy osadzaniu na stronie */
+.rp-theme{
+  position:fixed; top:14px; right:14px; z-index:60;
+  font:inherit; font-size:12px; font-weight:600; letter-spacing:.03em;
+  padding:7px 12px; border-radius:100px; cursor:pointer;
+  background:var(--card); color:var(--muted);
+  border:1px solid var(--hair);
+}
+.rp-theme:hover{ color:var(--ink); border-color:var(--axis) }
+@media print{ .rp-theme{ display:none } }
+
+/* ===================================================================
+   RATIO — nawigacja i stopka (spójne z resztą serwisu ratiopro.net)
+   =================================================================== */
+.ratio-nav{
+  position:sticky; top:0; z-index:100; background:rgba(255,255,255,.92);
+  backdrop-filter:blur(6px); border-bottom:1px solid #f3f4f6;
+}
+.ratio-nav-inner{
+  max-width:900px; margin:0 auto; padding:14px 20px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.ratio-nav-inner img{ height:36px; display:block }
+.ratio-nav-links{ display:flex; align-items:center; gap:20px }
+.ratio-nav-links a{
+  font-family:'Inter',sans-serif; font-size:14px; font-weight:600;
+  color:#11172a; text-decoration:none;
+}
+.ratio-nav-links a:hover{ color:#1f2a4f }
+.ratio-nav-links a.cta{
+  background:#1f2a4f; color:#fff; padding:9px 18px; border-radius:999px;
+}
+.ratio-nav-links a.cta:hover{ background:#2d3d74; color:#fff }
+.ratio-nav-links .hide-mobile{ display:none }
+@media (min-width:640px){ .ratio-nav-links .hide-mobile{ display:inline } }
+
+.ratio-footer{
+  background:linear-gradient(160deg,#2d3d74 0%,#1f2a4f 100%);
+  margin-top:48px; font-family:'Inter',sans-serif;
+}
+.ratio-footer-inner{ max-width:900px; margin:0 auto; padding:44px 20px 0; }
+.ratio-footer-grid{ display:grid; grid-template-columns:1fr; gap:32px; }
+@media (min-width:640px){ .ratio-footer-grid{ grid-template-columns:1fr 1fr } }
+.ratio-footer img{ height:40px; margin-bottom:18px }
+.ratio-footer p{ color:#d1d5db; font-size:13px; line-height:1.6; margin:0 0 4px }
+.ratio-footer a{ color:#d1d5db; text-decoration:none }
+.ratio-footer a:hover{ color:#ffb719 }
+.ratio-footer-nav-title{
+  font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+  color:#9ca3af; margin:0 0 14px;
+}
+.ratio-footer-nav ul{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px }
+.ratio-footer-nav a{ font-size:13px }
+.ratio-footer-bottom{
+  border-top:1px solid rgba(255,255,255,.1); margin-top:32px; padding:20px;
+  display:flex; flex-direction:column; gap:10px; align-items:center; justify-content:space-between;
+  font-size:11px; color:#9ca3af; text-align:center;
+}
+@media (min-width:640px){ .ratio-footer-bottom{ flex-direction:row; text-align:left } }
+.ratio-footer-bottom .legal-links{ display:flex; gap:16px }
+</style>
+</head>
+<body>
+<header class="ratio-nav">
+  <div class="ratio-nav-inner">
+    <a href="../index.html"><img src="../assets/logo-black.svg" alt="Ratio Logo" /></a>
+    <nav class="ratio-nav-links">
+      <a href="../jak-pracujemy.html" class="hide-mobile">Jak pracujemy</a>
+      <a href="../case-studies.html" class="hide-mobile">Case studies</a>
+      <a href="../ankiety.html" class="hide-mobile">Ankiety</a>
+      <a href="../index.html#kontakt" class="cta">Kontakt</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+
+<form name="ankieta-jaki-dom" data-netlify="true" hidden>
+  <input type="hidden" name="form-name" value="ankieta-jaki-dom" />
+  <input type="text" name="result_summary" />
+  <textarea name="answers_json"></textarea>
+</form>
+
+<!-- ============ INTRO ============ -->
+<section id="intro">
+  <h1>Jaki dom</h1>
+  <p class="lead">Dwie różne osoby mogą zbudować ten sam dom i jedna będzie szczęśliwa, a druga nie. Ta ankieta sprawdza, po co Ci ten dom.</p>
+  <p>Są ludzie, którzy budują dom, żeby coś o sobie powiedzieć: nowoczesna bryła, wielkie przeszklenia, technologia, przestrzeń, która robi wrażenie. I są tacy, którzy budują miejsce do życia rodziny, gdzie liczy się, czy jest gdzie powiesić pranie i czy da się zamknąć drzwi, kiedy ktoś ogląda film. Żadna z tych motywacji nie jest lepsza od drugiej.</p>
+  <p>Ta ankieta nie próbuje nikogo z niczego wyleczyć. Nazywa Twoją motywację po imieniu i pokazuje jej rachunek — w złotówkach, w godzinach obsługi i w tym, co się znudzi szybciej, niż sądzisz. Osobna ankieta, <a href="jaka-dzialka.html">Jaka działka</a>, sprawdza z kolei, czy działka, którą masz albo której szukasz, jest w stanie ten dom unieść.</p>
+
+  <div class="dims-preview">
+    <span class="chip">Pokazanie</span><span class="chip">Nowość</span><span class="chip">Doznanie przestrzeni</span>
+    <span class="chip">Funkcja</span><span class="chip">Rodzina</span><span class="chip">Prywatność</span>
+    <span class="chip">Horyzont</span><span class="chip">Realizm eksploatacyjny</span>
+  </div>
+
+  <dl class="kv">
+    <dt>Pytań</dt><dd>20</dd>
+    <dt>Czas</dt><dd>5–7 minut</dd>
+    <dt>Wynik</dt><dd>profil motywacji domu, z rekomendacjami dopasowanymi do profilu</dd>
+    <dt>Dane</dt><dd>wynik liczy się w Twojej przeglądarce; Twoje odpowiedzi możesz opcjonalnie pomóc nam wykorzystać do rozwoju ankiety</dd>
+  </dl>
+
+  <label class="consent-row">
+    <input type="checkbox" id="consent-data" />
+    <span>Zgadzam się na przesłanie moich odpowiedzi i wyniku wyłącznie w celu doskonalenia tej ankiety
+    (opcjonalne — ankieta działa tak samo bez zaznaczenia). Szczegóły w
+    <a href="../polityka-prywatnosci.html" target="_blank" rel="noopener">Polityce Prywatności</a>.</span>
+  </label>
+
+  <div class="actions"><button class="btn" id="start">Zaczynamy</button></div>
+
+  <div class="foot">
+    <p><b>Uwaga na start.</b> Kilka pytań dotyczy tego, jak Twój dom odbiorą inni. Nikt tego nie sprawdza i nie ma tu odpowiedzi, których należałoby się wstydzić — chęć zbudowania czegoś, co robi wrażenie, jest jednym z najstarszych powodów budowania w ogóle.</p>
+  </div>
+</section>
+
+
+<!-- ============ QUIZ ============ -->
+<section id="quiz" hidden>
+  <div class="topbar">
+    <div class="pbar"><i id="pfill" style="width:0%"></i></div>
+    <div class="pmeta"><span id="psec"></span><span>Pytanie <b id="pnum">1</b> z <span id="ptot">39</span></span></div>
+  </div>
+  <div id="qbody"></div>
+  <div class="qnav">
+    <button class="btn ghost sm" id="back">Wstecz</button>
+    <div class="spacer"></div>
+    <button class="btn sm" id="next" hidden>Dalej</button>
+  </div>
+</section>
+
+<!-- ============ RESULT ============ -->
+<section id="result" hidden></section>
+
+</div>
+<script>
+/* ====================================================================
+   JAKI DOM I GDZIE — dane merytoryczne
+   Wymiary domu:
+   P = pokazanie (motywacja zewnętrzna)   N = nowość i wyjątkowość
+   D = doznanie (przestrzeń, światło)     F = funkcja i codzienność
+   R = rodzina i wspólnota                Y = prywatność i azyl
+   H = horyzont (dom na całe życie)       E = realizm eksploatacyjny
+   ==================================================================== */
+
+const DIMS = {
+  P:{short:'Pokazanie',  name:'Pokazanie',            desc:'Ile w Twojej motywacji jest tego, jak dom zostanie odebrany przez innych. Nie jest to wada — sygnalizowanie statusu jest normalną funkcją domu od zawsze. Jest to jednak informacja kosztowa: efekt, który ma robić wrażenie, kosztuje więcej i szybciej się dezaktualizuje.'},
+  N:{short:'Nowość',     name:'Nowość i wyjątkowość', desc:'Potrzeba, żeby dom był nowy, inny, niepowtarzalny. Wysoki wynik to jednocześnie ryzyko: rozwiązania bez historii serwisowej i mody, które przemijają szybciej niż kredyt.'},
+  D:{short:'Doznanie',   name:'Doznanie przestrzeni', desc:'Ile znaczy dla Ciebie samo przeżycie przestrzeni: światło, wysokość, widok, otwarcie na ogród. To wymiar autentycznie estetyczny — niezależny od tego, czy ktokolwiek to zobaczy.'},
+  F:{short:'Funkcja',    name:'Funkcja i codzienność',desc:'Waga rzeczy, które działają: schowki, pralnia, akustyka, koszty utrzymania, sensowne odległości. Nudne i najlepiej korelujące z zadowoleniem po pięciu latach.'},
+  R:{short:'Rodzina',    name:'Rodzina i wspólnota',  desc:'Na ile dom ma być narzędziem życia rodzinnego: wspólne siedzenie, miejsce dla dzieci, dla rodziców, dla gości.'},
+  Y:{short:'Prywatność', name:'Prywatność i azyl',    desc:'Potrzeba odcięcia się — od sąsiadów, od ulicy, czasem od domowników. Wymiar najczęściej pomijany na etapie projektu i najczęściej żałowany później.'},
+  H:{short:'Horyzont',   name:'Horyzont',             desc:'Czy to dom na całe życie, czy na etap. Zmienia praktycznie wszystko: standard, elastyczność układu, sens inwestowania w rzeczy, których nie da się odzyskać przy sprzedaży.'},
+  E:{short:'Realizm',    name:'Realizm eksploatacyjny',desc:'Na ile trzeźwo patrzysz na to, co dom będzie kosztował w utrzymaniu — w złotówkach i w godzinach. Niski wynik nie oznacza, że nie powinieneś budować tego, co chcesz. Oznacza, że warto policzyć rachunek zanim, a nie po.'}
+};
+
+/* --------------------------------------------------------------------
+   PYTANIA
+   -------------------------------------------------------------------- */
+
+const Q = [
+
+/* ===================== BLOK A — DOM (20) ===================== */
+
+{ sec:'Dom', t:'Zacznijmy od tego, po co Ci ten dom',
+  q:'Dom jest gotowy. Wchodzi ktoś, kogo dawno nie widziałeś. Co pokazujesz najpierw?',
+  h:'To jedno z najbardziej diagnostycznych pytań w całej ankiecie. Ludzie prowadzą gości do tego, co uważają za najlepszą część siebie.',
+  wt:{P:2,D:2,R:2},
+  o:[
+    { t:'Salon z przeszkleniem otwartym na ogród',            s:{P:78,D:95,R:40,F:30,Y:15} },
+    { t:'Kuchnię — i tak wszyscy w niej siedzą',              s:{P:25,D:45,R:95,F:75,Y:40} },
+    { t:'Kotłownię, rozdzielnicę, panel sterowania',          s:{P:55,D:30,R:30,F:85,N:95} },
+    { t:'Nic nie pokazuję — siadamy i rozmawiamy',            s:{P:5, D:35,R:70,F:60,Y:85} }
+  ]},
+
+{ sec:'Dom',
+  q:'Masz 80 000 zł ponad zaplanowany budżet. Możesz wydać je tylko na jedną rzecz:',
+  h:'Wybory z realną ceną mówią więcej niż deklaracje. Każda z tych opcji jest sensowna — chodzi o to, która jest sensowna dla Ciebie.',
+  wt:{P:2,F:2,D:2},
+  o:[
+    { t:'Przeszklenie w salonie od podłogi do sufitu',        s:{P:60,D:97,F:20,E:25,N:60} },
+    { t:'Pralnia, spiżarnia i porządna garderoba',            s:{P:8, D:25,F:100,E:85,R:75} },
+    { t:'Pompa ciepła i rekuperacja wyższej klasy',           s:{P:30,D:25,F:85,E:95,N:80} },
+    { t:'Piętnaście metrów kwadratowych więcej powierzchni',  s:{P:62,D:60,F:60,E:40,R:70} },
+    { t:'Nic — zostają jako rezerwa na nieprzewidziane',      s:{P:5, D:20,F:80,E:100,H:45} }
+  ]},
+
+{ sec:'Dom',
+  q:'Znajomy pokazuje Ci zdjęcia swojego nowego domu. Jest bardzo podobny do Twojego projektu, tylko skończony rok wcześniej. Pierwsza myśl:',
+  h:null,
+  wt:{N:3},
+  o:[
+    { t:'Świetnie — podpytam go, co by zmienił',              s:{N:8, P:10} },
+    { t:'Lekkie rozczarowanie, chciałbym czegoś swojego',     s:{N:70,P:50} },
+    { t:'Zaczynam myśleć, co zmienić, żeby mój był inny',     s:{N:100,P:78} },
+    { t:'W ogóle mnie to nie zajmuje',                        s:{N:0, P:0} }
+  ]},
+
+{ sec:'Dom',
+  q:'Ludzie, którzy budują domy z bardzo dużymi przeszkleniami, robią to przede wszystkim dlatego, że:',
+  h:'Pytanie o innych, nie o Ciebie. Odpowiadając za innych, ludzie ujawniają własne motywy dużo dokładniej niż odpowiadając wprost o sobie.',
+  wt:{P:3},
+  o:[
+    { t:'Chcą mieć w domu światło i kontakt z ogrodem',       s:{P:18,D:85} },
+    { t:'Dobrze to wygląda i robi wrażenie',                  s:{P:88,D:55} },
+    { t:'Taki jest teraz standard, wszyscy tak robią',        s:{P:65,N:20,D:40} },
+    { t:'Nie zastanawiałem się nad tym',                      s:{P:45,D:50} }
+  ]},
+
+{ sec:'Dom',
+  q:'Mija dwadzieścia lat, dzieci się wyprowadziły. Ten dom:',
+  h:null,
+  wt:{H:3},
+  o:[
+    { t:'Zostaje nasz — zestarzejemy się w nim',              s:{H:100,R:80} },
+    { t:'Pewnie zamienimy go na coś mniejszego',              s:{H:30} },
+    { t:'Sprzedamy, coś się wymyśli',                         s:{H:5} },
+    { t:'Nie wiem, to dla mnie za daleko',                    s:{H:50} }
+  ]},
+
+{ sec:'Dom',
+  q:'Sąsiad obok stawia dom wyraźnie większy i bardziej efektowny od Twojego. To:',
+  h:null,
+  wt:{P:3},
+  o:[
+    { t:'Nie robi na mnie żadnego wrażenia',                  s:{P:0} },
+    { t:'Ciekawi mnie, chętnie wejdę zobaczyć',               s:{P:32} },
+    { t:'Trochę mnie uwiera',                                 s:{P:75} },
+    { t:'Zastanowiłbym się, co zmienić u siebie',             s:{P:100,N:70} }
+  ]},
+
+{ sec:'Dom',
+  q:'Które zdanie brzmi najbardziej jak Ty?',
+  h:null,
+  wt:{D:2,F:2,R:2,N:2},
+  o:[
+    { t:'Chcę wejść do środka i poczuć „wow”',                s:{D:98,P:52,F:30,N:60} },
+    { t:'Chcę, żeby wszystko było na miejscu i nic nie irytowało', s:{F:100,D:30,P:10,E:85} },
+    { t:'Chcę miejsca, do którego wszyscy chętnie schodzą',   s:{R:100,F:70,D:45,P:15} },
+    { t:'Chcę najnowszych rozwiązań i domu, który sam się ogarnia', s:{N:98,F:75,E:60,P:45} },
+    { t:'Chcę móc zamknąć za sobą drzwi i mieć spokój',       s:{Y:100,F:60,P:5,R:40} }
+  ]},
+
+{ sec:'Dom',
+  q:'Salon otwarty na dwie kondygnacje, wysoki na sześć metrów, z antresolą. Kosztuje około 8% budżetu i podnosi rachunki za ogrzewanie. Twoja reakcja:',
+  h:'Przestrzeń, której nie da się zamieszkać, jest najdroższym metrem kwadratowym w całym domu. To nie argument przeciw — to cena, którą warto znać.',
+  wt:{D:2,E:2},
+  o:[
+    { t:'Biorę — właśnie o taki efekt mi chodzi',             s:{D:100,P:55,E:15,F:20} },
+    { t:'Biorę, jeśli policzę, że różnica w rachunkach jest do przyjęcia', s:{D:72,P:45,E:85,F:55} },
+    { t:'Wolę zamienić to na dodatkowy pokój',                s:{D:35,F:90,R:80,E:80} },
+    { t:'To strata metrów i pieniędzy',                       s:{D:5, F:100,E:95,P:5} }
+  ]},
+
+{ sec:'Dom',
+  q:'Duże okna oznaczają, że z ulicy i od sąsiada widać, co się dzieje w środku. Dla Ciebie to:',
+  h:null,
+  wt:{Y:3},
+  o:[
+    { t:'Żaden problem',                                      s:{Y:0, D:80} },
+    { t:'Rozwiąże się roletami i zielenią',                   s:{Y:38,D:65} },
+    { t:'To by mi realnie przeszkadzało',                     s:{Y:85,D:40} },
+    { t:'To dla mnie wykluczające',                           s:{Y:100,D:25} }
+  ]},
+
+{ sec:'Dom',
+  q:'Ile godzin miesięcznie jesteś gotów oddać na utrzymanie efektu — mycie dużych szyb, czyszczenie betonu, ogród ozdobny, serwis automatyki?',
+  h:'Sześć metrów przeszklenia to nie jest okno. To powierzchnia, którą ktoś musi umyć — i przy wysokim salonie zwykle nie jesteś to Ty, tylko firma z podnośnikiem.',
+  wt:{E:3},
+  o:[
+    { t:'Ponad 10 godzin albo zapłacę komuś',                 s:{E:100,P:60} },
+    { t:'Cztery do ośmiu godzin',                             s:{E:72} },
+    { t:'Jedną do trzech',                                    s:{E:35} },
+    { t:'Zero — ma się utrzymywać samo',                      s:{E:0, F:80} }
+  ]},
+
+{ sec:'Dom',
+  q:'Czego z domu, o którym marzysz, najszybciej przestaniesz zauważać?',
+  h:'Ludzie systematycznie przeceniają, jak długo dana cecha domu będzie ich cieszyć, i nie doceniają, jak długo będzie ich uwierać rzecz, która przeszkadza codziennie. Świadomość tego jest realną przewagą przy projektowaniu.',
+  wt:{E:2},
+  o:[
+    { t:'Niczego — będę się cieszył codziennie',              s:{E:10,P:55} },
+    { t:'Widoku i przeszkleń',                                s:{E:88} },
+    { t:'Wielkości pokoi',                                    s:{E:92} },
+    { t:'Nowoczesnych rozwiązań i automatyki',                s:{E:85,N:55} }
+  ]},
+
+{ sec:'Dom', type:'multi',
+  q:'Zaznacz wszystko, co w Twoim domu MUSI być:',
+  h:null,
+  wt:{F:2,P:2},
+  o:[
+    { t:'Pralnia z miejscem na suszarkę',    s:{F:100,E:85} },
+    { t:'Spiżarnia',                          s:{F:100,E:80} },
+    { t:'Garderoba przy sypialni',            s:{F:90, E:70} },
+    { t:'Osobny pokój do pracy, z drzwiami',  s:{F:85, Y:85} },
+    { t:'Pomieszczenie gospodarcze lub warsztat', s:{F:95,E:80} },
+    { t:'Pokój gościnny albo dla rodziców',   s:{R:100,F:70} },
+    { t:'Duży zadaszony taras',               s:{D:85, P:70,R:65} },
+    { t:'Basen lub jacuzzi',                  s:{P:95, D:80,E:20} },
+    { t:'Sauna',                              s:{P:75, D:80,E:35} },
+    { t:'Garaż dwustanowiskowy',              s:{F:75, P:55} },
+    { t:'Wyspa kuchenna jako centrum domu',   s:{D:80, R:75,P:65} }
+  ]},
+
+{ sec:'Dom',
+  q:'Ile osób będzie mieszkać w tym domu za pięć lat?',
+  h:null,
+  wt:{R:2},
+  o:[
+    { t:'Jedna albo dwie',                                    s:{R:20,Y:80} },
+    { t:'Trzy',                                               s:{R:65} },
+    { t:'Cztery',                                             s:{R:88} },
+    { t:'Pięć lub więcej',                                    s:{R:100,F:85} },
+    { t:'Jeszcze nie wiemy — planujemy dzieci',               s:{R:80,H:75} }
+  ]},
+
+{ sec:'Dom',
+  q:'Otwarta przestrzeń: salon, jadalnia i kuchnia razem, bez ścian. Z dziećmi w domu oznacza to, że zapach obiadu, telewizor, rozmowy i lekcje dzieją się w jednym pomieszczeniu.',
+  h:'Akustyka jest najczęściej pomijanym parametrem otwartego układu i jednocześnie tym, który najbardziej męczy po kilku latach. Da się to zaprojektować — ale trzeba o tym pomyśleć przed, nie po.',
+  wt:{F:2,D:2,Y:2},
+  o:[
+    { t:'I tak chcę otwartą przestrzeń',                      s:{D:92,F:22,Y:10,P:60} },
+    { t:'Otwartą, ale z osobnym pokojem do wycofania się',    s:{D:70,F:82,Y:65} },
+    { t:'Kuchnia osobno, reszta otwarta',                     s:{D:52,F:88,Y:55} },
+    { t:'Wolę klasyczny układ z osobnymi pomieszczeniami',    s:{D:18,F:88,Y:90} }
+  ]},
+
+{ sec:'Dom', type:'multi',
+  q:'Skąd czerpiesz pomysły na swój dom?',
+  h:null,
+  wt:{N:2,P:2},
+  o:[
+    { t:'Instagram, Pinterest, TikTok',                       s:{N:88,P:90,D:75} },
+    { t:'Portale z projektami gotowymi',                      s:{N:25,P:40,F:65} },
+    { t:'Domy znajomych i rodziny',                           s:{N:20,P:60,F:70} },
+    { t:'Czasopisma i książki o architekturze',               s:{N:80,P:22,D:96} },
+    { t:'Rozmowy z architektem',                              s:{N:65,P:18,D:88,F:75} },
+    { t:'Z tego, czego brakowało mi tam, gdzie mieszkałem',   s:{N:10,P:10,F:100,E:90} }
+  ]},
+
+{ sec:'Dom',
+  q:'Jedno słowo, które najlepiej opisuje dom, w jakim chcesz mieszkać:',
+  h:null,
+  wt:{P:2,F:2,R:2,N:2,Y:2},
+  o:[
+    { t:'Imponujący',   s:{P:100,D:85,N:70,F:30,R:35,Y:20} },
+    { t:'Wygodny',      s:{P:15, D:45,N:25,F:100,R:65,Y:60} },
+    { t:'Ciepły',       s:{P:12, D:55,N:20,F:75, R:100,Y:65} },
+    { t:'Nowoczesny',   s:{P:70, D:80,N:95,F:55, R:40,Y:35} },
+    { t:'Spokojny',     s:{P:8,  D:60,N:25,F:75, R:60,Y:100} },
+    { t:'Wyjątkowy',    s:{P:52, D:94,N:100,F:35,R:45,Y:50} }
+  ]},
+
+{ sec:'Dom',
+  q:'Budżet się nie domyka i trzeba coś wyciąć. Co idzie pierwsze?',
+  h:null,
+  wt:{P:2,F:2,D:2},
+  o:[
+    { t:'Metry — zbuduję mniejszy dom',                       s:{P:15,F:85,D:60,E:90} },
+    { t:'Standard wykończenia — zrobię go później',           s:{P:35,F:70,D:55,H:80} },
+    { t:'Efektowne rozwiązania: przeszklenia, antresola, elewacja', s:{P:5,F:95,D:20,E:95} },
+    { t:'Technologia i automatyka',                           s:{P:40,N:15,F:75,E:80} },
+    { t:'Pomieszczenia pomocnicze: pralnia, spiżarnia',       s:{P:80,F:8, D:85,E:20} }
+  ]},
+
+{ sec:'Dom',
+  q:'Wprowadzasz się do domu dokładnie takiego, jak sobie wyobrażałeś. Co byłoby dla Ciebie największą porażką?',
+  h:null,
+  wt:{P:2,F:2,R:2,Y:2,E:2},
+  o:[
+    { t:'Że jest zwyczajny, taki jak wszystkie inne',         s:{P:95,N:100,D:80,F:30,R:35,Y:30,E:35} },
+    { t:'Że coś w nim codziennie irytuje',                    s:{P:20,N:30,D:45,F:100,R:60,Y:60,E:90} },
+    { t:'Że rodzina i tak nie spędza w nim czasu razem',      s:{P:15,N:25,D:50,F:70,R:100,Y:45,E:70} },
+    { t:'Że kosztuje majątek w utrzymaniu',                   s:{P:20,N:25,D:35,F:90,R:55,Y:55,E:100} },
+    { t:'Że nie mam w nim poczucia prywatności',              s:{P:10,N:30,D:45,F:70,R:50,Y:100,E:70} }
+  ]},
+
+{ sec:'Dom',
+  q:'Ile razy w tygodniu będziecie mieli w domu kogoś spoza najbliższej rodziny?',
+  h:null,
+  wt:{P:2,Y:2},
+  o:[
+    { t:'Praktycznie codziennie',                             s:{P:75,Y:10,R:85} },
+    { t:'Kilka razy w tygodniu',                              s:{P:60,Y:32,R:75} },
+    { t:'Raz na tydzień albo dwa',                            s:{P:38,Y:58,R:55} },
+    { t:'Prawie nigdy — to nasza przestrzeń',                 s:{P:8, Y:100,R:45} }
+  ]},
+
+{ sec:'Dom',
+  q:'Gdyby dało się wybrać tylko jedno: dom, którym zachwycają się inni, czy dom, w którym Ty czujesz się najlepiej — nawet gdyby wydawał się komuś dziwny?',
+  h:'Nie ma tu dobrej odpowiedzi. Oba wybory są uczciwe i oba mają swoją cenę.',
+  wt:{P:3},
+  o:[
+    { t:'Zdecydowanie taki, którym zachwycają się inni',      s:{P:100,D:70} },
+    { t:'Raczej ten pierwszy',                                s:{P:75,D:65} },
+    { t:'Trudno wybrać, chcę obu naraz',                      s:{P:52,D:70} },
+    { t:'Raczej ten, w którym mnie jest dobrze',              s:{P:22,D:78,Y:58} },
+    { t:'Zdecydowanie ten drugi',                             s:{P:2, D:72,Y:82} }
+  ]},
+
+];
+
+/* --------------------------------------------------------------------
+   PROFILE DOMU
+   -------------------------------------------------------------------- */
+
+const PROFILES = [
+{
+  id:'witryna', name:'Witryna', tag:'Dom, który ma robić wrażenie — i niech robi',
+  proto:{P:92,N:85,D:92,F:35,R:45,Y:25,H:55,E:35},
+  w:    {P:3, N:2, D:3, F:2, R:1, Y:2, H:1, E:2},
+  lead:'Chcesz domu, który zwraca uwagę. To całkowicie uprawniony powód budowania i nie ma sensu udawać, że jest inaczej.',
+  body:'Dom sygnalizujący status jest funkcją domu od kilku tysięcy lat i nie ma w tym nic wstydliwego — ludzie od zawsze budowali też po to, żeby coś o sobie powiedzieć. Problem nie leży w motywacji, tylko w tym, że efekt ma dwie ceny, o których rzadko się mówi przed podpisaniem umowy: cenę wykonania i cenę utrzymania. Twoje odpowiedzi pokazują wysoki priorytet dla efektu przy wyraźnie niższym dla codziennej eksploatacji — a to jest dokładnie ta kombinacja, która po pięciu latach zamienia się w rozgoryczenie. Nie dlatego, że dom jest zły. Dlatego, że nikt nie policzył rachunku z wyprzedzeniem.',
+  reko:[
+    'Policz koszt utrzymania efektu ZANIM zamkniesz projekt: mycie przeszkleń powyżej 4 m wymaga firmy z podnośnikiem, beton architektoniczny wymaga impregnacji, ogród ozdobny to stały koszt lub stały weekend.',
+    'Postaw na jeden mocny gest zamiast pięciu średnich. Jedna świetnie zaprojektowana przestrzeń robi większe wrażenie niż dom, w którym wszystko próbuje być efektowne — i kosztuje wyraźnie mniej.',
+    'Efekt ulokuj w rzeczach trwałych: proporcje, wysokość, światło, relacja z ogrodem. Unikaj lokowania go w rzeczach modnych: kolory, faktury, konkretne materiały wykończeniowe. Pierwsze nie starzeją się nigdy, drugie starzeją się w pięć lat.',
+    'Zaprojektuj zaplecze, nawet jeśli Cię nudzi. Dom bez pralni i spiżarni po roku wygląda inaczej niż na zdjęciach, bo wszystko, co nie ma swojego miejsca, ląduje na widoku.',
+    'Zamknij decyzje estetyczne przed startem budowy. Przy Twoim profilu zmiany w trakcie będą kuszące i będą najdroższą pozycją w całym budżecie.'
+  ],
+  uwaga:'Do widoku i przeszkleń przyzwyczaisz się szybciej, niż myślisz — to najlepiej udokumentowany mechanizm w psychologii zadowolenia. Do braku miejsca na odkurzacz nie przyzwyczaisz się nigdy. To nie jest argument przeciwko efektownemu domowi. To argument za tym, żeby efekt i zaplecze zaprojektować w tym samym momencie.',
+  checklist:[
+    'Policzony koszt utrzymania kluczowych elementów efektownych (mycie przeszkleń, impregnacja, pielęgnacja ogrodu) — przed zamknięciem projektu',
+    'Zdecydowany „jeden mocny gest” zamiast rozproszonych efektów w całym domu',
+    'Zaplecze (pralnia, spiżarnia) zaplanowane na równi z częścią reprezentacyjną',
+    'Zamrożone decyzje estetyczne przed startem budowy — spisane jako warunek z wykonawcą',
+    'Materiały i kolory wybrane pod kątem trwałości efektu (proporcje, światło), nie chwilowej mody'
+  ],
+  rozmowa:[
+    'Ile realnie kosztuje utrzymanie tego rozwiązania rocznie, nie tylko jego wykonanie?',
+    'Czy mogę zobaczyć ten materiał/rozwiązanie po 5 latach użytkowania, nie tylko na wizualizacji?',
+    'Pytaj wprost o koszt zmiany zdania w trakcie budowy — przy Twoim profilu to najdroższa pozycja budżetu.'
+  ],
+  redFlag:'Brak zaplanowanego zaplecza (pralnia, spiżarnia, schowki) w projekcie skupionym na efekcie — to pierwsza rzecz, która „psuje” wygląd domu po roku użytkowania.'
+},
+{
+  id:'gniazdo', name:'Gniazdo', tag:'Dom jako narzędzie życia rodzinnego',
+  proto:{P:15,N:22,D:52,F:92,R:95,Y:60,H:88,E:85},
+  w:    {P:2, N:2, D:2, F:3, R:3, Y:2, H:2, E:2},
+  lead:'Budujesz miejsce, a nie obiekt. Dom ma obsłużyć życie, które już się dzieje.',
+  body:'Twoje odpowiedzi układają się bardzo spójnie: liczy się to, co dom robi dla ludzi, którzy w nim mieszkają, a nie to, jak wygląda na zdjęciu. To profil o najwyższej przewidywanej satysfakcji po pięciu latach — i jednocześnie ten, który najłatwiej dać sobie wyperswadować w rozmowie z architektem albo pod wpływem tego, co widać w internecie. Twoje ryzyko nie polega na tym, że zbudujesz zły dom. Polega na tym, że dasz się namówić na cudzy.',
+  reko:[
+    'Zbuduj program domu od czynności, nie od pomieszczeń: gdzie wchodzą dzieci z błotem, gdzie schnie pranie w listopadzie, gdzie stoi wózek, gdzie ktoś może zamknąć drzwi i porozmawiać przez telefon.',
+    'Akustyka jest ważniejsza niż metraż. Otwarta przestrzeń z dziećmi wymaga przynajmniej jednego pomieszczenia, w którym da się zamknąć drzwi — inaczej wieczorem nie ma gdzie usiąść.',
+    'Zaplanuj dom na trzy etapy życia: małe dzieci, nastolatki, pusty dom. Najtańszy sposób to elastyczny układ na parterze i sypialnia, która może stać się gabinetem.',
+    'Nie oszczędzaj na izolacji akustycznej między pokojami dzieci i na drzwiach. To pozycja rzędu kilku tysięcy, o której nikt nie mówi, i jedna z najczęściej żałowanych.',
+    'Miejsce, w którym wszyscy siadają, zaprojektuj jako pierwsze. W większości domów jest to kuchnia ze stołem, a nie salon — i warto to przyznać na etapie projektu, a nie po wprowadzeniu.'
+  ],
+  uwaga:'Ostrożnie z jedną rzeczą: dom zaprojektowany wyłącznie pod dzieci będzie za duży przez ostatnie trzydzieści lat życia w nim. Warto już teraz sprawdzić, jak ten dom działa dla dwóch osób.',
+  checklist:[
+    'Program domu spisany od czynności (gdzie wchodzą dzieci z błotem, gdzie schnie pranie), nie od nazw pomieszczeń',
+    'Sprawdzona akustyka między pomieszczeniami — minimum jedno z drzwiami do zamknięcia',
+    'Układ zaplanowany na 3 etapy życia rodziny: małe dzieci, nastolatki, dom pusty',
+    'Izolacja akustyczna między pokojami dzieci wpisana jako pozycja budżetowa, nie „opcja”',
+    'Miejsce, w którym wszyscy realnie siadają (często kuchnia, nie salon), zaprojektowane jako pierwsze'
+  ],
+  rozmowa:[
+    'Jak ten układ będzie działał, gdy dzieci dorosną i się wyprowadzą?',
+    'Czy to rozwiązanie wynika z tego, co faktycznie robimy w domu, czy z tego, co dobrze wygląda na wizualizacji?',
+    'Nie daj się przekonać do rozwiązań „bo tak się teraz projektuje” — trzymaj się tego, co wiesz o codzienności swojej rodziny.'
+  ],
+  redFlag:'Projekt zoptymalizowany pod jeden etap życia rodziny (np. tylko pod małe dzieci) bez planu na kolejne 20-30 lat w tym samym domu.'
+},
+{
+  id:'autor', name:'Autor', tag:'Architektura dla siebie, nie dla oglądających',
+  proto:{P:28,N:90,D:96,F:58,R:48,Y:70,H:82,E:60},
+  w:    {P:3, N:3, D:3, F:2, R:1, Y:2, H:2, E:2},
+  lead:'Zależy Ci na architekturze naprawdę, a nie na tym, żeby ktoś ją pochwalił. To rzadka i bardzo dobra kombinacja.',
+  body:'Wysoka wrażliwość na przestrzeń przy niskiej motywacji statusowej to profil, który najczęściej kończy się domami, o których mówi się „ten jest inny” — bo powstały z przekonania, a nie z porównania. Twoje ryzyko nie leży w motywacji, tylko w tempie: chcesz rozwiązań, które nie mają jeszcze historii serwisowej, a dom to nie jest dobre miejsce na prototypowanie. Drugie ryzyko jest bardziej prozaiczne: architektura autorska bywa trudna w eksploatacji, a Ty masz tendencję zakładać, że to Cię nie dotyczy.',
+  reko:[
+    'Wybierz architekta, a nie projekt gotowy. Przy Twoim profilu adaptacja katalogu skończy się serią zmian, które kosztują więcej niż projekt indywidualny od początku.',
+    'Postaw twardą granicę na rozwiązania eksperymentalne: maksymalnie jedno na cały dom, i najlepiej takie, którego awaria nie zatrzymuje mieszkania. Reszta ma być sprawdzona.',
+    'Zapytaj o serwis, zanim zapytasz o cenę. Nietypowa stolarka, niestandardowe systemy i importowane rozwiązania są świetne do momentu pierwszej usterki.',
+    'Zamroź projekt wykonawczy przed startem. Autorska wizja plus zmiany w trakcie to najdroższa kombinacja, jaka istnieje na budowie.',
+    'Zapisz sobie, czego z tego domu nie da się zmienić później, a co da. Odważne decyzje warto podejmować tam, gdzie są odwracalne.'
+  ],
+  uwaga:'Twoim naturalnym sojusznikiem jest dobry architekt, a naturalnym przeciwnikiem — kompromis wprowadzany po cichu przez wykonawcę na etapie realizacji. Pilnuj detali, które decydują o całości, i odpuszczaj te, które nie decydują.',
+  checklist:[
+    'Portfolio architekta sprawdzone pod kątem stylu, nie tylko rekomendacji — czy jego dotychczasowe realizacje faktycznie rezonują z Twoją wizją',
+    'Maksymalnie 1-2 rozwiązania „eksperymentalne” spisane jako świadomy wyjątek — reszta oparta na sprawdzonych technologiach',
+    'Sprawdzona dostępność serwisu/części zamiennych dla nietypowych rozwiązań, zanim zostaną wybrane',
+    'Projekt wykonawczy zamrożony przed startem budowy — zapisane jako warunek w umowie z wykonawcą',
+    'Lista elementów „odwracalnych” i „nieodwracalnych” w projekcie — spisana świadomie, nie z pamięci'
+  ],
+  rozmowa:[
+    'Które z zaproponowanych rozwiązań są sprawdzone w praktyce, a które to Pana/Pani pierwsze wdrożenie?',
+    'Co się stanie, jeśli ten konkretny system albo materiał zniknie z rynku za 5 lat?',
+    'Pytaj wprost o koszt utrzymania nietypowych rozwiązań, nie tylko koszt wykonania.'
+  ],
+  redFlag:'Zgoda na więcej niż jedno-dwa nowatorskie rozwiązania w jednym projekcie — to najczęstsza droga do domu, który wygląda świetnie i nie działa.'
+},
+{
+  id:'maszyna', name:'Maszyna', tag:'Technologia, efektywność, dom, który sam się ogarnia',
+  proto:{P:45,N:90,D:55,F:88,R:50,Y:50,H:75,E:88},
+  w:    {P:2, N:3, D:2, F:3, R:1, Y:1, H:2, E:3},
+  lead:'Interesuje Cię, jak dom działa, bardziej niż jak wygląda. Efektowność mierzysz w kilowatogodzinach.',
+  body:'To profil zorientowany na sprawność: pompa ciepła, rekuperacja, fotowoltaika, automatyka, szczelność, sterowanie. Nowość szukasz w technologii, nie w formie — i to jest istotna różnica, bo technologia w odróżnieniu od mody ma mierzalny zwrot. Twoje ryzyko jest specyficzne: łatwo przeinwestować w systemy, których zwrot liczy się w dekadach, i przeoczyć rzeczy podstawowe, których żadna automatyka nie naprawi — bryłę, orientację względem słońca i mostki termiczne.',
+  reko:[
+    'Kolejność jest odwrotna niż intuicyjna: najpierw bryła, izolacja i szczelność, potem instalacje, dopiero na końcu automatyka. Zła bryła z drogą pompą ciepła przegrywa z dobrą bryłą i tanią pompą.',
+    'Wymagaj testu szczelności budynku. To kilkaset złotych i jedyny sposób, żeby sprawdzić, czy dostałeś to, za co zapłaciłeś.',
+    'Przy automatyce trzymaj się jednego standardu i wybieraj systemy, które działają także wtedy, gdy padnie serwer producenta. Dom nie może przestać działać dlatego, że firma zmieniła model biznesowy.',
+    'Policz zwrot każdej technologii osobno, z realną ceną energii, a nie z folderu. Część rozwiązań zwraca się w 6 lat, część w 25 — i sprzedaje się je tym samym tonem.',
+    'Zostaw sobie zapas w rozdzielnicy i przepusty na przyszłe instalacje. To najtańsza inwestycja w elastyczność, jaką można zrobić.'
+  ],
+  uwaga:'Uważaj na jedną rzecz: efektywność jest łatwo mierzalna, więc łatwo staje się celem samym w sobie. Sprawdź, czy w tym domu ktoś będzie chciał usiąść — bo to jest parametr, którego żaden system nie pokaże w aplikacji.',
+  checklist:[
+    'Kolejność decyzji: najpierw bryła, izolacja i szczelność — dopiero potem instalacje i automatyka',
+    'Zamówiony test szczelności budynku (blower door) jako warunek odbioru',
+    'Automatyka oparta o jeden standard, działający też bez serwera producenta',
+    'Zwrot każdej technologii policzony osobno, z realną — nie folderową — ceną energii',
+    'Zapas w rozdzielnicy i przepusty na przyszłe instalacje'
+  ],
+  rozmowa:[
+    'Jaki jest realny czas zwrotu tej technologii przy obecnych cenach energii, nie w scenariuszu z ulotki?',
+    'Co się stanie z tym systemem, jeśli producent zniknie z rynku za 10 lat?',
+    'Pytaj o wyniki testu szczelności konkretnego wykonawcy z poprzednich realizacji, nie tylko o deklaracje.'
+  ],
+  redFlag:'Drogi system instalacyjny (pompa ciepła, automatyka) zaplanowany przy niesprawdzonej jeszcze bryle i izolacji budynku — dobra technologia nie naprawi złej bryły.'
+},
+{
+  id:'azyl', name:'Azyl', tag:'Dom jako miejsce odcięcia się od świata',
+  proto:{P:8, N:35,D:65,F:82,R:55,Y:95,H:88,E:78},
+  w:    {P:3, N:2, D:2, F:2, R:2, Y:3, H:2, E:2},
+  lead:'Dom ma być miejscem, w którym się chowasz, a nie pokazujesz. Prywatność jest tu funkcją, nie dodatkiem.',
+  body:'Wysoka potrzeba prywatności przy niskiej motywacji statusowej daje bardzo konkretny program: dom zamknięty od ulicy i otwarty do środka, na własne podwórze. To układ znany od starożytności i wciąż jeden z najlepiej działających — ale w Polsce rzadko projektowany, bo katalogowe domy zakładają, że najładniejsza elewacja ma być od drogi. U Ciebie jest odwrotnie: od drogi ma być spokój, a widok ma być na to, co Twoje.',
+  reko:[
+    'Rozważ układ z dziedzińcem albo dom w kształcie litery L otaczający ogród. Przeszklenia kieruj do środka działki, nie na ulicę — dostaniesz światło bez oddawania prywatności.',
+    'Ogrodzenie, zieleń i ukształtowanie terenu zaplanuj razem z domem, a nie po. Wał, żywopłot i dobrze postawiony budynek gospodarczy robią więcej dla prywatności niż jakikolwiek płot.',
+    'Zadbaj o miejsce do wycofania się wewnątrz domu, nie tylko wobec sąsiadów. Przy Twoim profilu pokój z drzwiami, które da się zamknąć, jest ważniejszy niż dodatkowe metry salonu.',
+    'Sprawdź linie zabudowy i to, gdzie stanie dom sąsiada oraz jego okna. Jedno okno w złym miejscu potrafi zepsuć cały układ.',
+    'Akustyka od strony drogi: potrójna szyba i układ z sypialniami od ogrodu. To decyzja projektowa, nie zakupowa — po fakcie nie da się jej naprawić.'
+  ],
+  uwaga:'Uważaj, żeby dom nie zamknął się nadmiernie. Granica między azylem a izolacją bywa cienka, zwłaszcza gdy dzieci dorosną i wyprowadzą się. Zostaw sobie jedną przestrzeń otwartą na świat.',
+  checklist:[
+    'Sprawdzone linie zabudowy sąsiadów i położenie ich okien względem Twojej działki',
+    'Układ domu (litera L, dziedziniec) z przeszkleniami do środka działki, nie na ulicę',
+    'Ogrodzenie, zieleń i ukształtowanie terenu zaplanowane razem z domem, nie jako dodatek po budowie',
+    'Akustyka od strony drogi (szyby, układ pomieszczeń) rozwiązana na etapie projektu, nie po fakcie',
+    'Zostawiona minimum jedna przestrzeń otwarta na świat — na przyszłość'
+  ],
+  rozmowa:[
+    'Jak ten układ zachowa się, gdy sąsiedzi w pełni zabudują swoją działkę?',
+    'Czy ta izolacja akustyczna od drogi to decyzja projektowa, czy da się ją dodać później?',
+    'Zapytaj wprost, co dokładnie widać z okien sąsiadów w stronę Twojej działki — nie zakładaj, sprawdź.'
+  ],
+  redFlag:'Prywatność zaplanowana wyłącznie przez ogrodzenie, bez uwzględnienia układu domu i przeszkleń — płot nie zastąpi dobrze zaprojektowanej bryły.'
+},
+{
+  id:'rachmistrz', name:'Rachmistrz', tag:'Dom rozsądny, policzony, z myślą o wartości',
+  proto:{P:33,N:26,D:36,F:94,R:56,Y:50,H:20,E:97},
+  w:    {P:2, N:2, D:2, F:3, R:1, Y:1, H:3, E:3},
+  lead:'Patrzysz na dom jak na decyzję finansową, którą trzeba zamknąć rozsądnie. To nie jest brak wyobraźni — to inna funkcja celu.',
+  body:'Twoje odpowiedzi pokazują krótszy horyzont i wysoki realizm eksploatacyjny: dom ma być dobry, ale nie ma być dziełem życia. Przy takim nastawieniu największym zagrożeniem nie jest przeinwestowanie w efekt, tylko przeinwestowanie w rzeczy, których nie odzyskasz przy sprzedaży — bardzo osobiste rozwiązania, nietypowy układ, technologia, której następny właściciel nie umie obsłużyć.',
+  reko:[
+    'Buduj układ, który da się łatwo opisać i łatwo sprzedać: cztery sypialnie biją trzy plus pracownię, nawet jeśli dziś potrzebujesz pracowni.',
+    'Trzymaj się sprawdzonych technologii i rozwiązań, na które są ekipy w promieniu 30 km. Egzotyka to koszt przy budowie i dyskonto przy sprzedaży.',
+    'Prosta bryła i dach dwuspadowy to 10–15% oszczędności przy budowie — a różnica między dachem dwuspadowym a wielospadowym to 20–60 tys. zł.',
+    'Nie podpiwniczaj bez wyraźnej potrzeby: to plus 30–40% kosztów, czyli 50–120 tys. zł, których rynek zwykle nie wycenia.',
+    'Zainwestuj tam, gdzie widać to w wycenie: standard energetyczny, stan techniczny, ogród i elewacja. Odpuść tam, gdzie nie widać: bardzo drogie wykończenia wnętrz.'
+  ],
+  uwaga:'Warto sprawdzić jedno założenie. Statystycznie ludzie zostają w domach jednorodzinnych dłużej, niż planowali w momencie budowy. Jeśli to prawdopodobne także u Ciebie, kilka decyzji podjętych „pod odsprzedaż” może uwierać przez dwadzieścia lat.',
+  checklist:[
+    'Sprawdzone, które rozwiązania/układy w projekcie mogą utrudnić przyszłą odsprzedaż (bardzo nietypowy układ, wąska grupa odbiorców)',
+    'Koszt eksploatacji (ogrzewanie, media) policzony w horyzoncie 10 lat, nie tylko koszt budowy',
+    'Porównanie kosztu „standardowego” i „nietypowego” rozwiązania w kluczowych punktach przed decyzją',
+    'Konsultacja z rzeczoznawcą majątkowym pod kątem wartości rynkowej, jeśli są wątpliwości',
+    'Pisemna lista „co jest inwestycją, a co kosztem bez zwrotu” przy każdej większej decyzji'
+  ],
+  rozmowa:[
+    'Jak to rozwiązanie wpłynie na wartość odsprzedaży domu za 10 lat?',
+    'Czy jest tańsza, równie funkcjonalna alternatywa dla tego elementu?',
+    'Pytaj o koszt całkowity (budowa + eksploatacja), nie tylko kwotę na fakturze za budowę.'
+  ],
+  redFlag:'Bardzo osobiste, nietypowe rozwiązanie architektoniczne, trudne do odsprzedania, jeśli dom kiedykolwiek miałby zmienić właściciela.'
+},
+{
+  id:'salon', name:'Salon i zaplecze', tag:'Jeden mocny gest, reszta bezwzględnie funkcjonalna',
+  proto:{P:56,N:56,D:90,F:90,R:74,Y:50,H:80,E:74},
+  w:    {P:1, N:2, D:3, F:3, R:2, Y:2, H:2, E:2},
+  lead:'Chcesz i efektu, i wygody — i to jest wykonalne, ale wyłącznie pod warunkiem, że rozdzielisz jedno od drugiego świadomie.',
+  body:'Twoje wyniki są wysokie zarówno na doznaniu przestrzeni, jak i na funkcji. To dobra kombinacja, ale kosztowna, jeśli próbować ją realizować równomiernie w całym domu — wtedy kończy się kompromisem, w którym ani efekt nie jest efektem, ani funkcja nie działa. Strategia, która sprawdza się przy tym profilu, jest inna: skoncentrować cały budżet na wrażenie w jednej strefie i bezlitośnie zoptymalizować resztę.',
+  reko:[
+    'Wyznacz jedną strefę reprezentacyjną — zwykle salon z jadalnią i wyjściem na taras — i tam ulokuj wysokość, światło, materiał i widok. To jest miejsce, w którym budżet ma pracować na wrażenie.',
+    'Cała reszta domu projektowana czysto użytkowo: normalne wysokości, zwykłe okna, maksimum schowków. Nikt tam nie zagląda, a Ty korzystasz z tego codziennie.',
+    'Wejście i strefa wiatrołapu to najbardziej niedoceniana część domu przy tym profilu. Pierwsze wrażenie i największy bałagan dzieją się w tym samym miejscu — rozdziel je.',
+    'Zaplanuj „kuchnię brudną” albo choćby spiżarnię z blatem. Otwarta kuchnia jako element reprezentacyjny działa tylko wtedy, gdy jest gdzie schować to, co ją psuje.',
+    'Zrób kosztorys w dwóch koszykach: efekt i funkcja. Jeśli budżet pęknie, tniesz w koszyku efektu, ale w jednym miejscu, a nie po trochu wszędzie.'
+  ],
+  uwaga:'Największe ryzyko tego profilu to rozmycie. Dom, w którym wszystko jest „trochę efektowne”, kosztuje jak efektowny i działa jak zwykły. Wybierz jedno miejsce i broń go do końca.',
+  checklist:[
+    'Wyznaczona jedna strefa reprezentacyjna (np. salon z jadalnią), na którą idzie budżet efektu',
+    'Reszta domu zaprojektowana czysto funkcjonalnie, bez ambicji efektownych',
+    'Strefa wiatrołapu/wejścia zaplanowana jako osobny punkt budżetu, nie „przy okazji”',
+    'Zaplanowana „kuchnia brudna” albo spiżarnia z blatem roboczym',
+    'Kosztorys podzielony na dwa koszyki: efekt i funkcja — osobno, żeby wiedzieć, gdzie ciąć w razie przekroczenia budżetu'
+  ],
+  rozmowa:[
+    'Czy mogę zobaczyć kosztorys podzielony osobno na strefę reprezentacyjną i resztę domu?',
+    'Które elementy w tym projekcie są „efektem”, a które „funkcją” — czy to rozróżnienie w ogóle widać w kosztorysie?',
+    'Jeśli budżet zaczyna pękać, pytaj wprost, co można wyciąć ze strefy efektu, zanim zaczniesz ciąć funkcję.'
+  ],
+  redFlag:'Budżet efektu „rozlany” po całym domu zamiast skoncentrowany w jednej strefie — kończy się tak, że nic nie jest ani naprawdę efektowne, ani w pełni funkcjonalne.'
+}
+];
+
+/* ====================================================================
+   SILNIK 2 — punktacja domu, audyt działki, rozgałęzienie, render
+   ==================================================================== */
+
+const DIM_ORDER = ['P','N','D','F','R','Y','H','E'];
+const state = { i:0, ans:[] };
+
+/* ---------- które pytania są aktywne przy obecnych odpowiedziach ---------- */
+function metaSoFar(upTo){
+  const m = { dz:null };
+  for(let i=0;i<Q.length;i++){
+    if(upTo!==undefined && i>=upTo) break;
+    const a = state.ans[i];
+    if(a===null||a===undefined) continue;
+    const q=Q[i];
+    if(q.type==='multi') continue;
+    const o=q.o[a];
+    if(o && o.m) Object.assign(m,o.m);
+  }
+  return m;
+}
+function activeList(){
+  const m = metaSoFar();
+  return Q.map((q,i)=>({q,i})).filter(({q})=> !q.when || q.when(m));
+}
+
+/* ---------- punktacja ---------- */
+function compute(){
+  const sum={}, wts={}; DIM_ORDER.forEach(d=>{sum[d]=0;wts[d]=0;});
+  const meta={}; const risks=new Set();
+
+  activeList().forEach(({q,i})=>{
+    const a=state.ans[i];
+    if(a===null||a===undefined) return;
+
+    if(q.type==='multi'){
+      const picked=(a||[]).map(j=>q.o[j]).filter(o=>o.s);
+      if(!picked.length) return;
+      if(q.q && q.q.indexOf('MUSI być') !== -1){
+        meta.pomieszczeniaWybrane = picked.map(o=>({ t:o.t, s:o.s }));
+      }
+      const touched=new Set(); q.o.forEach(o=>Object.keys(o.s||{}).forEach(d=>touched.add(d)));
+      touched.forEach(d=>{
+        const vals=picked.map(o=>o.s[d]).filter(v=>v!==undefined);
+        if(!vals.length) return;
+        const w=(q.wt&&q.wt[d])||1;
+        sum[d]+=(vals.reduce((x,y)=>x+y,0)/vals.length)*w; wts[d]+=w;
+      });
+      return;
+    }
+
+    const opt=q.o[a];
+    if(opt.m) Object.assign(meta,opt.m);
+    if(opt.r) opt.r.forEach(r=>risks.add(r));
+    const touched=new Set(); q.o.forEach(o=>Object.keys(o.s||{}).forEach(d=>touched.add(d)));
+    touched.forEach(d=>{
+      const w=(q.wt&&q.wt[d])||1;
+      const v=(opt.s&&opt.s[d]!==undefined)?opt.s[d]:50;
+      sum[d]+=v*w; wts[d]+=w;
+    });
+  });
+
+  const dim={}; DIM_ORDER.forEach(d=>{ dim[d]= wts[d]? Math.round(sum[d]/wts[d]) : 50; });
+  return { dim, meta, risks };
+}
+
+/* ---------- dopasowanie profilu domu ---------- */
+function matchProfiles(dim){
+  return PROFILES.map(p=>{
+    let num=0,den=0;
+    DIM_ORDER.forEach(d=>{ const w=p.w[d]||1; num+=w*Math.abs(p.proto[d]-dim[d]); den+=w; });
+    let s=100-(num/den);
+    // bramki: profil musi mieć swoją cechę wyróżniającą, nie tylko leżeć blisko środka skali
+    if(p.id==='salon'){      if(dim.D<62||dim.F<62) s-=24; else if(dim.D>=72&&dim.F>=72) s+=7; }
+    if(p.id==='rachmistrz'){ if(dim.H>=58) s-=20;          else if(dim.H<=35&&dim.E>=70) s+=8; }
+    if(p.id==='witryna'){    if(dim.P>=68&&dim.D>=68) s+=11; if(dim.P<45) s-=14; }
+    if(p.id==='autor'){      if(dim.P<=45&&dim.D>=68) s+=13; if(dim.P>=68) s-=16; }
+    if(p.id==='gniazdo'){    if(dim.R>=72&&dim.F>=68) s+=9;  if(dim.R<50) s-=12; }
+    if(p.id==='azyl'){       if(dim.Y>=72) s+=9;             if(dim.Y<50) s-=14; }
+    if(p.id==='maszyna'){    if(dim.N>=68&&dim.E>=68) s+=9;  if(dim.N<48) s-=12; }
+    return { p, s };
+  }).sort((a,b)=>b.s-a.s);
+}
+const pct = s => Math.max(41, Math.min(97, Math.round(s)));
+
+function konfrontacjaHtml(meta, dim){
+  const picks = meta.pomieszczeniaWybrane || [];
+  if(!picks.length) return '';
+
+  const flagged = [], ok = [];
+  picks.forEach(p=>{
+    const e = p.s.E !== undefined ? p.s.E : (p.s.F !== undefined ? p.s.F : null);
+    if(p.s.P === undefined || e === null) return;
+    const diff = p.s.P - e;
+    if(diff >= 30){
+      if(dim.E >= 55) flagged.push(p.t); else ok.push(p.t);
+    }
+  });
+
+  if(!flagged.length && !ok.length){
+    return `<div class="sec"><h2>Konfrontacja: co jest naprawdę potrzebne, a co pod publiczkę</h2>
+      <div class="card"><p style="margin:0;color:var(--ink-2)">Twoje wybory pomieszczeń są spójne z resztą odpowiedzi — nie widzimy tu wyraźnego rozdźwięku między tym, co deklarujesz, a tym, jak realnie patrzysz na dom.</p></div>
+    </div>`;
+  }
+
+  let html = `<div class="sec"><h2>Konfrontacja: co jest naprawdę potrzebne, a co pod publiczkę</h2>`;
+  if(flagged.length){
+    html += `<div class="card" style="border-left:3px solid var(--warning)">
+      <h3>Warto to jeszcze raz przemyśleć</h3>
+      <p style="margin:0;color:var(--ink-2)">Zaznaczyłeś/aś jako „musi być": <b>${flagged.join(', ')}</b>. Twoje odpowiedzi w reszcie ankiety pokazują wysoki realizm eksploatacyjny — dbałość o to, co faktycznie się wykorzysta — a te pozycje są typowo bardziej „na pokaz" niż codziennego użytku. To nie znaczy, że nie powinieneś/aś ich mieć. Znaczy, że warto uczciwie sprawdzić, czy to realna potrzeba, czy coś, co dobrze wygląda na liście życzeń — zanim zapłacisz za instalację, której nikt nie będzie używał.</p>
+    </div>`;
+  }
+  if(ok.length){
+    html += `<div class="card" style="margin-top:12px;border-left:3px solid var(--good)">
+      <h3>Spójne z Twoim profilem</h3>
+      <p style="margin:0;color:var(--ink-2)">Zaznaczyłeś/aś też: <b>${ok.join(', ')}</b> — to pozycje bardziej nastawione na wrażenie niż codzienną funkcję, ale Twoje odpowiedzi w reszcie ankiety też pokazują niższy priorytet dla czystej praktyczności, więc to spójny, świadomy wybór, nie rozdźwięk.</p>
+    </div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+function radar(dim){
+  const R=104, cx=200, cy=156, n=DIM_ORDER.length;
+  const ang=i=>(-Math.PI/2)+i*2*Math.PI/n;
+  const pt=(i,r)=>[cx+Math.cos(ang(i))*r, cy+Math.sin(ang(i))*r];
+  let s=`<svg class="radar" viewBox="0 0 400 322" role="img" aria-label="Profil ośmiu wymiarów">`;
+  [0.25,0.5,0.75,1].forEach(f=>{
+    s+=`<polygon points="${DIM_ORDER.map((_,i)=>pt(i,R*f).map(v=>v.toFixed(1)).join(',')).join(' ')}" fill="none" stroke="var(--grid)" stroke-width="1"/>`;});
+  DIM_ORDER.forEach((_,i)=>{const [x,y]=pt(i,R);
+    s+=`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="var(--grid)" stroke-width="1"/>`;});
+  s+=`<polygon points="${DIM_ORDER.map((d,i)=>pt(i,R*Math.max(dim[d],3)/100).map(v=>v.toFixed(1)).join(',')).join(' ')}" fill="var(--series-1-soft)" stroke="var(--series-1)" stroke-width="2" stroke-linejoin="round"/>`;
+  DIM_ORDER.forEach((d,i)=>{const [x,y]=pt(i,R*Math.max(dim[d],3)/100);
+    s+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4.5" fill="var(--series-1)" stroke="var(--surface-1)" stroke-width="2"/>`;});
+  DIM_ORDER.forEach((d,i)=>{const [x,y]=pt(i,R+25);
+    const anc=Math.abs(x-cx)<6?'middle':(x>cx?'start':'end');
+    s+=`<text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="${anc}" font-size="11.5" fill="var(--muted)" font-family="var(--font)">${DIMS[d].short}</text>`;
+    s+=`<text x="${x.toFixed(1)}" y="${(y+17).toFixed(1)}" text-anchor="${anc}" font-size="12" font-weight="700" fill="var(--ink-2)" font-family="var(--font)">${dim[d]}</text>`;});
+  return s+`</svg>`;
+}
+
+/* ---------- render pytania ---------- */
+const el=id=>document.getElementById(id);
+
+function renderQ(){
+  const act=activeList();
+  const pos=act.findIndex(x=>x.i===state.i);
+  const q=Q[state.i], a=state.ans[state.i], multi=q.type==='multi';
+
+  el('pfill').style.width=((pos)/act.length*100).toFixed(1)+'%';
+  el('pnum').textContent=pos+1; el('ptot').textContent=act.length;
+  el('psec').textContent=q.sec;
+  el('back').disabled = pos===0;
+  el('next').hidden = !multi;
+  if(multi) el('next').disabled = !(a && a.length);
+
+  let h='';
+  if(q.t) h+=`<div class="sectitle">${q.t}</div>`;
+  h+=`<p class="qtext">${q.q}</p>`;
+  if(q.h) h+=`<div class="qhelp">${q.h}</div>`;
+  if(multi) h+=`<p class="muted" style="margin:-8px 0 0">Możesz zaznaczyć kilka odpowiedzi.</p>`;
+  h+=`<div class="opts">`;
+  q.o.forEach((o,i)=>{
+    const on = multi ? (a||[]).includes(i) : a===i;
+    h+=`<button class="opt${on?' on':''}" ${multi?'data-multi':''} data-i="${i}"><span class="mk"><i></i></span><span class="lbl">${o.t}</span></button>`;
+  });
+  el('qbody').innerHTML=h+`</div>`;
+
+  el('qbody').querySelectorAll('.opt').forEach(b=>{
+    b.onclick=()=>{
+      const i=+b.dataset.i;
+      if(multi){
+        let cur=state.ans[state.i]||[];
+        const noneIdx=q.o.findIndex(o=>o.excl);
+        if(i===noneIdx) cur = cur.includes(i)?[]:[i];
+        else cur = cur.includes(i)?cur.filter(x=>x!==i):cur.filter(x=>x!==noneIdx).concat(i);
+        state.ans[state.i]=cur; renderQ();
+      } else { state.ans[state.i]=i; setTimeout(advance,150); }
+    };
+  });
+  window.scrollTo({top:0,behavior:'instant'});
+}
+
+function advance(){
+  const act=activeList();
+  const pos=act.findIndex(x=>x.i===state.i);
+  if(pos>=0 && pos<act.length-1){ state.i=act[pos+1].i; renderQ(); }
+  else showResult();
+}
+function goBack(){
+  const act=activeList();
+  const pos=act.findIndex(x=>x.i===state.i);
+  if(pos>0){ state.i=act[pos-1].i; renderQ(); }
+}
+
+/* ---------- wynik ---------- */
+const KIND={ fix:['Nie do usunięcia','fix'], proj:['Do rozwiązania projektem','proj'], mit:['Do złagodzenia','mit'], '':['','']};
+
+function showResult(){
+  const { dim, meta } = compute();
+  const ranked=matchProfiles(dim);
+  const top=ranked[0].p, alt=ranked[1].p;
+
+  let h=`
+  <div class="hero">
+    <div class="eyebrow">Twój profil domu</div>
+    <p class="pname">${top.name}</p>
+    <p class="ptag">${top.tag}</p>
+    <p class="plead">${top.lead}</p>
+    <p style="color:var(--ink-2)">${top.body}</p>
+    <div class="matchrow"><b>${pct(ranked[0].s)}%</b><span>dopasowania · drugi w kolejności: ${alt.name} (${pct(ranked[1].s)}%)</span></div>
+  </div>
+
+  <div class="sec"><h2>Co to znaczy dla projektu</h2>
+    <div class="card"><ol class="steps">${top.reko.map(k=>`<li><span>${k}</span></li>`).join('')}</ol></div>
+    <div class="card" style="margin-top:12px;border-left:3px solid var(--series-1)">
+      <h3 style="color:var(--series-1)">Rzecz, którą warto wiedzieć zawczasu</h3>
+      <p style="margin:0;color:var(--ink-2)">${top.uwaga}</p>
+    </div>
+  </div>
+
+  <div class="sec"><h2>Checklista dla profilu ${top.name}</h2>
+    <div class="card"><ol class="steps">${top.checklist.map(k=>`<li><span>${k}</span></li>`).join('')}</ol></div>
+  </div>
+
+  <div class="sec"><h2>Jak rozmawiać z architektem/wykonawcą</h2>
+    <div class="card"><ul style="margin:0;padding-left:20px;color:var(--ink-2)">${top.rozmowa.map(k=>`<li style="margin-bottom:8px">${k}</li>`).join('')}</ul></div>
+  </div>
+
+  <div class="sec">
+    <div class="flag critical"><span class="ico">🚩</span><div><h3>Czerwona flaga</h3><p>${top.redFlag}</p></div></div>
+  </div>
+
+  <div class="sec"><h2>Twój profil w ośmiu wymiarach</h2>
+    <div class="vizwrap">${radar(dim)}
+      <div class="dimtable">${DIM_ORDER.map(d=>`<div class="r"><div class="top"><span class="nm">${DIMS[d].name}</span><span class="vl">${dim[d]}</span></div><div class="track"><i style="width:${dim[d]}%"></i></div><div class="ds">${DIMS[d].desc}</div></div>`).join('')}</div>
+    </div>
+    <p class="muted" style="margin-top:12px">Kliknij wymiar, żeby zobaczyć, co oznacza. Żaden z nich nie jest dobry ani zły — to opis, nie ocena.</p>
+  </div>`;
+
+
+  h+=`<div class="sec"><h2>Alternatywny profil</h2>
+    <div class="alt"><h3>${alt.name} — ${alt.tag}</h3>
+      <p style="margin:8px 0 0;color:var(--ink-2)">${alt.lead}</p>
+      <p style="margin:10px 0 0;font-size:14.5px;color:var(--muted)">Drugi w kolejności z wynikiem ${pct(ranked[1].s)}%. Jeśli czytając opis głównego profilu miałeś wrażenie, że coś nie pasuje — najprawdopodobniej pasuje ten.</p>
+    </div></div>
+
+  <div class="actions">
+    <button class="btn" onclick="window.print()">Zapisz jako PDF</button>
+    <button class="btn ghost" id="again">Wypełnij jeszcze raz</button>
+  </div>
+
+  ${konfrontacjaHtml(meta, dim)}
+
+  <div class="sec">
+    <div class="card" style="border-left:3px solid var(--warning)">
+      <h3>Zasada elastycznych pomieszczeń</h3>
+      <p style="margin:0;color:var(--ink-2)">Jeśli wahasz się, czy pomieszczenie pod konkretne hobby (siłownia, pracownia, strefa relaksu) będzie realnie używane — zaprojektuj je jako zwykły, uniwersalny pokój: standardowe wymiary, standardowa instalacja elektryczna, bez wbudowanych na stałe elementów specjalistycznych (podłoga siłowni, zabudowa sauny, instalacja pod jacuzzi). Koszt przystosowania zwykłego pokoju pod hobby później jest zwykle niższy niż koszt pomieszczenia, które nigdy nie było używane zgodnie z pierwotnym planem — a w razie potrzeby taki pokój równie łatwo staje się pokojem dziecka, gabinetem albo pokojem gościnnym.</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="card" style="border-left:3px solid var(--series-1)">
+      <h3 style="color:var(--series-1)">Masz też wynik z ankiety o działce?</h3>
+      <p style="margin:0 0 10px;color:var(--ink-2)">Sprawdź, czy Twój dom i działka do siebie pasują — porównanie działa, jeśli wypełniłeś obie ankiety w tej samej przeglądarce.</p>
+      <a class="btn ghost" href="dopasowanie.html" style="text-decoration:none;display:inline-block">Sprawdź dopasowanie →</a>
+    </div>
+  </div>
+
+  <div class="foot">
+    <p><b>Jak czytać ten wynik.</b> Ta ankieta nikogo nie ocenia i nie ma zdania na temat tego, jaki dom jest właściwy. Dom, który ma robić wrażenie, jest równie uprawniony jak dom zbudowany wyłącznie pod codzienność — ludzie budowali też po to, żeby coś o sobie powiedzieć, odkąd w ogóle zaczęli budować. Narzędzie robi jedną rzecz: nazywa motywację i pokazuje jej rachunek, żeby nikt nie odkrywał go dopiero na etapie faktur.</p>
+    <p><b>Jedna rzecz, która najbardziej podniesie trafność.</b> Niech osoba, z którą będziesz w tym domu mieszkać, wypełni ankietę niezależnie. Rozbieżność profilów sama w sobie nie jest problemem — problemem jest odkrycie jej na etapie wyboru płytek.</p>
+  </div>`;
+
+  el('quiz').hidden=true;
+  const r=el('result'); r.hidden=false; r.innerHTML=h;
+  r.querySelectorAll('.dimtable .r').forEach(x=>x.onclick=()=>x.classList.toggle('open'));
+  el('again').onclick=()=>{ state.i=0; state.ans=[]; r.hidden=true; el('quiz').hidden=false; renderQ(); };
+  window.scrollTo({top:0,behavior:'instant'});
+
+  try {
+    localStorage.setItem('ratio-dom-wynik', JSON.stringify({ profileId: top.id, dim: dim, savedAt: Date.now() }));
+  } catch(e) { console.error('Nie udało się zapisać wyniku lokalnie:', e); }
+
+  const consentEl = document.getElementById('consent-data');
+  if (consentEl && consentEl.checked) {
+    submitSurveyData('ankieta-jaki-dom', {
+      result_summary: top.name + ' — ' + top.tag,
+      answers_json: JSON.stringify(state.ans)
+    });
+  }
+}
+
+function submitSurveyData(formName, fields){
+  const body = new URLSearchParams({ 'form-name': formName, ...fields }).toString();
+  fetch('/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body
+  }).catch(e => console.error('Nie udało się przesłać danych ankiety:', e));
+}
+
+/* ---------- start ---------- */
+el('start').onclick=()=>{ el('intro').hidden=true; el('quiz').hidden=false; state.i=0; renderQ(); };
+el('back').onclick=goBack;
+el('next').onclick=advance;
+document.addEventListener('keydown',e=>{
+  if(el('quiz').hidden) return;
+  if(e.key>='1'&&e.key<='9'){ const b=el('qbody').querySelectorAll('.opt')[+e.key-1]; if(b) b.click(); }
+  if(e.key==='ArrowLeft') goBack();
+  if(e.key==='Enter'&&Q[state.i].type==='multi'&&(state.ans[state.i]||[]).length) advance();
+});
+
+</script>
+
+<footer class="ratio-footer">
+  <div class="ratio-footer-inner">
+    <div class="ratio-footer-grid">
+      <div>
+        <img src="../assets/logo-white.svg" alt="Ratio Logo" />
+        <p style="color:#fff;font-weight:600;">RATIO Zarządzanie Inwestycjami Budowlanymi<br>Bartosz Zapadka-Żydek</p>
+        <p>14-202 Iława, ul. Gdańska 2D/16</p>
+        <p><a href="mailto:bartosz@ratiopro.net">bartosz@ratiopro.net</a></p>
+        <p><a href="tel:+48537913341">+48 537 913 341</a></p>
+      </div>
+      <div class="ratio-footer-nav">
+        <p class="ratio-footer-nav-title">Nawigacja</p>
+        <ul>
+          <li><a href="../index.html">Strona główna</a></li>
+          <li><a href="../index.html#uslugi">Usługi</a></li>
+          <li><a href="../jak-pracujemy.html">Jak pracujemy</a></li>
+          <li><a href="../case-studies.html">Case studies</a></li>
+          <li><a href="../ankiety.html">Ankiety</a></li>
+          <li><a href="../index.html#kontakt">Kontakt</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="ratio-footer-bottom">
+      <p>&copy; 2026 RATIO Zarządzanie Inwestycjami Budowlanymi Bartosz Zapadka-Żydek · NIP 7441843748 · REGON 544820288</p>
+      <div class="legal-links">
+        <a href="../polityka-prywatnosci.html">Polityka prywatności</a>
+        <a href="../regulamin.html">Regulamin</a>
+      </div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
