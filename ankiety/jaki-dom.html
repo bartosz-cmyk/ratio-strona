@@ -159,11 +159,25 @@ ol.steps li::before{
 .gtrack>i{display:block;height:100%;background:var(--series-1);border-radius:100px}
 .gtick{position:absolute;top:0;bottom:0;width:2px;background:var(--surface-1)}
 .glabels{display:flex;justify-content:space-between;margin-top:7px;font-size:11.5px;color:var(--muted)}
-@media print{
-  body{background:#fff}
-  .topbar,.actions,.btn{display:none!important}
-  .card,.hero,.numgrid,.dimtable{break-inside:avoid}
-}
+@media print{{
+  body{{background:#fff}}
+  .ratio-nav,.ratio-footer,.topbar,.actions,.btn{{display:none!important}}
+  .card,.hero,.numgrid,.dimtable,.sec,.flag,.alt{{break-inside:avoid;page-break-inside:avoid}}
+  h1,h2,h3{{break-after:avoid;page-break-after:avoid}}
+  .wrap{{max-width:100%!important;padding:0 8px!important}}
+  .print-header{{display:flex!important}}
+  .print-footer{{display:block!important}}
+}}
+.print-header{{
+  display:none; align-items:center; justify-content:space-between;
+  border-bottom:2px solid var(--series-1); padding-bottom:14px; margin-bottom:24px;
+}}
+.print-header .ph-brand{{font-family:var(--font-heading);font-weight:700;font-size:20px;color:var(--series-1)}}
+.print-header .ph-doc{{font-size:12px;color:var(--muted);text-align:right}}
+.print-footer{{
+  display:none; margin-top:32px; padding-top:12px; border-top:1px solid var(--hair);
+  font-size:11px;color:var(--muted);text-align:center;
+}}
 
 /* ===================================================================
    RATIO — nadpisanie tokenów marki.
@@ -317,6 +331,10 @@ ol.steps li::before{color:var(--accent-text);border-color:var(--axis);font-varia
   </div>
 </header>
 <div class="wrap">
+<div class="print-header">
+  <span class="ph-brand">RATIO</span>
+  <span class="ph-doc">Jaki dom — profil motywacji<br>ratiopro.net</span>
+</div>
 
 <form name="ankieta-jaki-dom" data-netlify="true" hidden>
   <input type="hidden" name="form-name" value="ankieta-jaki-dom" />
@@ -1120,7 +1138,8 @@ function showResult(){
   <div class="foot">
     <p><b>Jak czytać ten wynik.</b> Ta ankieta nikogo nie ocenia i nie ma zdania na temat tego, jaki dom jest właściwy. Dom, który ma robić wrażenie, jest równie uprawniony jak dom zbudowany wyłącznie pod codzienność — ludzie budowali też po to, żeby coś o sobie powiedzieć, odkąd w ogóle zaczęli budować. Narzędzie robi jedną rzecz: nazywa motywację i pokazuje jej rachunek, żeby nikt nie odkrywał go dopiero na etapie faktur.</p>
     <p><b>Jedna rzecz, która najbardziej podniesie trafność.</b> Niech osoba, z którą będziesz w tym domu mieszkać, wypełni ankietę niezależnie. Rozbieżność profilów sama w sobie nie jest problemem — problemem jest odkrycie jej na etapie wyboru płytek.</p>
-  </div>`;
+  </div>
+  <div class="print-footer">Raport wygenerowany na ratiopro.net · ${new Date().toLocaleDateString('pl-PL')}</div>`;
 
   el('quiz').hidden=true;
   const r=el('result'); r.hidden=false; r.innerHTML=h;

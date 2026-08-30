@@ -148,11 +148,25 @@ ol.steps li::before{
 .foot p{margin:0 0 10px}
 .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
 
-@media print{
-  body{background:#fff}
-  .topbar,.actions,.btn{display:none!important}
-  .card,.hero,.numgrid,.dimtable{break-inside:avoid}
-}
+@media print{{
+  body{{background:#fff}}
+  .ratio-nav,.ratio-footer,.topbar,.actions,.btn{{display:none!important}}
+  .card,.hero,.numgrid,.dimtable,.sec,.flag,.alt{{break-inside:avoid;page-break-inside:avoid}}
+  h1,h2,h3{{break-after:avoid;page-break-after:avoid}}
+  .wrap{{max-width:100%!important;padding:0 8px!important}}
+  .print-header{{display:flex!important}}
+  .print-footer{{display:block!important}}
+}}
+.print-header{{
+  display:none; align-items:center; justify-content:space-between;
+  border-bottom:2px solid var(--series-1); padding-bottom:14px; margin-bottom:24px;
+}}
+.print-header .ph-brand{{font-family:var(--font-heading);font-weight:700;font-size:20px;color:var(--series-1)}}
+.print-header .ph-doc{{font-size:12px;color:var(--muted);text-align:right}}
+.print-footer{{
+  display:none; margin-top:32px; padding-top:12px; border-top:1px solid var(--hair);
+  font-size:11px;color:var(--muted);text-align:center;
+}}
 
 /* ===================================================================
    RATIO — nadpisanie tokenów marki.
@@ -306,6 +320,10 @@ ol.steps li::before{color:var(--accent-text);border-color:var(--axis);font-varia
   </div>
 </header>
 <div class="wrap">
+<div class="print-header">
+  <span class="ph-brand">RATIO</span>
+  <span class="ph-doc">Profil inwestora<br>ratiopro.net</span>
+</div>
 
 <form name="ankieta-profil-inwestora" data-netlify="true" hidden>
   <input type="hidden" name="form-name" value="ankieta-profil-inwestora" />
@@ -1411,7 +1429,8 @@ function showResult(){
   <div class="foot">
     <p><b>Jak czytać ten wynik.</b> To nie jest diagnoza ani test psychologiczny w sensie klinicznym. To narzędzie doradcze zbudowane na dorobku psychologii różnic indywidualnych — poczuciu umiejscowienia kontroli, skłonności do zaufania, nietolerancji niepewności, stylu decyzyjnym maksymalizatora i satysfakcjonisty, stylach radzenia sobie z konfliktem — oraz na twardych realiach polskiego rynku budowlanego. Nazwy profilów są skrótem komunikacyjnym; realny wynik to osiem ciągłych wymiarów i ich kombinacja.</p>
     <p><b>Jedna rzecz, która podniesie trafność najbardziej.</b> Niech osoba, z którą będziesz w tym domu mieszkać, wypełni test niezależnie od Ciebie. Potem porównajcie trzy liczby zapisane osobno i bez podglądania: docelowy budżet, akceptowalne przekroczenie i czas trwania budowy. Rozbieżność powyżej 20% jest twardym sygnałem ryzyka i warto ją domknąć przed pierwszą łopatą, a nie przy stanie surowym.</p>
-  </div>`;
+  </div>
+  <div class="print-footer">Raport wygenerowany na ratiopro.net · ${new Date().toLocaleDateString('pl-PL')}</div>`;
 
   el('quiz').hidden = true;
   const r = el('result');
