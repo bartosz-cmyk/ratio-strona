@@ -150,7 +150,7 @@ ol.steps li::before{
 
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
-  body{background:#fff;font-size:12.5px}
+  body{background:#fff;font-size:12px}
   .ratio-nav,.ratio-footer,.topbar,.actions,.btn{display:none!important}
   .card,.hero,.numgrid,.dimtable,.sec,.flag,.alt{break-inside:avoid;page-break-inside:avoid}
   h1,h2,h3{break-after:avoid;page-break-after:avoid}
@@ -160,12 +160,16 @@ ol.steps li::before{
   .print-hide{display:none!important}
   .print-only{display:block!important}
   .card,.flag{border-radius:4px!important;border-width:1px!important}
-  .hero{border-radius:0!important;border:none!important;border-bottom:3px solid var(--series-1)!important;
-    padding:0 0 22px!important;margin-bottom:26px!important;text-align:center}
-  .sec{margin-bottom:20px!important;counter-increment:modul}
-  .sec>h2{border-bottom:1px solid var(--hair);padding-bottom:6px;font-size:16px!important}
+  .hero{border-radius:6px!important;border:1px solid var(--hair)!important;border-bottom:3px solid var(--series-1)!important;
+    padding:20px 22px!important;margin-bottom:26px!important;text-align:center;background:var(--surface-1)!important}
+  .sec{margin-bottom:20px!important;counter-increment:modul;background:var(--surface-1)!important;border:1px solid var(--hair)!important;border-radius:6px!important;padding:16px 18px!important}
+  .sec>h2{border-bottom:1px solid var(--hair);padding-bottom:6px;font-size:20px!important}
   .sec>h2::before{content:"MODUŁ " counter(modul, decimal-leading-zero) " · ";color:var(--series-1);font-weight:700}
   a[href]{color:inherit!important;text-decoration:none!important}
+  /* trzy rozmiary czcionek — nic pomiędzy */
+  h1,h2,.pname,.matchrow b{font-size:20px!important}
+  h3,p,li,.ptag,.plead,.row .k,.row .v,ul,ol{font-size:12px!important}
+  .eyebrow,.muted,.matchrow span,.glossary-item h4,.glossary-item p,.ph-doc,.print-footer{font-size:10px!important}
 }
 .print-only{display:none}
 .print-header{
