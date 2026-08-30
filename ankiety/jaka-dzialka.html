@@ -165,17 +165,20 @@ ol.steps li::before{
   .ratio-nav,.ratio-footer,.topbar,.actions,.btn{display:none!important}
   .card,.hero,.numgrid,.dimtable,.sec,.flag,.alt{break-inside:avoid;page-break-inside:avoid}
   h1,h2,h3{break-after:avoid;page-break-after:avoid}
-  .wrap{max-width:100%!important;padding:0!important}
+  .wrap{max-width:100%!important;padding:0!important;counter-reset:modul}
   .print-header{display:flex!important}
   .print-footer{display:block!important}
   .print-hide{display:none!important}
+  .print-only{display:block!important}
   .card,.flag{border-radius:4px!important;border-width:1px!important}
   .hero{border-radius:0!important;border:none!important;border-bottom:3px solid var(--series-1)!important;
     padding:0 0 22px!important;margin-bottom:26px!important;text-align:center}
-  .sec{margin-bottom:20px!important}
+  .sec{margin-bottom:20px!important;counter-increment:modul}
   .sec>h2{border-bottom:1px solid var(--hair);padding-bottom:6px;font-size:16px!important}
+  .sec>h2::before{content:"MODUŁ " counter(modul, decimal-leading-zero) " · ";color:var(--series-1);font-weight:700}
   a[href]{color:inherit!important;text-decoration:none!important}
 }
+.print-only{display:none}
 .print-header{
   display:none; align-items:center; justify-content:space-between;
   border-bottom:2px solid var(--series-1); padding-bottom:14px; margin-bottom:24px;
@@ -186,6 +189,10 @@ ol.steps li::before{
   display:none; margin-top:32px; padding-top:12px; border-top:1px solid var(--hair);
   font-size:11px;color:var(--muted);text-align:center;
 }
+.glossary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 20px}
+.glossary-item{border-left:2px solid var(--series-1);padding-left:10px}
+.glossary-item h4{margin:0 0 3px;font-size:12.5px;font-weight:700;color:var(--series-1)}
+.glossary-item p{margin:0;font-size:11px;color:var(--ink-2);line-height:1.4}
 
 /* ===================================================================
    RATIO — nadpisanie tokenów marki.
@@ -1341,6 +1348,15 @@ function matchProfiles(dim){
 const pct = s => Math.max(41, Math.min(97, Math.round(s)));
 
 /* ---------- radar ---------- */
+function glossaryHtml(){
+  return `<div class="print-only sec glossary-print">
+    <h2>Słowniczek pojęć</h2>
+    <div class="glossary-grid">
+      ${DIM_ORDER.map(d=>`<div class="glossary-item"><h4>${DIMS[d].name}</h4><p>${DIMS[d].desc}</p></div>`).join('')}
+    </div>
+  </div>`;
+}
+
 function radar(dim){
   const R=104, cx=200, cy=156, n=DIM_ORDER.length;
   const ang=i=>(-Math.PI/2)+i*2*Math.PI/n;
@@ -1553,6 +1569,8 @@ function showResult(){
       <a class="btn ghost" href="dopasowanie.html" style="text-decoration:none;display:inline-block">Sprawdź dopasowanie →</a>
     </div>
   </div>
+
+  ${glossaryHtml()}
 
   <div class="foot">
     <p><b>Jak czytać ten wynik.</b> Ta ankieta nikogo nie ocenia i nie ma zdania na temat tego, jak należy szukać działki. Ostrożność formalna i skłonność do ryzyka to oba uprawnione style, jeśli są świadome. Narzędzie robi jedną rzecz: nazywa Twój styl i pokazuje jego rachunek, żeby nikt nie odkrywał go dopiero po podpisaniu umowy.</p>

@@ -154,17 +154,20 @@ ol.steps li::before{
   .ratio-nav,.ratio-footer,.topbar,.actions,.btn{display:none!important}
   .card,.hero,.numgrid,.dimtable,.sec,.flag,.alt{break-inside:avoid;page-break-inside:avoid}
   h1,h2,h3{break-after:avoid;page-break-after:avoid}
-  .wrap{max-width:100%!important;padding:0!important}
+  .wrap{max-width:100%!important;padding:0!important;counter-reset:modul}
   .print-header{display:flex!important}
   .print-footer{display:block!important}
   .print-hide{display:none!important}
+  .print-only{display:block!important}
   .card,.flag{border-radius:4px!important;border-width:1px!important}
   .hero{border-radius:0!important;border:none!important;border-bottom:3px solid var(--series-1)!important;
     padding:0 0 22px!important;margin-bottom:26px!important;text-align:center}
-  .sec{margin-bottom:20px!important}
+  .sec{margin-bottom:20px!important;counter-increment:modul}
   .sec>h2{border-bottom:1px solid var(--hair);padding-bottom:6px;font-size:16px!important}
+  .sec>h2::before{content:"MODUŁ " counter(modul, decimal-leading-zero) " · ";color:var(--series-1);font-weight:700}
   a[href]{color:inherit!important;text-decoration:none!important}
 }
+.print-only{display:none}
 .print-header{
   display:none; align-items:center; justify-content:space-between;
   border-bottom:2px solid var(--series-1); padding-bottom:14px; margin-bottom:24px;
@@ -175,6 +178,10 @@ ol.steps li::before{
   display:none; margin-top:32px; padding-top:12px; border-top:1px solid var(--hair);
   font-size:11px;color:var(--muted);text-align:center;
 }
+.glossary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 20px}
+.glossary-item{border-left:2px solid var(--series-1);padding-left:10px}
+.glossary-item h4{margin:0 0 3px;font-size:12.5px;font-weight:700;color:var(--series-1)}
+.glossary-item p{margin:0;font-size:11px;color:var(--ink-2);line-height:1.4}
 
 /* ===================================================================
    RATIO — nadpisanie tokenów marki.
@@ -907,7 +914,20 @@ const PROFILES = [
     'Umów z kierownikiem budowy zakres szerszy niż ryczałtowy. Standardowy pakiet to 8–12 wizyt na całej budowie — przy Twoim modelu to za mało.',
     'Ustal z góry limit czasu na decyzję: 48 godzin od kompletu informacji. Bez tego Twoja własna dokładność stanie się wąskim gardłem.'
   ],
-  ryzyko:'Największe ryzyko Twojego profilu to nie błąd techniczny, tylko wypalenie w 18. miesiącu. Zaplanuj przerwę w harmonogramie tak samo poważnie, jak planujesz stropy.'
+  ryzyko:'Największe ryzyko Twojego profilu to nie błąd techniczny, tylko wypalenie w 18. miesiącu. Zaplanuj przerwę w harmonogramie tak samo poważnie, jak planujesz stropy.',
+  checklist:[
+    'Ekipy stanu surowego zakontraktowane minimum 6 miesięcy przed startem',
+    'Policzona różnica VAT (materiał własny 23% vs usługa z materiałem 8%)',
+    'Harmonogram zbudowany od przerw technologicznych (21 dni beton, 3-4 tyg. wylewki)',
+    'Rozszerzony zakres wizyt kierownika budowy uzgodniony (więcej niż standardowe 8-12)',
+    'Ustalony limit czasu na własną decyzję (48h), żeby nie stać się wąskim gardłem'
+  ],
+  rozmowa:[
+    'Ile realnie wizyt na budowie obejmuje Pana/Pani stawka, a nie tylko formalne odbiory?',
+    'Co się stanie, jeśli ekipa się spóźni — jak to wpłynie na harmonogram kolejnych etapów?',
+    'Pytaj wprost o dostępność kluczowych fachowców (dekarz, tynkarz) z wyprzedzeniem, nie na tydzień przed potrzebą.'
+  ],
+  redFlag:'Brak zaplanowanej przerwy w harmonogramie własnego zaangażowania — wypalenie w 18. miesiącu jest bardziej prawdopodobnym zagrożeniem niż błąd techniczny.'
 },
 {
   id:'dyrygent',
@@ -931,7 +951,20 @@ const PROFILES = [
     'Zbieraj pisemne oświadczenia podwykonawców o uregulowaniu płatności — przy solidarnej odpowiedzialności inwestora możesz zapłacić dwa razy za tę samą pracę.',
     'Zbuduj jedną tabelę: etap, ekipa, termin, kwota, status odbioru. Bez niej po dziewiątym miesiącu przestaniesz panować nad rozliczeniami.'
   ],
-  ryzyko:'Przy braku jednego wykonawcy odpowiedzialnego za całość, wada na styku etapów — np. przemarzanie między ociepleniem a stolarką — nie ma adresata. To Ty będziesz tym adresatem.'
+  ryzyko:'Przy braku jednego wykonawcy odpowiedzialnego za całość, wada na styku etapów — np. przemarzanie między ociepleniem a stolarką — nie ma adresata. To Ty będziesz tym adresatem.',
+  checklist:[
+    'Kierownik budowy z rozszerzonym zakresem wizyt (min. 2x/tydzień w stanie surowym)',
+    'Harmonogram z buforami między ekipami',
+    'Klauzula o zakryciu robót bez zgłoszenia na ryzyko wykonawcy',
+    'Pisemne oświadczenia podwykonawców o uregulowaniu płatności',
+    'Tabela: etap / ekipa / termin / kwota / status odbioru'
+  ],
+  rozmowa:[
+    'Co się stanie, jeśli poprzednia ekipa się spóźni — kto ponosi koszt przestoju?',
+    'Czy mogę dostać pisemne potwierdzenie rozliczenia z podwykonawcami przed kolejną płatnością?',
+    'Pytaj kierownika budowy wprost o realne, nie ryczałtowe, obłożenie wizytami w krytycznych momentach.'
+  ],
+  redFlag:'Brak jednego wykonawcy odpowiedzialnego za całość oznacza, że wada na styku etapów (np. ocieplenie-stolarka) nie ma adresata — tym adresatem zostajesz Ty.'
 },
 {
   id:'etapowiec',
@@ -955,7 +988,20 @@ const PROFILES = [
     'Ostatnia rata (ok. 30%) płatna po usunięciu usterek z protokołu odbioru — to Twoja jedyna realna dźwignia.',
     'Zamów okna z minimum kilkutygodniowym wyprzedzeniem — to najczęstsze wąskie gardło przed zamknięciem stanu surowego.'
   ],
-  ryzyko:'Wykończenie prowadzone „we własnym tempie” ma tendencję do zamieniania się w brak tempa. Wyznacz sobie twardą datę zakończenia elewacji i tarasu — to najczęściej porzucane pozycje.'
+  ryzyko:'Wykończenie prowadzone „we własnym tempie” ma tendencję do zamieniania się w brak tempa. Wyznacz sobie twardą datę zakończenia elewacji i tarasu — to najczęściej porzucane pozycje.',
+  checklist:[
+    'Firma na stan surowy wybrana na podstawie referencji i obejrzanych realizacji',
+    'Wynagrodzenie ryczałtowe, nie kosztorysowe',
+    'Kary umowne 0,1-1% wartości za dzień zwłoki wpisane wprost',
+    'Ostatnia rata (ok. 30%) płatna po usunięciu usterek z protokołu odbioru',
+    'Okna zamówione z kilkutygodniowym wyprzedzeniem'
+  ],
+  rozmowa:[
+    'Czy wynagrodzenie jest ryczałtowe, czy kosztorysowe — i co się stanie przy wzroście cen materiałów?',
+    'Jakie kary umowne obowiązują za zwłokę, i od którego dnia są liczone?',
+    'Zapytaj o realny termin dostawy okien i innych elementów z długim czasem oczekiwania, zanim podpiszesz harmonogram.'
+  ],
+  redFlag:'Wykończenie prowadzone „we własnym tempie” ma tendencję do zamieniania się w brak tempa — wyznacz twardą datę zakończenia elewacji i tarasu.'
 },
 {
   id:'nadzorca',
@@ -979,7 +1025,20 @@ const PROFILES = [
     'Umowa z wynagrodzeniem ryczałtowym, harmonogram płatności etapowy (10 / 20 / 20 / 20 / 30%), kary umowne za zwłokę, polisa OC wykonawcy minimum 500 tys. zł jako załącznik.',
     'Zdefiniuj z góry listę decyzji, które są Twoje, i tych, które są inspektora. Wszystko, co nie jest na Twojej liście, nie wraca do Ciebie.'
   ],
-  ryzyko:'Twoje pieniądze najprawdopodobniej wypłyną nie przez oszustwo, tylko przez zmiany w trakcie. Zamroź projekt wykonawczy przed startem i wprowadź zasadę: żadnej zmiany bez wyceny na piśmie.'
+  ryzyko:'Twoje pieniądze najprawdopodobniej wypłyną nie przez oszustwo, tylko przez zmiany w trakcie. Zamroź projekt wykonawczy przed startem i wprowadź zasadę: żadnej zmiany bez wyceny na piśmie.',
+  checklist:[
+    'Ustalone, kto zapewnia kierownika budowy (niezależny inspektor, nie człowiek wykonawcy)',
+    'Jeden kanał kontaktu: inspektor, nie bezpośrednio wykonawca',
+    'Raport z każdego odbioru (protokół + dokumentacja fotograficzna) przed płatnością etapową',
+    'Harmonogram płatności etapowy (10/20/20/20/30%) z karami umownymi',
+    'Polisa OC wykonawcy min. 500 tys. zł jako załącznik do umowy'
+  ],
+  rozmowa:[
+    'Czy kierownik budowy jest niezależny ode mnie, czy zatrudniony przez wykonawcę?',
+    'Czy mogę otrzymywać dokumentację fotograficzną z każdego odbioru przed płatnością?',
+    'Ustal z inspektorem, jakie decyzje należą do niego, a jakie wracają do Ciebie — zanim zacznie się budowa.'
+  ],
+  redFlag:'Pieniądze najprawdopodobniej nie wypłyną przez oszustwo, tylko przez niekontrolowane zmiany w trakcie budowy — zamroź projekt wykonawczy przed startem.'
 },
 {
   id:'zleceniodawca',
@@ -1003,7 +1062,20 @@ const PROFILES = [
     'Jedna rzecz, której nie możesz oddać: obecność przy odbiorach robót zanikających. Zbrojenie, izolacje przeciwwilgociowe, instalacje przed zakryciem. Wpisz te terminy do kalendarza jak spotkania zarządu.',
     'Ostatnia rata 30% wypłacana po usunięciu usterek. Jeśli zgodzisz się zapłacić wszystko przy odbiorze, tracisz jedyny instrument nacisku.'
   ],
-  ryzyko:'Największe zagrożenie: kumulacja „drobnych” ustępstw. Wyznacz z góry kwotę, powyżej której każda dopłata wymaga pisemnej wyceny i Twojej zgody — i trzymaj się jej, nawet gdy będzie niezręcznie.'
+  ryzyko:'Największe zagrożenie: kumulacja „drobnych” ustępstw. Wyznacz z góry kwotę, powyżej której każda dopłata wymaga pisemnej wyceny i Twojej zgody — i trzymaj się jej, nawet gdy będzie niezręcznie.',
+  checklist:[
+    'Doprecyzowany zakres „pod klucz” (w Polsce zwykle oznacza stan deweloperski, nie pełne wykończenie)',
+    'Minimum 3 oferty porównawcze zebrane przed decyzją',
+    'Rękojmia i gwarancja wpisane do umowy wprost, z terminem',
+    'Obecność ustalona przy każdym odbiorze robót zanikających (zbrojenie, izolacje, instalacje)',
+    'Ostatnia rata (ok. 30%) płatna po usunięciu usterek'
+  ],
+  rozmowa:[
+    'Co dokładnie oznacza „pod klucz” w tej ofercie — gdzie kończy się zakres?',
+    'Jaka rękojmia i gwarancja obowiązują, i na jak długo?',
+    'Zapytaj wprost, dlaczego cena jest niższa niż w innych ofertach, jeśli różnica przekracza 25%.'
+  ],
+  redFlag:'Twoje realne ryzyko to nie przekontrolowanie, tylko niedokontrolowanie — zaakceptowanie „drobnych” zamienników i dopłat, żeby nie robić problemu.'
 },
 {
   id:'spokoj',
@@ -1028,7 +1100,20 @@ const PROFILES = [
     'Ogranicz liczbę decyzji świadomie: wybierz gotowy pakiet wykończeniowy zamiast komponować własny. Mniej wariantów to dla Ciebie realna korzyść, nie kompromis.',
     'Zapewnij sobie stabilne mieszkanie na cały okres budowy. Mieszkanie kątem u rodziny „na chwilę” jest przy Twoim profilu najkosztowniejszą pozycją całego projektu.'
   ],
-  ryzyko:'Nie zaczynaj budowy w roku, w którym dzieje się coś jeszcze — przeprowadzka, zmiana pracy, dziecko. Twój profil nie ma rezerwy na dwa równoległe kryzysy.'
+  ryzyko:'Nie zaczynaj budowy w roku, w którym dzieje się coś jeszcze — przeprowadzka, zmiana pracy, dziecko. Twój profil nie ma rezerwy na dwa równoległe kryzysy.',
+  checklist:[
+    'Sprawdzone dokładnie, co NIE wchodzi w pakiet (fundamenty, źródło ciepła, wentylacja, przyłącza)',
+    'Wybrany projekt z prostą bryłą i dachem dwuspadowym',
+    'Zabezpieczone stabilne zakwaterowanie na cały okres budowy',
+    'Ograniczona liczba decyzji wykończeniowych (gotowy pakiet zamiast komponowania własnego)',
+    'Potwierdzona gwarancja producenta i jej realny zakres'
+  ],
+  rozmowa:[
+    'Co dokładnie wchodzi w cenę pakietu, a co jest dodatkowo płatne?',
+    'Jaka jest gwarancja producenta i co ona faktycznie obejmuje?',
+    'Zapytaj o realny, udokumentowany czas montażu z poprzednich realizacji, nie tylko deklarowany.'
+  ],
+  redFlag:'Nie zaczynaj budowy w roku, w którym dzieje się coś jeszcze ważnego w życiu — Twój profil nie ma rezerwy na dwa równoległe kryzysy.'
 },
 {
   id:'kurator',
@@ -1052,7 +1137,20 @@ const PROFILES = [
     'Zakaz sprawdzania cen po zakupie. To nie jest rada psychologiczna, to zasada operacyjna: każde takie sprawdzenie kosztuje Cię satysfakcję z gotowego domu i nic nie zmienia.',
     'Ustal z wykonawcą sztywną procedurę zmian: pisemny wniosek, wycena, akceptacja, dopiero potem realizacja. Chroni Was oboje.'
   ],
-  ryzyko:'Twoje realne ryzyko to nie przekroczenie budżetu, tylko to, że wprowadzisz się do obiektywnie świetnego domu i nie będziesz z niego zadowolony. Zdecyduj z góry, kiedy uznajesz budowę za skończoną.'
+  ryzyko:'Twoje realne ryzyko to nie przekroczenie budżetu, tylko to, że wprowadzisz się do obiektywnie świetnego domu i nie będziesz z niego zadowolony. Zdecyduj z góry, kiedy uznajesz budowę za skończoną.',
+  checklist:[
+    'Projekt wykonawczy w pełni zamknięty przed startem (instalacje, oświetlenie, gniazda, zabudowa)',
+    'Zamknięta lista dostawców i zasada szybkich decyzji poniżej progu kwotowego',
+    'Zakaz sprawdzania cen po zakupie (zasada operacyjna, nie tylko rada)',
+    'Sztywna procedura zmian: pisemny wniosek, wycena, akceptacja, dopiero realizacja',
+    'Ustalony z góry moment, w którym budowa jest uznana za „skończoną”'
+  ],
+  rozmowa:[
+    'Czy mogę zamknąć pełny projekt wykonawczy przed podpisaniem umowy, żeby uniknąć zmian w trakcie?',
+    'Jaka jest procedura wprowadzania zmian — ile to kosztuje w czasie i pieniądzach?',
+    'Zapytaj architekta wnętrz o pomoc w zamknięciu listy materiałowej, zamiast przeglądać warianty samodzielnie.'
+  ],
+  redFlag:'Realne ryzyko to nie przekroczenie budżetu, tylko wprowadzenie się do obiektywnie świetnego domu i brak satysfakcji z efektu — zdecyduj z góry, kiedy budowa jest skończona.'
 },
 {
   id:'solista',
@@ -1076,7 +1174,20 @@ const PROFILES = [
     'Zakontraktuj firmę na cały stan surowy i instalacje. To są etapy, w których Twoja nieobecność kosztuje najwięcej.',
     'Powiedz to wprost drugiej stronie: ile weekendów przez ile miesięcy. Niewypowiedziana wersja tego planu jest głównym źródłem konfliktu w tym profilu.'
   ],
-  ryzyko:'Historia niedokończonych projektów w połączeniu z ambitnym zakresem prac własnych to najlepiej udokumentowany sposób na budowę, która trwa pięć lat. Zawęź zakres teraz, dobrowolnie — będzie to tańsze niż zawężanie go później, pod presją.'
+  ryzyko:'Historia niedokończonych projektów w połączeniu z ambitnym zakresem prac własnych to najlepiej udokumentowany sposób na budowę, która trwa pięć lat. Zawęź zakres teraz, dobrowolnie — będzie to tańsze niż zawężanie go później, pod presją.',
+  checklist:[
+    'Lista prac własnych zweryfikowana pytaniem: „czy ktoś czeka, jeśli tego nie skończę na czas?”',
+    'Firma zakontraktowana na cały stan surowy i instalacje',
+    'Prace własne zaplanowane po wprowadzeniu, nie przed',
+    'Policzona własna stawka godzinowa vs koszt tygodnia przestoju budowy',
+    'Jasno zakomunikowany drugiej stronie realny zakres czasowy (ile weekendów, ile miesięcy)'
+  ],
+  rozmowa:[
+    'Czy mój zakres prac własnych blokuje wejście Waszej ekipy na kolejny etap?',
+    'Jak wygląda harmonogram, jeśli moja część się opóźni?',
+    'Rozmawiaj otwarcie z domownikami o realnym czasie, jaki prace własne zajmą — to częsty punkt konfliktu.'
+  ],
+  redFlag:'Ambitny zakres prac własnych połączony z historią niedokończonych projektów to najlepiej udokumentowany sposób na budowę trwającą pięć lat — zawęź zakres teraz, dobrowolnie.'
 }
 ];
 
@@ -1244,6 +1355,15 @@ function matchProfiles(dim, flags, meta){
 const pct = s => Math.max(41, Math.min(97, Math.round(s)));
 
 /* ---------- radar ---------- */
+function glossaryHtml(){
+  return `<div class="print-only sec glossary-print">
+    <h2>Słowniczek pojęć</h2>
+    <div class="glossary-grid">
+      ${DIM_ORDER.map(d=>`<div class="glossary-item"><h4>${DIMS[d].name}</h4><p>${DIMS[d].desc}</p></div>`).join('')}
+    </div>
+  </div>`;
+}
+
 function radar(dim){
   const R=104, cx=200, cy=156, n=DIM_ORDER.length;
   const ang = i => (-Math.PI/2) + i*2*Math.PI/n;
@@ -1371,6 +1491,18 @@ function showResult(){
       <h3 style="color:var(--series-1)">Największe ryzyko Twojego profilu</h3>
       <p style="margin:0;color:var(--ink-2)">${top.ryzyko}</p>
     </div>
+  </div>
+
+  <div class="sec"><h2>Checklista dla profilu ${top.name}</h2>
+    <div class="card"><ol class="steps">${top.checklist.map(k=>`<li><span>${k}</span></li>`).join('')}</ol></div>
+  </div>
+
+  <div class="sec"><h2>Jak rozmawiać z wykonawcą/kierownikiem budowy</h2>
+    <div class="card"><ul style="margin:0;padding-left:20px;color:var(--ink-2)">${top.rozmowa.map(k=>`<li style="margin-bottom:8px">${k}</li>`).join('')}</ul></div>
+  </div>
+
+  <div class="sec">
+    <div class="flag critical"><span class="ico">🚩</span><div><h3>Czerwona flaga</h3><p>${top.redFlag}</p></div></div>
   </div>`;
 
   if(fl.length){
@@ -1433,6 +1565,8 @@ function showResult(){
     <button class="btn" onclick="window.print()">Zapisz jako PDF</button>
     <button class="btn ghost" id="again">Wypełnij jeszcze raz</button>
   </div>
+
+  ${glossaryHtml()}
 
   <div class="foot">
     <p><b>Jak czytać ten wynik.</b> To nie jest diagnoza ani test psychologiczny w sensie klinicznym. To narzędzie doradcze zbudowane na dorobku psychologii różnic indywidualnych — poczuciu umiejscowienia kontroli, skłonności do zaufania, nietolerancji niepewności, stylu decyzyjnym maksymalizatora i satysfakcjonisty, stylach radzenia sobie z konfliktem — oraz na twardych realiach polskiego rynku budowlanego. Nazwy profilów są skrótem komunikacyjnym; realny wynik to osiem ciągłych wymiarów i ich kombinacja.</p>
