@@ -4,17 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>MVP — Pokrycie kosztorysu ofertami</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; }
   body {
-    font-family: -apple-system, 'Inter', system-ui, sans-serif;
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
     background: #f4f5f7;
     color: #11172a;
     margin: 0;
     padding: 24px 16px 80px;
   }
   .wrap { max-width: 980px; margin: 0 auto; }
-  h1 { font-size: 20px; margin: 0 0 4px; }
+  h1 { font-family:'Zilla Slab',serif; font-size: 21px; font-weight:700; margin: 0 0 4px; color:#1f2a4f; }
+  h2 { font-family:'Zilla Slab',serif; }
+  h3 { font-family:'Zilla Slab',serif; }
   .sub { color: #6b7280; font-size: 13px; margin: 0 0 24px; }
   .project-name {
     font-size: 22px; font-weight: 700; border: none; background: transparent;
@@ -74,9 +79,21 @@
   .progress-bar { height: 8px; border-radius: 4px; background: #e5e7eb; overflow: hidden; margin-top: 8px; }
   .progress-fill { height: 100%; background: #1f2a4f; }
   .status-line { font-size: 12px; color: #6b7280; margin-top: 6px; }
-  .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .save-indicator { font-size: 12px; color: #16a34a; opacity: 0; transition: opacity 0.3s; }
-  .save-indicator.show { opacity: 1; }
+  .brand-header { margin-bottom: 18px; }
+  .brand-logo { height: 30px; width: auto; display: block; }
+  .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 14px; border-bottom: 2px solid #ffb719; }
+  /* Wskaźnik zapisu w chmurze — zawsze widoczny (nie znika po 1200ms jak
+     dawniej przy localStorage), bo to jedyny sygnał dla użytkownika czy
+     jego dane są bezpieczne. 4 stany zamiast dawnego jednego. */
+  .save-indicator { font-size: 12px; font-weight: 600; transition: opacity 0.3s; }
+  .save-indicator.save-ok      { color: #16a34a; }
+  .save-indicator.save-pending { color: #9ca3af; }
+  .save-indicator.save-offline { color: #d97706; }
+  .save-indicator.save-error   { color: #dc2626; }
+  /* Osobny, krótkotrwały "toast" na konkretne akcje (np. "Dodano dokument")
+     — niezależny od stałego wskaźnika zapisu powyżej, żeby oba się nie gryzły. */
+  .toast { font-size: 12px; color: #16a34a; opacity: 0; transition: opacity 0.3s; margin-left: 10px; }
+  .toast.show { opacity: 1; }
   .reset-btn { background: none; border: 1px solid #d1d5db; border-radius: 8px; padding: 6px 12px; font-size: 12px; cursor: pointer; color: #6b7280; }
   .reset-btn.confirming { border-color: #dc2626; color: #dc2626; background: #fef2f2; }
   .empty-state { text-align: center; color: #9ca3af; font-size: 13px; padding: 20px; }
@@ -125,11 +142,15 @@
     display: none; position: absolute; top: 100%; left: 0; padding-top: 6px;
     z-index: 50; width: 220px;
   }
+  @media (max-width: 480px) {
+    .calendar-popup { left: auto; right: 0; width: 200px; }
+  }
   .calendar-popup-inner {
     background: white; border: 1px solid #d1d5db; border-radius: 8px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.12); padding: 10px;
   }
   .date-icon-wrap:hover .calendar-popup { display: block; }
+  .date-icon-wrap.tapped .calendar-popup { display: block; }
   .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 12px; font-weight: 700; color: #11172a; }
   .cal-nav-btn { cursor: pointer; padding: 2px 8px; border-radius: 4px; font-size: 14px; }
   .cal-nav-btn:hover { background: #f0f2f7; }
@@ -140,17 +161,406 @@
   .cal-day.weekday-label { font-weight: 700; color: #9ca3af; cursor: default; }
   .cal-day.empty { cursor: default; }
   .date-hint { font-size: 10px; color: #9ca3af; margin-top: 2px; }
+  .date-error-msg { font-size: 11px; color: #92660c; margin: 3px 0 0; }
+
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(17,23,42,0.55); z-index:200; align-items:flex-start; justify-content:center; padding:30px 16px; overflow-y:auto; }
+  .modal-overlay.show { display:flex; }
+  .modal-box { background:white; border-radius:14px; max-width:600px; width:100%; padding:24px; }
+  .modal-box h2 { margin:0 0 6px; font-size:17px; }
+  .modal-sub { font-size:12.5px; color:#6b7280; margin:0 0 18px; }
+  .survey-q { margin-bottom:16px; }
+  .survey-q .q-label { display:block; font-size:12.5px; font-weight:700; color:#374151; margin-bottom:7px; }
+  .survey-opts { display:flex; flex-wrap:wrap; gap:6px; }
+  .survey-opt { border:1px solid #d1d5db; border-radius:999px; padding:6px 13px; font-size:12px; cursor:pointer; background:white; color:#374151; }
+  .survey-opt:hover { border-color:#9ca3af; }
+  .survey-opt.selected { background:#1f2a4f; color:white; border-color:#1f2a4f; }
+  .modal-actions { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:20px; }
+  .template-disclaimer { font-size:11px; color:#92400e; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:9px 11px; margin-bottom:16px; }
+  .template-cta { background:#eef1f8; border:1px dashed #1f2a4f; border-radius:10px; padding:14px; margin-bottom:14px; text-align:center; }
+  .template-cta p { font-size:12.5px; color:#374151; margin:0 0 10px; }
+  .template-result-banner { font-size:12px; color:#166534; background:#dcfce7; border-radius:8px; padding:8px 11px; margin-bottom:12px; }
+  .approval-box { border-radius:10px; padding:14px 16px; margin-bottom:14px; }
+  .approval-box.pending { background:#fff; border:1px dashed #d1d5db; text-align:center; }
+  .approval-box.approved { background:#dcfce7; border:1px solid #86efac; }
+  .approval-box.approved p { color:#166534; font-weight:600; margin:0 0 10px; }
+  .approval-box .btn-row { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+  .approval-box.approved .btn-row { justify-content:flex-start; }
+  .line-item.locked { background:#fafafa; }
+  .line-item.locked input, .line-item.locked .line-item-name { background:#f3f4f6; color:#4b5563; }
+  .qa-price-row { display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid #f0f0f0; }
+  .qa-price-row:last-child { border-bottom:none; }
+  .qa-price-label { flex:1; font-size:13px; color:#374151; }
+  .qa-price-row input { max-width:150px; }
+
+  #protokol-print-area { display: none; }
+
+  /* Tabela porównawcza ofert */
+  .offers-compare-table { width:100%; border-collapse:collapse; font-size:12.5px; }
+  .offers-compare-table th { text-align:left; font-size:10px; color:#6b7280; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; padding:5px 7px; border-bottom:2px solid #e5e7eb; white-space:nowrap; }
+  .offers-compare-table td { padding:7px; vertical-align:middle; border-bottom:1px solid #f3f4f6; }
+  .offer-table-row.selected td { background:#eef1f8; }
+  .offers-compare-table input, .offers-compare-table select { font-size:12.5px; padding:5px 7px; }
+  .coverage-badge-btn { font-size:11px; padding:3px 8px; border-radius:999px; font-weight:600; border:none; cursor:pointer; }
+  .offer-scope-expand-row td { background:#fffbeb; padding:10px 14px; }
+
+  /* Oś czasu deklarowanych terminów ofert */
+  .offer-timeline { margin:0 0 14px; background:#fafafa; border:1px solid #e5e7eb; border-radius:8px; padding:10px 14px; }
+  .timeline-title { font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:0.02em; margin:0 0 8px; }
+  .timeline-axis-labels { display:flex; justify-content:space-between; font-size:10px; color:#9ca3af; margin:0 0 6px; padding-left:150px; }
+  @media (max-width: 480px) {
+    .timeline-axis-labels { padding-left:0; font-size:9px; }
+  }
+  .month-tick { position:absolute; top:-14px; width:1px; height:50px; background:#e5e7eb; z-index:0; }
+  .month-tick-label { position:absolute; top:-46px; font-size:10px; color:#9ca3af; transform:translateX(-50%); white-space:nowrap; }
+  .timeline-row { display:flex; align-items:center; gap:8px; margin-bottom:5px; }
+  .timeline-label { width:145px; flex-shrink:0; font-size:11.5px; color:#374151; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  @media (max-width: 480px) {
+    .timeline-label { width:88px; font-size:10.5px; }
+  }
+  .timeline-track { flex:1; position:relative; height:16px; background:#f0f0f0; border-radius:4px; }
+  .timeline-bar { position:absolute; top:2px; height:12px; border-radius:3px; background:#9ca3af; min-width:2px; }
+  .timeline-bar.timeline-plan { background:transparent; border:1px dashed #9ca3af; top:1px; height:14px; }
+  .timeline-bar.timeline-selected { background:#1f2a4f; }
+
+  /* Wizualny pasek w panelu terminów krytycznych (zamówienia z wyprzedzeniem) */
+  .leadtime-timeline-track { position:relative; height:22px; background:#f0f0f0; border-radius:4px; margin:6px 0 4px; }
+  .leadtime-segment { position:absolute; top:3px; height:16px; border-radius:3px; min-width:2px; }
+  .leadtime-segment.leadtime-zamowienie { background:#fbbf24; }
+  .leadtime-segment.leadtime-realizacja { background:#60a5fa; }
+  .leadtime-today-marker { position:absolute; top:-3px; width:2px; height:28px; background:#dc2626; z-index:2; }
+  .deadline-flag { position:absolute; top:-9px; width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent; border-top:8px solid #ffb719; z-index:1; }
+  .legend-triangle { display:inline-block; width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent; border-top:8px solid #ffb719; vertical-align:middle; margin-right:2px; }
+
+  /* Wiersze osi czasu w stylu "wstążek" — ikona + chevron z nazwą etapu */
+  .stage-row { display:flex; align-items:center; gap:8px; margin-bottom:9px; }
+  .stage-icon-circle { width:26px; height:26px; border-radius:50%; background:#ffb719; color:#1f2a4f; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; box-shadow:0 1px 2px rgba(0,0,0,0.15); }
+  .stage-chevron { background:linear-gradient(135deg,#1f2a4f,#2d3d74); color:white; font-family:'Zilla Slab',serif; font-size:11.5px; font-weight:700; padding:5px 16px 5px 10px; clip-path:polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%); white-space:nowrap; display:inline-block; }
+
+  /* Jedna pozioma oś czasu — kompaktowe ikony domyślnie, pełne dane
+     w dymku po najechaniu (ten sam mechanizm co przy ikonie kalendarza). */
+  .horizontal-timeline { padding:4px 0 44px; }
+  .value-curve-wrap { margin:0 16px 10px; }
+  .value-curve-chart { position:relative; background:#fafafa; border:1px solid #e5e7eb; border-radius:6px; }
+  .value-curve-svg { position:absolute; left:0; width:100%; display:block; }
+  .value-curve-axis-label { position:absolute; left:4px; font-size:9px; color:#9ca3af; background:rgba(250,250,250,0.85); padding:0 2px; z-index:1; }
+  .value-curve-today-dot { position:absolute; width:7px; height:7px; border-radius:50%; background:#dc2626; border:1.5px solid white; transform:translate(-50%,-50%); z-index:2; box-shadow:0 1px 3px rgba(0,0,0,0.3); }
+  .h-timeline-track-wrap { position:relative; margin:58px 16px 30px; }
+  .h-timeline-track { position:relative; height:6px; background:#e5e7eb; border-radius:3px; }
+  .h-stage-marker { position:absolute; top:50%; transform:translate(-50%,-50%); cursor:default; }
+  .h-stage-marker .stage-icon-circle { width:18px; height:18px; font-size:9px; opacity:0.7; position:relative; transition:transform 0.15s, opacity 0.15s; }
+  .h-stage-marker:hover .stage-icon-circle, .h-stage-marker.pinned .stage-icon-circle { transform:scale(1.6); opacity:1; box-shadow:0 2px 6px rgba(0,0,0,0.3); }
+  .stage-hover-detail { display:none; position:absolute; bottom:38px; left:50%; transform:translateX(-50%); background:white; border:1px solid #d1d5db; border-radius:8px; box-shadow:0 6px 20px rgba(0,0,0,0.18); padding:10px 12px; z-index:50; }
+  .curve-marker.pinned .stage-hover-detail, .curve-marker:hover .stage-hover-detail { display:block; }
+  .phase-band { position:absolute; top:-13px; height:32px; border-radius:6px; z-index:0; }
+  .phase-band-label { position:absolute; bottom:-32px; left:5px; font-size:8.5px; font-weight:700; color:#4b5563; text-transform:uppercase; letter-spacing:0.02em; white-space:nowrap; }
+
+  /* Jeden zintegrowany wykres — krzywa narastającej wartości z podpisami
+     etapów bezpośrednio w punkcie skoku, zamiast osobnej listy ikon. */
+  .unified-chart-wrap { position:relative; margin:0 16px; background:#fafafa; border:1px solid #e5e7eb; border-radius:8px; overflow:visible; }
+  .phase-band-full { position:absolute; top:0; bottom:0; z-index:0; border-radius:8px; }
+  .month-tick-label-bottom { position:absolute; bottom:-18px; font-size:9px; color:#9ca3af; transform:translateX(-50%); white-space:nowrap; }
+  .unified-today-line { position:absolute; top:0; width:2px; background:#dc2626; z-index:2; opacity:0.6; }
+  .curve-marker { position:absolute; transform:translate(-50%,-50%); z-index:5; }
+  .curve-marker-dot { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:18px; height:18px; border-radius:50%; background:#ffb719; color:#1f2a4f; display:flex; align-items:center; justify-content:center; font-size:9px; box-shadow:0 1px 2px rgba(0,0,0,0.15); z-index:3; cursor:pointer; transition:transform 0.15s, opacity 0.15s; opacity:0.85; }
+  .curve-marker:hover .curve-marker-dot, .curve-marker.pinned .curve-marker-dot { transform:translate(-50%,-50%) scale(1.6); opacity:1; box-shadow:0 2px 6px rgba(0,0,0,0.3); }
+  .curve-marker-leader { position:absolute; left:50%; bottom:50%; width:1px; background:#9ca3af; z-index:1; display:none; }
+  .curve-marker-label { position:absolute; left:50%; transform:translateX(-50%); cursor:pointer; z-index:4; display:none; }
+  .curve-marker-label .stage-chevron { font-size:10.5px; padding:4px 12px 4px 8px; }
+  .curve-marker:hover .curve-marker-leader, .curve-marker.pinned .curve-marker-leader,
+  .curve-marker:hover .curve-marker-label, .curve-marker.pinned .curve-marker-label { display:block; }
+  .hover-dates { font-size:10.5px; color:#6b7280; margin:6px 0 2px; white-space:nowrap; }
+  .hover-status { font-size:11px; font-weight:700; margin:2px 0 0; white-space:nowrap; }
+  .hover-status.ok { color:#166534; }
+  .hover-status.warn { color:#dc2626; }
+  .hover-actions { margin-top:7px; border-top:1px solid #f0f0f0; padding-top:6px; }
+  .hover-add-btn { font-size:10.5px; color:#1f2a4f; background:#f0f2f7; border:1px solid #d1d5db; border-radius:6px; padding:3px 10px; cursor:pointer; font-weight:600; }
+  .hover-add-btn:hover { background:#e5e9f2; }
+  .hover-menu { display:none; flex-direction:column; gap:3px; margin-top:6px; }
+  .hover-menu.show { display:flex; }
+  .hover-menu button { font-size:10.5px; text-align:left; background:white; border:1px solid #e5e7eb; border-radius:5px; padding:5px 8px; cursor:pointer; white-space:nowrap; }
+  .hover-menu button:hover { background:#f9fafb; border-color:#1f2a4f; }
+  .leadtime-legend { display:flex; gap:14px; font-size:10.5px; color:#6b7280; margin:2px 0 8px; flex-wrap:wrap; }
+  .leadtime-legend-swatch { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:4px; vertical-align:middle; }
+  @media print {
+    body * { visibility: hidden; }
+    #protokol-print-area, #protokol-print-area * { visibility: visible; }
+    #protokol-print-area {
+      display: block; visibility: visible;
+      position: absolute; left: 0; top: 0; width: 100%;
+    }
+  }
 </style>
 </head>
 <body>
 
+<div class="modal-overlay" id="template-modal">
+  <div class="modal-box">
+    <h2>Nowy kosztorys z szablonu</h2>
+    <p class="modal-sub">Odpowiedz na kilka pytań, a przygotujemy dopasowany szablon pozycji kosztorysu — wszystko zostanie w pełni edytowalne.</p>
+    <div class="template-disclaimer">Kwoty w szablonie są orientacyjne i wymagają weryfikacji względem aktualnej sytuacji rynkowej — traktuj je jako punkt startowy, nie gotowy kosztorys.</div>
+
+    <div class="survey-q">
+      <span class="q-label">1. Fundamenty</span>
+      <div class="survey-opts" data-q="fundament">
+        <button class="survey-opt" data-v="lawa" onclick="selectAnswer('fundament','lawa',this)">Ława fundamentowa</button>
+        <button class="survey-opt" data-v="plyta" onclick="selectAnswer('fundament','plyta',this)">Płyta fundamentowa</button>
+      </div>
+    </div>
+
+    <div class="survey-q">
+      <span class="q-label">2. Technologia ścian</span>
+      <div class="survey-opts" data-q="sciany">
+        <button class="survey-opt" data-v="murowana" onclick="selectAnswer('sciany','murowana',this)">Murowana</button>
+        <button class="survey-opt" data-v="szkieletowa" onclick="selectAnswer('sciany','szkieletowa',this)">Szkieletowa (drewniana)</button>
+        <button class="survey-opt" data-v="prefabrykowana" onclick="selectAnswer('sciany','prefabrykowana',this)">Prefabrykowana/modułowa</button>
+      </div>
+    </div>
+
+    <div class="survey-q">
+      <span class="q-label">3. Dach</span>
+      <div class="survey-opts" data-q="dach">
+        <button class="survey-opt" data-v="skosny" onclick="selectAnswer('dach','skosny',this)">Skośny (dachówka/blachodachówka)</button>
+        <button class="survey-opt" data-v="plaski" onclick="selectAnswer('dach','plaski',this)">Płaski / jednospadowy</button>
+      </div>
+    </div>
+
+    <div class="survey-q">
+      <span class="q-label">4. Ogrzewanie</span>
+      <div class="survey-opts" data-q="ogrzewanie">
+        <button class="survey-opt" data-v="gaz" onclick="selectAnswer('ogrzewanie','gaz',this)">Gazowe</button>
+        <button class="survey-opt" data-v="pompa" onclick="selectAnswer('ogrzewanie','pompa',this)">Pompa ciepła</button>
+        <button class="survey-opt" data-v="inne" onclick="selectAnswer('ogrzewanie','inne',this)">Inne</button>
+      </div>
+    </div>
+
+    <div class="survey-q">
+      <span class="q-label">5. Wentylacja</span>
+      <div class="survey-opts" data-q="wentylacja">
+        <button class="survey-opt" data-v="grawitacyjna" onclick="selectAnswer('wentylacja','grawitacyjna',this)">Grawitacyjna</button>
+        <button class="survey-opt" data-v="rekuperacja" onclick="selectAnswer('wentylacja','rekuperacja',this)">Mechaniczna z rekuperacją</button>
+      </div>
+    </div>
+
+    <div class="survey-q">
+      <span class="q-label">6. Standard wykończenia</span>
+      <div class="survey-opts" data-q="wykonczenie">
+        <button class="survey-opt" data-v="deweloperski" onclick="selectAnswer('wykonczenie','deweloperski',this)">Deweloperski</button>
+        <button class="survey-opt" data-v="pod_klucz" onclick="selectAnswer('wykonczenie','pod_klucz',this)">Pod klucz — standard</button>
+        <button class="survey-opt" data-v="premium" onclick="selectAnswer('wykonczenie','premium',this)">Pod klucz — podwyższony</button>
+      </div>
+    </div>
+
+    <div class="survey-q">
+      <span class="q-label">7. Tryb realizacji</span>
+      <div class="survey-opts" data-q="tryb">
+        <button class="survey-opt" data-v="ciagly" onclick="selectAnswer('tryb','ciagly',this)">Budowa ciągła</button>
+        <button class="survey-opt" data-v="etapowy" onclick="selectAnswer('tryb','etapowy',this)">Etapowa (stan surowy, potem przerwa)</button>
+      </div>
+    </div>
+
+    <div class="survey-q" id="qa-gap-wrap" style="display:none">
+      <span class="q-label">7a. Planowana długość przerwy między fazami</span>
+      <input type="number" id="qa-gap-months" placeholder="liczba miesięcy, np. 6" min="0" />
+      <p class="date-hint">Harmonogram wstawi tę przerwę między stanem surowym a wykończeniem — inaczej oba etapy wyszłyby jako budowa ciągła.</p>
+    </div>
+
+    <div class="survey-q">
+      <span class="q-label">8. Planowany termin rozpoczęcia budowy</span>
+      <div id="qa-start-date-container"></div>
+      <p class="date-hint">Na tej podstawie rozłożymy orientacyjny harmonogram wszystkich pozycji — dowolnie go później poprawisz.</p>
+    </div>
+
+    <div class="modal-actions">
+      <button class="secondary" onclick="closeTemplateModal()">Anuluj</button>
+      <button class="primary" onclick="generateFromTemplate()">Wygeneruj kosztorys</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="quick-add-modal">
+  <div class="modal-box">
+    <h2>Szybkie dodanie oferty od jednego wykonawcy</h2>
+    <p class="modal-sub">Jeden wykonawca często wycenia kilka pozycji naraz. Wpisz jego dane raz, a ceny podaj tylko dla pozycji, których dotyczy jego oferta — resztę zostaw pustą.</p>
+
+    <div class="survey-q">
+      <span class="q-label">Wykonawca</span>
+      <input type="text" id="qa-wykonawca" placeholder="Nazwa firmy" />
+    </div>
+    <div class="row" style="margin-bottom:16px">
+      <div class="field">
+        <label>Stopień satysfakcji (wspólny, opcjonalnie)</label>
+        <select id="qa-satisfaction">
+          <option value="">— wybierz —</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Realizacja od (wspólna, opcjonalnie)</label>
+        <div id="qa-term-from-container"></div>
+      </div>
+      <div class="field">
+        <label>Realizacja do (wspólna, opcjonalnie)</label>
+        <div id="qa-term-to-container"></div>
+      </div>
+    </div>
+
+    <div class="survey-q">
+      <span class="q-label">Ceny dla poszczególnych pozycji kosztorysu</span>
+      <div id="qa-price-rows"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="secondary" onclick="closeQuickAddModal()">Anuluj</button>
+      <button class="primary" onclick="submitQuickAdd()">Dodaj oferty</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="leadtime-modal">
+  <div class="modal-box">
+    <h2 id="leadtime-modal-title">Wyprzedzenie zamówienia</h2>
+    <p class="modal-sub">Ile tygodni przed potrzebnym terminem na budowie trzeba już mieć to zamówione/dostarczone?</p>
+
+    <div class="row">
+      <div class="field">
+        <label>Czas realizacji zamówienia (tygodnie)</label>
+        <input type="number" id="leadtime-modal-realizacja" min="0" placeholder="np. 4" />
+        <p class="date-hint">Od podpisania umowy do dostawy/wykonania.</p>
+      </div>
+      <div class="field">
+        <label>Czas na złożenie zamówienia / umowę (tygodnie)</label>
+        <input type="number" id="leadtime-modal-zamowienie" min="0" placeholder="np. 2" />
+        <p class="date-hint">Wybór dostawcy, negocjacje, podpisanie umowy.</p>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="secondary" onclick="closeLeadtimeModal()">Anuluj</button>
+      <button class="primary" onclick="saveLeadtimeModal()">Zapisz</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="notatka-modal">
+  <div class="modal-box">
+    <h2>Dodaj notatkę ze spotkania</h2>
+    <p class="modal-sub">Notatki najwygodniej dodaje się na telefonie prosto z budowy — na komputerze wygodniej je potem przeglądać.</p>
+
+    <div class="survey-q">
+      <span class="q-label">Data</span>
+      <div id="notatka-modal-date-container"></div>
+    </div>
+
+    <div class="survey-q">
+      <span class="q-label">Treść notatki</span>
+      <textarea id="notatka-modal-tekst" rows="4" placeholder="Co ustalono, jakie usterki, kto ma co zrobić..."
+        style="width:100%;padding:9px 11px;border:1px solid #d1d5db;border-radius:8px;font-family:inherit;font-size:13.5px;resize:vertical"></textarea>
+    </div>
+
+    <div class="survey-q">
+      <span class="q-label">Zdjęcia (opcjonalnie)</span>
+      <input type="file" id="notatka-modal-photos" accept="image/*" multiple onchange="handleNotatkaPhotoSelect(this)" />
+      <p class="date-hint">Zdjęcia są automatycznie zmniejszane przed zapisaniem, żeby nie zapchać pamięci przeglądarki.</p>
+      <div id="notatka-modal-photo-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="secondary" onclick="closeNotatkaModal()">Anuluj</button>
+      <button class="primary" onclick="submitNotatkaModal()">Dodaj notatkę</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="protokol-edit-modal">
+  <div class="modal-box">
+    <h2 id="protokol-modal-title">Dodaj protokół odbioru</h2>
+
+    <div class="survey-q">
+      <span class="q-label">Temat odbioru</span>
+      <input type="text" id="protokol-modal-temat" list="protokol-temat-datalist"
+        placeholder="Wybierz z listy pozycji kosztorysu albo wpisz własny temat"
+        oninput="handleProtokolTematChange()" />
+      <datalist id="protokol-temat-datalist"></datalist>
+    </div>
+
+    <div class="survey-q">
+      <span class="q-label">Typ odbioru</span>
+      <div class="survey-opts" id="protokol-typ-opts">
+        <button type="button" class="survey-opt selected" data-v="koncowy" onclick="selectProtokolTyp('koncowy', this)">Końcowy</button>
+        <button type="button" class="survey-opt" data-v="czesciowy" onclick="selectProtokolTyp('czesciowy', this)">Częściowy</button>
+      </div>
+    </div>
+
+    <div class="survey-q" id="protokol-numer-wrap" style="display:none">
+      <span class="q-label">Numer odbioru częściowego</span>
+      <input type="number" id="protokol-modal-numer" min="1" value="1" />
+      <p class="date-hint">Podpowiedziane automatycznie na podstawie poprzednich odbiorów częściowych tego samego tematu — możesz poprawić.</p>
+    </div>
+
+    <div class="survey-q">
+      <span class="q-label">Data odbioru</span>
+      <div id="protokol-modal-date-container"></div>
+    </div>
+
+    <div class="survey-q">
+      <span class="q-label">Wykonawca</span>
+      <input type="text" id="protokol-modal-wykonawca" placeholder="nazwa firmy" />
+      <p class="date-hint" id="protokol-modal-autofill-hint" style="display:none">Uzupełniono automatycznie na podstawie wybranej oferty lub poprzedniego odbioru tego tematu.</p>
+    </div>
+
+    <div class="survey-q">
+      <span class="q-label">Zakres odbieranych prac (opcjonalnie)</span>
+      <textarea id="protokol-modal-zakres" rows="3" placeholder="Jeden punkt na linię, np.:&#10;Wykop&#10;Deskowanie&#10;Zbrojenie"
+        style="width:100%;padding:9px 11px;border:1px solid #d1d5db;border-radius:8px;font-family:inherit;font-size:13.5px;resize:vertical"></textarea>
+      <p class="date-hint">Jeśli temat odpowiada dokładnie pozycji kosztorysu, zakres dociągnie się stamtąd automatycznie — to pole nadpisze go, gdy coś tu wpiszesz.</p>
+    </div>
+
+    <div class="survey-q">
+      <span class="q-label">Uwagi / usterki (opcjonalnie)</span>
+      <textarea id="protokol-modal-uwagi" rows="3" placeholder="np. drobne rysy na tynku do poprawy"
+        style="width:100%;padding:9px 11px;border:1px solid #d1d5db;border-radius:8px;font-family:inherit;font-size:13.5px;resize:vertical"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="secondary" onclick="closeProtokolModal()">Anuluj</button>
+      <button class="primary" onclick="saveProtokolModal()">Zapisz protokół</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="document-add-modal">
+  <div class="modal-box">
+    <h2>Dodaj dokument</h2>
+
+    <div class="survey-q">
+      <span class="q-label">Nazwa dokumentu</span>
+      <input type="text" id="document-modal-nazwa" placeholder="np. atest materiału, protokół odbioru" />
+    </div>
+
+    <div class="survey-q">
+      <span class="q-label">Plik (opcjonalnie — zdjęcie lub PDF)</span>
+      <input type="file" id="document-modal-file" accept="image/*,application/pdf" onchange="handleDocumentFileSelect(this)" />
+      <p class="date-hint">Zdjęcia są kompresowane automatycznie. Pliki PDF — maks. 3 MB (limit pamięci przeglądarki).</p>
+      <div id="document-modal-preview" style="margin-top:8px"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="secondary" onclick="closeDocumentModal()">Anuluj</button>
+      <button class="primary" onclick="saveDocumentModal()">Zapisz dokument</button>
+    </div>
+  </div>
+</div>
+
 <div class="wrap">
+  <div class="brand-header">
+    <img src="data:image/svg+xml;base64,CiAgICAgICAgPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIHdpZHRoPSIzMTQxLjUwOTQzMzk2MjI2NCIgaGVpZ2h0PSIyNTExLjc5MjQ1MjgzMDE4ODciIHZpZXdCb3g9IjAgMCAzMTQxLjUwOTQzMzk2MjI2NCAyNTExLjc5MjQ1MjgzMDE4ODciPgoJCQkKCQkJPGcgdHJhbnNmb3JtPSJzY2FsZSg3LjA3NTQ3MTY5ODExMzIwNzUpIHRyYW5zbGF0ZSgxMCwgMTApIj4KCQkJCTxkZWZzIGlkPSJTdmdqc0RlZnMxMDc1Ii8+PGcgaWQ9IlN2Z2pzRzEwNzYiIGZlYXR1cmVLZXk9InJvb3RDb250YWluZXIiIHRyYW5zZm9ybT0ibWF0cml4KDEsMCwwLDEsMCwwKSIgZmlsbD0iIzAwMCI+PHBhdGggeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9IiBNMCwwIEg0MjQgVjMzNSBIMCwwIHogTTIsMiBINDIyIFYzMzMgSDIsMiB6IE02LDYgSDQxOCBWMzI5IEg2IHogTTgsOCBINDE2IFYzMjcgSDYsOCB6ICIvPjwvZz48ZyBpZD0iU3ZnanNHMTA3NyIgZmVhdHVyZUtleT0ic3ltYm9sRmVhdHVyZS0wIiB0cmFuc2Zvcm09Im1hdHJpeCgwLjE2NzczODMyMjQ4MzY4MiwwLDAsMC4xNjc3MzgzMjI0ODM2ODIsMTI4LjEzMDgzNjE5ODY3NTMsMjMuODgzMTQ2MjYwNjcxMTMpIiBmaWxsPSIjMDAwIj48cGF0aCB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGQ9Ik01MDAsMjkyLjNsMzQzLjcsOTcuOGMxLDAuMywyLDAuNCwzLDAuNGMyLjQsMCw0LjctMC44LDYuNi0yLjJjMi44LTIuMSw0LjQtNS4zLDQuNC04Ljh2LTkzLjhjMC00LjctMy04LjktNy40LTEwLjQgIEw1MDMuNiwxNTYuM2MtMC4yLTAuMS0wLjMtMC4xLTAuNS0wLjFjLTAuMiwwLTAuMy0wLjEtMC41LTAuMWMtMC4zLTAuMS0wLjUtMC4xLTAuOC0wLjJjLTAuMiwwLTAuNC0wLjEtMC41LTAuMSAgYy0wLjIsMC0wLjUsMC0wLjctMC4xYy0wLjIsMC0wLjQsMC0wLjYsMGMtMC4yLDAtMC40LDAtMC42LDBjLTAuMiwwLTAuNSwwLTAuNywwLjFjLTAuMiwwLTAuNCwwLjEtMC41LDAuMWMtMC4zLDAtMC41LDAuMS0wLjgsMC4yICBjLTAuMiwwLTAuMywwLjEtMC41LDAuMWMtMC4yLDAtMC4zLDAuMS0wLjUsMC4xTDE0OS43LDI3NS4zYy00LjQsMS41LTcuNCw1LjctNy40LDEwLjR2MjQ1LjFjMCwzLjMsMS41LDYuNCw0LDguNSAgYzIsMS42LDQuNSwyLjUsNywyLjVjMC43LDAsMS40LTAuMSwyLTAuMkw1MDAsNDc2LjJMNzY3LjgsNTI3djM4bC0yNjYuMS00MC45Yy0wLjIsMC0wLjQsMC0wLjUtMC4xYy0wLjIsMC0wLjQsMC0wLjUtMC4xICBjLTAuMiwwLTAuNCwwLTAuNiwwcy0wLjQsMC0wLjYsMGMtMC4yLDAtMC40LDAtMC41LDAuMWMtMC4yLDAtMC40LDAtMC41LDAuMWwtMzQ2LjcsNTMuM2MtNS40LDAuOC05LjMsNS40LTkuMywxMC45djI0NS4xICBjMCw2LjEsNC45LDExLDExLDExSDUwMGMwLDAsMCwwLDAsMHMwLDAsMCwwaDM0Ni43YzYuMSwwLDExLTQuOSwxMS0xMXYtOTMuOGMwLTUuOC00LjUtMTAuNi0xMC40LTExbC0zNDYuNy0yMC40YzAsMC0wLjEsMC0wLjEsMCAgYy0wLjIsMC0wLjQsMC0wLjYsMGMtMC4yLDAtMC4zLDAtMC41LDBjMCwwLTAuMSwwLTAuMSwwbC0yNjcuMSwxNS43di0zOC4yTDUwMCw2NjAuMkw4NDUuNyw2OTNjMC4zLDAsMC43LDAsMSwwICBjMi43LDAsNS40LTEsNy40LTIuOWMyLjMtMi4xLDMuNi01LDMuNi04LjFWNDM3YzAtNS4xLTMuNC05LjUtOC4zLTEwLjdsLTM0Ni43LTg2LjJjLTAuMSwwLTAuMiwwLTAuMiwwYy0wLjIsMC0wLjMtMC4xLTAuNS0wLjEgIGMtMC4yLDAtMC41LTAuMS0wLjctMC4xYy0wLjIsMC0wLjQsMC0wLjYsMGMtMC4yLDAtMC40LDAtMC42LDBjLTAuMiwwLTAuNCwwLTAuNywwYy0wLjIsMC0wLjQsMC0wLjYsMGMtMC4yLDAtMC41LDAuMS0wLjcsMC4xICBjLTAuMiwwLTAuMywwLjEtMC41LDAuMWMtMC4xLDAtMC4yLDAtMC4yLDBMMjMyLjIsNDA2di0zNy41TDUwMCwyOTIuM3ogTTUxMSwxODIuMWwzMjQuNywxMTEuNVYzNjVMNTExLDI3Mi42VjE4Mi4xeiBNNTExLDczMC44ICBsMzI0LjcsMTkuMXY3Mi40SDUxMVY3MzAuOHogTTQ4OSw2MzkuMmwtMjY4LjgsMjUuNWMtNS42LDAuNS0xMCw1LjMtMTAsMTF2NTkuOWMwLDMsMS4yLDUuOSwzLjUsOGMyLjIsMi4xLDUuMiwzLjIsOC4yLDNMNDg5LDczMC44ICB2OTEuNUgxNjQuM1Y1OTcuN0w0ODksNTQ3LjhWNjM5LjJ6IE01MTEsMzY0LjlsMzI0LjcsODAuN1Y2NzBMNTExLDYzOS4ydi05MS40bDI2Ni4xLDQwLjljMy4yLDAuNSw2LjQtMC40LDguOC0yLjUgIGMyLjQtMi4xLDMuOC01LjEsMy44LTguM3YtNTkuOWMwLTUuMy0zLjgtOS44LTktMTAuOEw1MTEsNDU1LjlWMzY0Ljl6IE0yMTQuNCw0MjguOGMyLjcsMi4xLDYuMSwyLjgsOS40LDJMNDg5LDM2NC45djkxICBsLTMyNC43LDYxLjZWMjkzLjZMNDg5LDE4Mi4xdjkwLjVsLTI3MC44LDc3LjFjLTQuNywxLjMtOCw1LjctOCwxMC42djU5LjlDMjEwLjIsNDIzLjUsMjExLjgsNDI2LjcsMjE0LjQsNDI4Ljh6Ii8+PC9nPjxnIGlkPSJTdmdqc0cxMDc4IiBmZWF0dXJlS2V5PSJuYW1lRmVhdHVyZS0wIiB0cmFuc2Zvcm09Im1hdHJpeCgzLjY4NzMxNTYwNjU1NjU1MywwLDAsMy42ODczMTU2MDY1NTY1NTMsNTguNDYwMTc4NjM1Mjk0ODgsMTAyLjIyNDE5ODk4MzkxMDIpIiBmaWxsPSIjMDAwIj48cGF0aCBkPSJNMTMuMTYgMzcuMTIgbDIuMiAwIGwwIDIuODggbC03LjIgMCBsMCAtMi44OCBsMS4zMiAwIGwtNC4yIC01LjI0IGwwIDUuMjQgbDEuNDQgMCBsMCAyLjg4IGwtMS40NCAwIGwtMi44OCAwIGwtMS40NCAwIGwwIC0yLjg4IGwxLjQ0IDAgbDAgLTExLjUyIGwtMS40NCAwIGwwIC0yLjg4IGwxLjQ0IDAgbDIuODggMCBsMy42OCAwIGMwLjEyIDAgMS4yOCAwIDIuNDQgMC42IGMxLjY0IDAuODQgMi41MiAyLjQgMi41MiA0LjQgYzAgMS4wNCAtMC4yNCAyLjUyIC0xLjM2IDMuNjQgYy0wLjk2IDAuOTYgLTIuMTIgMS4yOCAtMi44OCAxLjQgeiBNNS4yOCAyOS45MiBsMy43MiAwIGMwLjA0IDAgMC42IDAgMS4xNiAtMC4zMiBjMC4zNiAtMC4yIDAuODggLTAuNjQgMC44OCAtMS44OCBjMCAtMC42NCAtMC4wOCAtMS40IC0wLjk2IC0xLjg0IGMtMC41MiAtMC4yNCAtMS4xMiAtMC4yOCAtMS4xMiAtMC4yOCBsLTMuNjggMCBsMCA0LjMyIHogTTMyLjQ0IDM3LjEyIGwxLjQ0IDAgbDAgMi44OCBsLTQuMzIgMCBsMCAtNS43NiBsLTUuNzYgMCBsMCA1Ljc2IGwtNC4zNiAwIGwwIC0yLjg4IGwxLjQ4IDAgbDAgLTguNjQgYzAgLTAuMTYgMCAtMS40NCAwLjY4IC0yLjggYzAuOTYgLTEuOTIgMi43NiAtMi45NiA1LjA4IC0yLjk2IHM0LjEyIDEuMDQgNS4wOCAyLjk2IGMwLjY0IDEuMzYgMC42OCAyLjY0IDAuNjggMi44IGwwIDguNjQgeiBNMjMuOCAzMS4zNiBsNS43NiAwIGwwIC0yLjg4IGMwIC0wLjA0IC0wLjA0IC0wLjg0IC0wLjQ0IC0xLjYgYy0wLjQ0IC0wLjg4IC0xLjI0IC0xLjI4IC0yLjQ0IC0xLjI4IHMtMiAwLjQgLTIuNDQgMS4yOCBjLTAuNCAwLjc2IC0wLjQ0IDEuNTYgLTAuNDQgMS42IGwwIDIuODggeiBNNDUuNjggMjIuNzIgbDUuNzYgMCBsMCA1Ljc2IGwtMi44OCAwIGwwIC0yLjg4IGwtMi44OCAwIGwwIDExLjUyIGwxLjQ0IDAgbDAgMi44OCBsLTEuNDQgMCBsLTIuODggMCBsLTEuNDQgMCBsMCAtMi44OCBsMS40NCAwIGwwIC0xMS41MiBsLTIuODggMCBsMCAyLjg4IGwtMi44OCAwIGwwIC01Ljc2IGw1Ljc2IDAgbDIuODggMCB6IE02MS40OCAyNS42IGwtMS40NCAwIGwwIDExLjUyIGwxLjQ0IDAgbDAgMi44OCBsLTEuNDQgMCBsLTIuODggMCBsLTEuNDQgMCBsMCAtMi44OCBsMS40NCAwIGwwIC0xMS41MiBsLTEuNDQgMCBsMCAtMi44OCBsMS40NCAwIGwyLjg4IDAgbDEuNDQgMCBsMCAyLjg4IHogTTczLjY4IDQwIGMtMi4zMiAwIC00LjQ4IC0wLjg4IC02LjEyIC0yLjUyIHMtMi41MiAtMy44IC0yLjUyIC02LjEyIHMwLjg4IC00LjQ4IDIuNTIgLTYuMTIgYzEuNjQgLTEuNiAzLjggLTIuNTIgNi4xMiAtMi41MiBzNC40OCAwLjkyIDYuMTIgMi41MiBjMS42IDEuNjQgMi41MiAzLjggMi41MiA2LjEyIHMtMC45MiA0LjQ4IC0yLjUyIDYuMTIgYy0xLjY0IDEuNjQgLTMuOCAyLjUyIC02LjEyIDIuNTIgeiBNNzMuNjggMjUuNiBjLTMuMTYgMCAtNS43NiAyLjYgLTUuNzYgNS43NiBzMi42IDUuNzYgNS43NiA1Ljc2IHM1Ljc2IC0yLjYgNS43NiAtNS43NiBzLTIuNiAtNS43NiAtNS43NiAtNS43NiB6Ii8+PC9nPjxnIGlkPSJTdmdqc0cxMDc5IiBmZWF0dXJlS2V5PSJzbG9nYW5GZWF0dXJlLTAiIHRyYW5zZm9ybT0ibWF0cml4KDAuNzg2NTk4NzAwNjU3OTY5MSwwLDAsMC43ODY1OTg3MDA2NTc5NjkxLDQ5LjY4NTM2MDQ0NDcyMDkxNCwyNjguODIwMTAxOTQ5MDEzMDYpIiBmaWxsPSIjMDAwIj48cGF0aCBkPSJNNS4xIDE3LjggbDMgLTkuNiBsMS45IDAgbDMgOS42IGwwLjEgMCBsMy4xIC0xMS44IGwxLjUgMCBsMCAwLjYgbC0zLjYgMTMuNCBsLTEuOSAwIGwtMy4xIC05LjggbC0wLjEgMCBsLTMuMSA5LjggbC0xLjkgMCBsLTMuNiAtMTMuNCBsMCAtMC42IGwxLjUgMCBsMy4xIDExLjggbDAuMSAwIHogTTIwLjIgNiBsMS41IDAgbDAgNiBsMy4yIC0xLjUgbDAgMS4zIGwtMy4yIDEuNSBsMCA1LjQgbDcuNSAwIGwwIDEuMyBsLTkgMCBsMCAtNiBsLTEuNyAwLjggbDAgLTEuMyBsMS43IC0wLjggbDAgLTYuNyB6IE0zMi40IDE2LjQgbC0xLjIgMy42IGwtMS41IDAgbDAgLTAuNiBsNC45IC0xMy40IGwxLjcgMCBsNC45IDEzLjQgbDAgMC42IGwtMS41IDAgbC0xLjIgLTMuNiBsLTYuMSAwIHogTTM4IDE1LjEgbC0yLjUgLTcuMyBsLTAuMSAwIGwtMi41IDcuMyBsNS4xIDAgeiBNNDIuNiA5LjkgbDAgLTAuNiBjMCAtMS45IDEuNCAtMy4zIDMuNSAtMy4zIGw1LjUgMCBsMCAwLjkgbC0wLjQgMC40IGwtNS4xIDAgYy0xLjEgMCAtMiAwLjkgLTIgMiBsMCAwLjYgYzAgMS4xIDAuNiAxLjY4IDEuNiAxLjkgbDMuNyAwLjggYzEuNCAwLjMgMi41IDEuNCAyLjUgMy4yIGwwIDAuOSBjMCAxLjkgLTEuNCAzLjMgLTMuNSAzLjMgbC02IDAgbDAgLTEuMyBsNiAwIGMxLjEgMCAyIC0wLjkgMiAtMiBsMCAtMC45IGMwIC0xLjEgLTAuNiAtMS42OCAtMS42IC0xLjkgbC0zLjcgLTAuOCBjLTEuNCAtMC4zIC0yLjUgLTEuNCAtMi41IC0zLjIgeiBNNDguNCAxLjUgbDEuNiAwIGwtMiAzLjEgbC0xLjEgMCB6IE02My43IDE4LjcgbDAgMS4zIGwtNS44IDAgYy0yLjEgMCAtMy41IC0xLjQgLTMuNSAtMy4zIGwwIC03LjQgYzAgLTEuOSAxLjQgLTMuMyAzLjUgLTMuMyBsNS44IDAgbDAgMC45IGwtMC40IDAuNCBsLTUuNCAwIGMtMS4xIDAgLTIgMC45IC0yIDIgbDAgNy40IGMwIDEuMSAwLjkgMiAyIDIgbDUuOCAwIHogTTY3LjkgMjAgbC0xLjUgMCBsMCAtMTQgbDEuNSAwIGwwIDE0IHogTTc1IDE3LjggbDMgLTkuNiBsMS45IDAgbDMgOS42IGwwLjEgMCBsMy4xIC0xMS44IGwxLjUgMCBsMCAwLjYgbC0zLjYgMTMuNCBsLTEuOSAwIGwtMy4xIC05LjggbC0wLjEgMCBsLTMuMSA5LjggbC0xLjkgMCBsLTMuNiAtMTMuNCBsMCAtMC42IGwxLjUgMCBsMy4xIDExLjggbDAuMSAwIHogTTkwIDIwIGwwIC0xNCBsOS4xIDAgbDAgMC45IGwtMC40IDAuNCBsLTcuMiAwIGwwIDQuOSBsNS43IDAgbDAgMS4zIGwtNS43IDAgbDAgNS4yIGw3LjYgMCBsMCAxLjMgbC05LjEgMCB6IE0xMDggMjAgbC0xLjUgMCBsMCAtMTQgbDYuMiAwIGMyLjEgMCAzLjUgMS40IDMuNSAzLjMgbDAgMi43IGMwIDEuOSAtMS40IDMuMyAtMy41IDMuMyBsLTQuNyAwIGwwIDQuNyB6IE0xMTIuNyA3LjMgbC00LjcgMCBsMCA2LjcgbDQuNyAwIGMxLjEgMCAyIC0wLjkgMiAtMiBsMCAtMi43IGMwIC0xLjEgLTAuOSAtMiAtMiAtMiB6IE0xMjAuNyAyMCBsLTEuNSAwIGwwIC0xNCBsNi4yIDAgYzIuMSAwIDMuNSAxLjQgMy41IDMuMyBsMCAxLjkgYzAgMi44IC0yLjcgMy4yIC0yLjcgMy4yIGwzLjEgNSBsMCAwLjYgbC0xLjUgMCBsLTMuMSAtNS41IGwtNCAwIGwwIDUuNSB6IE0xMjUuNCA3LjMgbC00LjcgMCBsMCA1LjkgbDQuNyAwIGMxLjEgMCAyIC0wLjkgMiAtMiBsMCAtMS45IGMwIC0xLjEgLTAuOSAtMiAtMiAtMiB6IE0xMzEuOSAxNi45IGwwIC03LjggYzAgLTEuOSAxLjQgLTMuMyAzLjUgLTMuMyBsMy41IDAgYzIuMSAwIDMuNSAxLjQgMy41IDMuMyBsMCA3LjggYzAgMS45IC0xLjQgMy4zIC0zLjUgMy4zIGwtMy41IDAgYy0yLjEgMCAtMy41IC0xLjQgLTMuNSAtMy4zIHogTTE0MC45IDE2LjkgbDAgLTcuOCBjMCAtMS4xIC0wLjkgLTIgLTIgLTIgbC0zLjUgMCBjLTEuMSAwIC0yIDAuOSAtMiAyIGwwIDcuOCBjMCAxLjEgMC45IDIgMiAyIGwzLjUgMCBjMS4xIDAgMiAtMC45IDIgLTIgeiBNMTQ3LjUgMjAgbC0xLjUgMCBsMCAtMTQgbDYuMiAwIGMyLjEgMCAzLjUgMS40IDMuNSAzLjMgbDAgMi43IGMwIDEuOSAtMS40IDMuMyAtMy41IDMuMyBsLTQuNyAwIGwwIDQuNyB6IE0xNTIuMiA3LjMgbC00LjcgMCBsMCA2LjcgbDQuNyAwIGMxLjEgMCAyIC0wLjkgMiAtMiBsMCAtMi43IGMwIC0xLjEgLTAuOSAtMiAtMiAtMiB6IE0xNTguMyAxNi45IGwwIC03LjggYzAgLTEuOSAxLjQgLTMuMyAzLjUgLTMuMyBsMy41IDAgYzIuMSAwIDMuNSAxLjQgMy41IDMuMyBsMCA3LjggYzAgMS45IC0xLjQgMy4zIC0zLjUgMy4zIGwtMy41IDAgYy0yLjEgMCAtMy41IC0xLjQgLTMuNSAtMy4zIHogTTE2Ny4zIDE2LjkgbDAgLTcuOCBjMCAtMS4xIC0wLjkgLTIgLTIgLTIgbC0zLjUgMCBjLTEuMSAwIC0yIDAuOSAtMiAyIGwwIDcuOCBjMCAxLjEgMC45IDIgMiAyIGwzLjUgMCBjMS4xIDAgMiAtMC45IDIgLTIgeiBNMTczLjkgMjAgbC0xLjUgMCBsMCAtMTQgbDYuMiAwIGMyLjEgMCAzLjUgMS40IDMuNSAzLjMgbDAgMS45IGMwIDIuOCAtMi43IDMuMiAtMi43IDMuMiBsMy4xIDUgbDAgMC42IGwtMS41IDAgbC0zLjEgLTUuNSBsLTQgMCBsMCA1LjUgeiBNMTc4LjYgNy4zIGwtNC43IDAgbDAgNS45IGw0LjcgMCBjMS4xIDAgMiAtMC45IDIgLTIgbDAgLTEuOSBjMCAtMS4xIC0wLjkgLTIgLTIgLTIgeiBNMTk0LjQgMTguNyBsMCAxLjMgbC01LjggMCBjLTIuMSAwIC0zLjUgLTEuNCAtMy41IC0zLjMgbDAgLTcuNCBjMCAtMS45IDEuNCAtMy4zIDMuNSAtMy4zIGw1LjggMCBsMCAwLjkgbC0wLjQgMC40IGwtNS40IDAgYy0xLjEgMCAtMiAwLjkgLTIgMiBsMCA3LjQgYzAgMS4xIDAuOSAyIDIgMiBsNS44IDAgeiBNMjAyLjggNiBsMCAxMC45IGMwIDEuOSAtMS40IDMuMyAtMy41IDMuMyBsLTQgMCBsMCAtMS4zIGw0IDAgYzEuMSAwIDIgLTAuOSAyIC0yIGwwIC0xMC45IGwxLjUgMCB6IE0yMDYuOCAyMCBsMCAtMTQgbDkuMSAwIGwwIDAuOSBsLTAuNCAwLjQgbC03LjIgMCBsMCA0LjkgbDUuNyAwIGwwIDEuMyBsLTUuNyAwIGwwIDUuMiBsNy42IDAgbDAgMS4zIGwtOS4xIDAgeiBNMjI3LjEgNy4zIGwwIDEyLjcgbC0xLjUgMCBsMCAtMTIuNyBsLTQuNCAwIGwwIC0xLjMgbDEwLjMgMCBsMCAwLjkgbC0wLjQgMC40IGwtNCAwIHogTTIzNi44IDE3LjggbDMgLTkuNiBsMS45IDAgbDMgOS42IGwwLjEgMCBsMy4xIC0xMS44IGwxLjUgMCBsMCAwLjYgbC0zLjYgMTMuNCBsLTEuOSAwIGwtMy4xIC05LjggbC0wLjEgMCBsLTMuMSA5LjggbC0xLjkgMCBsLTMuNiAtMTMuNCBsMCAtMC42IGwxLjUgMCBsMy4xIDExLjggbDAuMSAwIHogTTI1MS4zIDE2LjkgbDAgLTcuOCBjMCAtMS45IDEuNCAtMy4zIDMuNSAtMy4zIGwzLjUgMCBjMi4xIDAgMy41IDEuNCAzLjUgMy4zIGwwIDcuOCBjMCAxLjkgLTEuNCAzLjMgLTMuNSAzLjMgbC0zLjUgMCBjLTIuMSAwIC0zLjUgLTEuNCAtMy41IC0zLjMgeiBNMjYwLjMgMTYuOSBsMCAtNy44IGMwIC0xLjEgLTAuOSAtMiAtMiAtMiBsLTMuNSAwIGMtMS4xIDAgLTIgMC45IC0yIDIgbDAgNy44IGMwIDEuMSAwLjkgMiAyIDIgbDMuNSAwIGMxLjEgMCAyIC0wLjkgMiAtMiB6IE0yNzEuMSA2IGwwIDEwLjkgYzAgMS45IC0xLjQgMy4zIC0zLjUgMy4zIGwtNCAwIGwwIC0xLjMgbDQgMCBjMS4xIDAgMiAtMC45IDIgLTIgbDAgLTEwLjkgbDEuNSAwIHogTTI3NS4xIDIwIGwwIC0xNCBsOS4xIDAgbDAgMC45IGwtMC40IDAuNCBsLTcuMiAwIGwwIDQuOSBsNS43IDAgbDAgMS4zIGwtNS43IDAgbDAgNS4yIGw3LjYgMCBsMCAxLjMgbC05LjEgMCB6IE0yOTYuMSAyMCBsLTYuMiAwIGMtMi4xIDAgLTMuNSAtMS40IC0zLjUgLTMuMyBsMCAtNy40IGMwIC0xLjkgMS40IC0zLjMgMy41IC0zLjMgbDUuOCAwIGwwIDAuOSBsLTAuNCAwLjQgbC01LjQgMCBjLTEuMSAwIC0yIDAuOSAtMiAyIGwwIDcuNCBjMCAxLjEgMC45IDIgMiAyIGw0LjcgMCBsMCAtNi4zIGwxLjUgMCBsMCA3LjYgeiBNMjk5LjMgMTYuOSBsMCAtNy44IGMwIC0xLjkgMS40IC0zLjMgMy41IC0zLjMgbDMuNSAwIGMyLjEgMCAzLjUgMS40IDMuNSAzLjMgbDAgNy44IGMwIDEuOSAtMS40IDMuMyAtMy41IDMuMyBsLTMuNSAwIGMtMi4xIDAgLTMuNSAtMS40IC0zLjUgLTMuMyB6IE0zMDguMyAxNi45IGwwIC03LjggYzAgLTEuMSAtMC45IC0yIC0yIC0yIGwtMy41IDAgYy0xLjEgMCAtMiAwLjkgLTIgMiBsMCA3LjggYzAgMS4xIDAuOSAyIDIgMiBsMy41IDAgYzEuMSAwIDIgLTAuOSAyIC0yIHogTTMxOS43IDIwIGwtMS41IDAgbDAgLTE0IGw2LjIgMCBjMi4xIDAgMy41IDEuNCAzLjUgMy4zIGwwIDIuNyBjMCAxLjkgLTEuNCAzLjMgLTMuNSAzLjMgbC00LjcgMCBsMCA0LjcgeiBNMzI0LjQgNy4zIGwtNC43IDAgbDAgNi43IGw0LjcgMCBjMS4xIDAgMiAtMC45IDIgLTIgbDAgLTIuNyBjMCAtMS4xIC0wLjkgLTIgLTIgLTIgeiBNMzMyLjQgMjAgbC0xLjUgMCBsMCAtMTQgbDYuMiAwIGMyLjEgMCAzLjUgMS40IDMuNSAzLjMgbDAgMS45IGMwIDIuOCAtMi43IDMuMiAtMi43IDMuMiBsMy4xIDUgbDAgMC42IGwtMS41IDAgbC0zLjEgLTUuNSBsLTQgMCBsMCA1LjUgeiBNMzM3LjEgNy4zIGwtNC43IDAgbDAgNS45IGw0LjcgMCBjMS4xIDAgMiAtMC45IDIgLTIgbDAgLTEuOSBjMCAtMS4xIC0wLjkgLTIgLTIgLTIgeiBNMzQzLjYgMTYuOSBsMCAtNy44IGMwIC0xLjkgMS40IC0zLjMgMy41IC0zLjMgbDMuNSAwIGMyLjEgMCAzLjUgMS40IDMuNSAzLjMgbDAgNy44IGMwIDEuOSAtMS40IDMuMyAtMy41IDMuMyBsLTMuNSAwIGMtMi4xIDAgLTMuNSAtMS40IC0zLjUgLTMuMyB6IE0zNTIuNiAxNi45IGwwIC03LjggYzAgLTEuMSAtMC45IC0yIC0yIC0yIGwtMy41IDAgYy0xLjEgMCAtMiAwLjkgLTIgMiBsMCA3LjggYzAgMS4xIDAuOSAyIDIgMiBsMy41IDAgYzEuMSAwIDIgLTAuOSAyIC0yIHogTTM2My40IDYgbDAgMTAuOSBjMCAxLjkgLTEuNCAzLjMgLTMuNSAzLjMgbC00IDAgbDAgLTEuMyBsNCAwIGMxLjEgMCAyIC0wLjkgMiAtMiBsMCAtMTAuOSBsMS41IDAgeiBNMzY3LjQgMjAgbDAgLTE0IGw5LjEgMCBsMCAwLjkgbC0wLjQgMC40IGwtNy4yIDAgbDAgNC45IGw1LjcgMCBsMCAxLjMgbC01LjcgMCBsMCA1LjIgbDcuNiAwIGwwIDEuMyBsLTkuMSAwIHogTTM4MC42IDYgbDAgNi4yIGwzLjMgMCBsMy40IC02LjIgbDEuNSAwIGwwIDAuNiBsLTMuNyA2LjIgbDMuOSA2LjYgbDAgMC42IGwtMS41IDAgbC0zLjYgLTYuNSBsLTMuMyAwIGwwIDYuNSBsLTEuNSAwIGwwIC0xNCBsMS41IDAgeiBNMzk1LjcgNy4zIGwwIDEyLjcgbC0xLjUgMCBsMCAtMTIuNyBsLTQuNCAwIGwwIC0xLjMgbDEwLjMgMCBsMCAwLjkgbC0wLjQgMC40IGwtNCAwIHogTTQwOC44IDIwLjIgbC0zIDAgYy0yLjEgMCAtMy41IC0xLjQgLTMuNSAtMy4zIGwwIC0xMC45IGwxLjUgMCBsMCAxMC45IGMwIDEuMSAwLjkgMiAyIDIgbDMgMCBjMS4xIDAgMiAtMC45IDIgLTIgbDAgLTEwLjkgbDEuNSAwIGwwIDEwLjkgYzAgMS45IC0xLjQgMy4zIC0zLjUgMy4zIHoiLz48L2c+CgkJCTwvZz4KCQk8L3N2Zz4KCQ==" alt="Ratio" class="brand-logo" />
+  </div>
   <div class="toolbar">
     <div>
-      <h1>MVP — Pokrycie kosztorysu ofertami</h1>
-      <p class="sub">Prototyp roboczy. Dane zapisują się automatycznie w tej przeglądarce.</p>
+      <h1>Pokrycie kosztorysu ofertami</h1>
+      <p class="sub">Prototyp roboczy. Dane zapisują się automatycznie w chmurze.</p>
     </div>
-    <span class="save-indicator" id="save-indicator">✓ Zapisano</span>
+    <span class="save-indicator" id="save-indicator">Zapisywanie…</span>
+    <span class="toast" id="toast"></span>
   </div>
 
   <input type="text" class="project-name" id="project-name" placeholder="Nazwa projektu (np. Budowa domu — ul. Polna 12)" />
@@ -159,6 +569,8 @@
     <div class="tab active" data-tab="kosztorys" onclick="switchTab('kosztorys')">Kosztorys</div>
     <div class="tab" data-tab="oferty" onclick="switchTab('oferty')">Oferty i analiza</div>
     <div class="tab" data-tab="harmonogram" onclick="switchTab('harmonogram')">Harmonogram</div>
+    <div class="tab" data-tab="przebieg" onclick="switchTab('przebieg')">Przebieg budowy</div>
+    <div class="tab" data-tab="dokumentacja" onclick="switchTab('dokumentacja')">Dokumentacja powykonawcza</div>
   </div>
 
   <!-- ZAKŁADKA: KOSZTORYS -->
@@ -166,10 +578,16 @@
     <div class="section">
       <h2>Pozycje kosztorysu</h2>
       <p class="ref-line">Nazwa, kwota z kosztorysu, zakres oferty i planowany termin realizacji.</p>
+      <div id="approval-section"></div>
+      <div id="template-result-banner"></div>
+      <div class="template-cta" id="template-cta-box">
+        <p>Zaczynasz od zera? Wygeneruj szablon pozycji na podstawie technologii budowy — potem wszystko dowolnie edytujesz.</p>
+        <button class="secondary" onclick="openTemplateModal()">Użyj szablonu</button>
+      </div>
       <div id="line-items-kosztorys"></div>
       <div class="empty-state" id="empty-state-kosztorys">Brak pozycji. Dodaj pierwszą pozycję kosztorysu poniżej.</div>
 
-      <div class="add-form">
+      <div class="add-form" id="add-form-box">
         <input type="text" id="new-item-name" placeholder="Nazwa pozycji (np. Fundamenty)" />
         <input type="number" id="new-item-planned" placeholder="Kwota z kosztorysu (zł)" />
         <button class="primary" onclick="addLineItem()">Dodaj pozycję</button>
@@ -183,10 +601,24 @@
   <div class="tab-panel" id="panel-oferty">
     <div class="cards" id="summary-cards"></div>
 
+    <div class="template-cta">
+      <p>Jeden wykonawca wycenił kilka pozycji naraz? Dodaj jego ofertę do wszystkich jednym formularzem.</p>
+      <button class="secondary" onclick="openQuickAddModal()">Szybkie dodanie oferty od wykonawcy</button>
+    </div>
+
     <div class="section">
       <h2>Postęp pokrycia ofertami</h2>
       <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
       <p class="status-line" id="progress-status"></p>
+    </div>
+
+    <div class="section">
+      <h2>Terminy krytyczne — zamówienia z wyprzedzeniem</h2>
+      <p class="status-line" style="margin-bottom:14px;">
+        Niektóre materiały (np. okna) trzeba zamówić z dużym wyprzedzeniem — sam proces zamówienia/umowy
+        trwa dodatkowo swoje. Ustaw wyprzedzenie dla pozycji, które tego wymagają, żeby nie przegapić terminu.
+      </p>
+      <div id="leadtime-content"></div>
     </div>
 
     <div class="section">
@@ -208,13 +640,60 @@
     </div>
   </div>
 
+  <!-- ZAKŁADKA: PRZEBIEG BUDOWY -->
+  <div class="tab-panel" id="panel-przebieg">
+    <div class="section">
+      <h2>Notatki ze spotkania</h2>
+      <p class="status-line" style="margin-bottom:14px;">
+        Krótki dziennik ustaleń, usterek i decyzji z bieżących wizyt na budowie.
+      </p>
+      <div id="notatki-content"></div>
+      <button class="primary" style="margin-top:10px" onclick="openNotatkaModal()">Dodaj notatkę</button>
+    </div>
+
+    <div class="section">
+      <h2>Protokoły odbioru</h2>
+      <p class="status-line" style="margin-bottom:14px;">
+        Przegląd dodanych protokołów — końcowych i częściowych. Wybierz temat z listy pozycji kosztorysu albo wpisz własny.
+      </p>
+      <div id="protokoly-content"></div>
+      <button class="primary" style="margin-top:10px" onclick="openProtokolModal()">Dodaj protokół</button>
+    </div>
+  </div>
+
+  <!-- Niewidoczny obszar do drukowania pojedynczego protokołu -->
+  <div id="protokol-print-area"></div>
+
+  <!-- ZAKŁADKA: DOKUMENTACJA POWYKONAWCZA -->
+  <div class="tab-panel" id="panel-dokumentacja">
+    <div class="section">
+      <h2>Dokumentacja powykonawcza — ogólna</h2>
+      <p class="status-line" style="margin-bottom:14px;">
+        Typowe dokumenty do skompletowania po budowie. Zaznaczaj zebrane, dopisuj własne, dodawaj notatki.
+      </p>
+      <div id="dokumentacja-ogolna-content"></div>
+      <div class="scope-add-row" style="margin-top:10px">
+        <input type="text" id="new-dok-ogolny" placeholder="Dodaj dokument do listy ogólnej..." />
+        <button class="secondary" onclick="addDokumentOgolny()">Dodaj</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Dokumentacja przypisana do pozycji kosztorysu</h2>
+      <p class="status-line" style="margin-bottom:14px;">
+        Dokumenty specyficzne dla konkretnej pozycji (np. atest materiału, protokół odbioru robót zanikających).
+      </p>
+      <div id="dokumentacja-pozycje-content"></div>
+    </div>
+  </div>
+
 </div>
 
+<script src="/assets/js/cloud-sync.js"></script>
 <script>
-let state = { projectName: '', lineItems: [] };
+let state = { projectName: '', lineItems: [], kosztorysZatwierdzony: false, dokumentacjaOgolna: defaultDokumentacjaOgolna(), notatkiSpotkan: [], protokoly: [] };
 let resetConfirming = false;
 let resetTimeout = null;
-const STORAGE_KEY = 'mvp-pokrycie-ofertami:main-v3';
 
 const SCOPE_SUGGESTIONS = [
   { match: 'fundament', items: ['Wykopy', 'Ławy fundamentowe', 'Ściany fundamentowe', 'Izolacja pozioma i pionowa', 'Zbrojenie i beton', 'Zasypki'] },
@@ -231,6 +710,393 @@ const SCOPE_SUGGESTIONS = [
   { match: 'wykończen', items: ['Malowanie', 'Podłogi', 'Płytki', 'Biały montaż', 'Listwy przypodłogowe'] }
 ];
 
+/* ====================================================================
+   SZABLONY KOSZTORYSU
+   Kwoty orientacyjne — punkt startowy do weryfikacji, nie gotowe dane.
+   ==================================================================== */
+
+function scopeOf(items) {
+  return items.map((text, idx) => ({ id: 'scope-' + Date.now() + '-' + Math.random().toString(36).slice(2,7) + '-' + idx, text }));
+}
+
+function li(name, planned, scopeList) {
+  return { name, planned, scope: scopeList };
+}
+
+/* --------------------------------------------------------------------
+   KOMPOZYCYJNY SYSTEM GENEROWANIA KOSZTORYSU
+   Każdy element (fundament, konstrukcja, dach, elewacja, instalacje,
+   wykończenie) budowany jest NIEZALEŻNIE na podstawie konkretnej
+   odpowiedzi z ankiety. Żadna kombinacja odpowiedzi nie może więc
+   wygenerować sprzecznej treści (np. "wieńców" przy konstrukcji
+   szkieletowej) — to była przyczyna poprzednich niespójności przy
+   sztywnych szablonach.
+   -------------------------------------------------------------------- */
+
+function foundationItem(fundamentType, ctx) {
+  ctx = ctx || 'standard';
+  if (ctx === 'lekki') { // szkieletowa — lżejsza konstrukcja
+    return fundamentType === 'plyta'
+      ? li('Płyta fundamentowa (lekka konstrukcja)', 45000, ['Izolacja XPS','Zbrojenie','Wylewka'])
+      : li('Fundamenty — ława (lekka konstrukcja)', 32000, ['Wykopy','Ławy fundamentowe','Izolacja pozioma i pionowa','Zasypki']);
+  }
+  if (ctx === 'prefabrykat') {
+    return fundamentType === 'plyta'
+      ? li('Płyta fundamentowa pod prefabrykat', 48000, ['Izolacja XPS','Zbrojenie','Wylewka wg wytycznych producenta'])
+      : li('Ława fundamentowa pod prefabrykat', 38000, ['Wykopy','Ławy fundamentowe','Izolacja wg wytycznych producenta']);
+  }
+  if (fundamentType === 'plyta') {
+    return li('Płyta fundamentowa', 62000, ['Izolacja XPS','Zbrojenie','Wylewka','Instalacje w płycie']);
+  }
+  return li('Fundamenty (ława)', 47000, ['Wykopy','Ławy fundamentowe','Izolacja pozioma i pionowa','Zasypki']);
+}
+
+function structureItem(sciany) {
+  if (sciany === 'szkieletowa') {
+    return li('Konstrukcja szkieletowa (ściany + strop)', 110000, ['Szkielet drewniany','Płyty OSB','Izolacja międzybelkowa']);
+  }
+  // murowana — jedyny wariant, w którym sensowne są nadproża/wieńce
+  return li('Ściany konstrukcyjne', 72000, ['Ściany zewnętrzne','Ściany działowe','Nadproża','Wieńce']);
+}
+
+function roofItems(dach, sciany) {
+  if (dach === 'plaski') {
+    return [
+      li('Dach płaski (konstrukcja + pokrycie + odwodnienie)', 57000, ['Stropodach','Papa/PVC','Spadki','Wpusty dachowe','Obróbki']),
+      li('Attyki i detale wykończeniowe dachu', 16000, ['Attyki','Obróbki blacharskie niestandardowe'])
+    ];
+  }
+  if (sciany === 'szkieletowa') {
+    return [ li('Więźba i pokrycie dachowe', 45000, ['Więźba zintegrowana ze szkieletem','Pokrycie']) ];
+  }
+  return [
+    li('Więźba dachowa', 37000, ['Więźba','Łacenie','Membrana dachowa']),
+    li('Pokrycie dachowe', 32000, ['Dachówka/blachodachówka','Obróbki blacharskie','Rynny i rury spustowe'])
+  ];
+}
+
+function elewacjaItem(sciany) {
+  if (sciany === 'szkieletowa') {
+    return li('Elewacja (deskowanie/tynk lekki-mokry)', 32000, ['Okładzina elewacyjna','Paroizolacja']);
+  }
+  return li('Elewacja i ocieplenie', 37000, ['Styropian/wełna','Tynk elewacyjny','Obróbki']);
+}
+
+function stolarkaItem(isEnergo) {
+  if (isEnergo) {
+    return li('Stolarka okienna (podwyższona klasa energetyczna)', 57000, ['Okna 3-szybowe','Montaż ciepły']);
+  }
+  return li('Stolarka okienna i drzwiowa zewnętrzna', 45000, ['Okna','Drzwi zewnętrzne','Parapety']);
+}
+
+function elektrykaItem(isEnergo) {
+  if (isEnergo) {
+    return li('Instalacja elektryczna (z przygotowaniem pod PV)', 27000, ['Rozdzielnica','Okablowanie','Gniazda i włączniki','Oświetlenie','Przygotowanie pod fotowoltaikę']);
+  }
+  return li('Instalacja elektryczna', 25000, ['Rozdzielnica','Okablowanie','Gniazda i włączniki','Oświetlenie']);
+}
+
+function wentylacjaItem(wentylacja) {
+  if (wentylacja === 'rekuperacja') {
+    return li('Wentylacja mechaniczna z rekuperacją', 32000, ['Centrala wentylacyjna','Kanały','Anemostaty']);
+  }
+  return null; // grawitacyjna — brak osobnej pozycji, ujęta w instalacji sanitarnej
+}
+
+function ogrzewanieItem(ogrzewanie, wentylacja) {
+  if (ogrzewanie === 'pompa' && wentylacja === 'rekuperacja') {
+    return li('Pompa ciepła + ogrzewanie podłogowe', 50000, ['Pompa ciepła','Bufor','Ogrzewanie podłogowe całościowe']);
+  }
+  if (ogrzewanie === 'pompa') {
+    return li('Ogrzewanie (pompa ciepła)', 38000, ['Pompa ciepła','Grzejniki/ogrzewanie podłogowe','Rozdzielacze']);
+  }
+  return li('Ogrzewanie', 32000, ['Źródło ciepła','Grzejniki/ogrzewanie podłogowe','Rozdzielacze']);
+}
+
+const TPL_SANITARNA = li('Instalacja sanitarna', 23000, ['Piony','Podejścia','Biały montaż (podstawowy)']);
+
+// Wykończenie ścian wewnętrznych zależy od technologii — przy konstrukcji
+// suchej (szkieletowa, prefabrykowana) nie ma tynków mokrych, tylko
+// szpachlowanie płyt g-k. Dotyczy dokładnie tego samego problemu, który
+// naprawiliśmy już dla konstrukcji i dachu.
+function wallFinishItem(sciany, isPremium) {
+  const sucha = (sciany === 'szkieletowa' || sciany === 'prefabrykowana');
+  if (sucha) {
+    return isPremium
+      ? li('Wykończenie ścian wewnętrznych (płyty g-k, wysoki standard)', 22000, ['Szpachlowanie','Malowanie wysokiej jakości'])
+      : li('Wykończenie ścian wewnętrznych (płyty g-k)', 16000, ['Szpachlowanie','Malowanie']);
+  }
+  return isPremium
+    ? li('Tynki wewnętrzne i gładzie (wysoki standard)', 32000, ['Tynki maszynowe','Gładzie','Malowanie'])
+    : li('Tynki wewnętrzne i gładzie', 25000, ['Tynki maszynowe','Gładzie','Malowanie']);
+}
+
+const TPL_PODKLUCZ_DODATKI_RESZTA = [
+  li('Podłogi i posadzki', 32000, ['Wylewki','Panele/płytki','Listwy']),
+  li('Łazienki i kuchnia — wykończenie', 45000, ['Płytki','Biały montaż podwyższony','Zabudowa']),
+  li('Stolarka drzwiowa wewnętrzna', 16000, ['Drzwi wewnętrzne','Ościeżnice','Klamki'])
+];
+
+const TPL_PREMIUM_DODATKI_RESZTA = [
+  li('Podłogi i posadzki (wysoki standard)', 42000, ['Wylewki','Panele/płytki wielkoformatowe','Listwy']),
+  li('Łazienki i kuchnia — wykończenie premium', 60000, ['Płytki wielkoformatowe','Armatura premium','Zabudowa na wymiar']),
+  li('Stolarka drzwiowa wewnętrzna (podwyższona)', 22000, ['Drzwi wewnętrzne','Ościeżnice','Klamki']),
+  li('Klimatyzacja / chłodzenie', 27000, ['Jednostki wewnętrzne i zewnętrzne','Okablowanie','Uruchomienie']),
+  li('Instalacja smart home', 22000, ['Sterowanie oświetleniem','Rolety','Sterowanie ogrzewaniem']),
+  li('Fotowoltaika', 32000, ['Panele','Falownik','Montaż','Uruchomienie'])
+];
+
+function finishingItems(wykonczenie, sciany) {
+  if (wykonczenie === 'premium') return [wallFinishItem(sciany, true), ...TPL_PREMIUM_DODATKI_RESZTA];
+  if (wykonczenie === 'pod_klucz') return [wallFinishItem(sciany, false), ...TPL_PODKLUCZ_DODATKI_RESZTA];
+  return [];
+}
+
+// Orientacyjny czas trwania każdej pozycji (w miesiącach) — dopasowywany
+// po fragmencie nazwy. To uproszczenie: w realnej budowie część prac
+// (np. elektryka/sanitarna/wentylacja) biegnie równolegle, tutaj
+// rozkładamy je sekwencyjnie jedna po drugiej — to punkt startowy do
+// ręcznej korekty w Kosztorysie, nie precyzyjny harmonogram budowlany.
+const DURATION_RULES = [
+  { match: 'przyłącza i sieci zewnętrzne', months: 1 },
+  { match: 'fundament', months: 1 },
+  { match: 'płyta fundamentowa', months: 1 },
+  { match: 'konstrukcja szkieletowa', months: 1.5 },
+  { match: 'ściany konstrukcyjne', months: 1.5 },
+  { match: 'pakiet prefabrykowany', months: 1 },
+  { match: 'więźba', months: 1 },
+  { match: 'dach płaski', months: 1 },
+  { match: 'attyki', months: 0.5 },
+  { match: 'stolarka okienna', months: 0.5 },
+  { match: 'elewacja', months: 1 },
+  { match: 'wykończenie "domykające"', months: 1 },
+  { match: 'ostatniego metra', months: 1 },
+  { match: 'instalacja elektryczna', months: 1 },
+  { match: 'instalacja sanitarna', months: 1 },
+  { match: 'wentylacja', months: 0.5 },
+  { match: 'ogrzewanie', months: 1 },
+  { match: 'pompa ciepła', months: 1 },
+  { match: 'tynki', months: 1 },
+  { match: 'wykończenie ścian wewnętrznych', months: 1 },
+  { match: 'podłogi', months: 0.5 },
+  { match: 'łazienki i kuchnia', months: 1 },
+  { match: 'stolarka drzwiowa', months: 0.5 },
+  { match: 'klimatyzacja', months: 0.5 },
+  { match: 'smart home', months: 0.5 },
+  { match: 'fotowoltaika', months: 0.5 },
+  { match: 'ogrodzenie', months: 1 },
+  { match: 'podjazd', months: 1 },
+  { match: 'ogród', months: 1 }
+];
+
+function estimateDurationMonths(name) {
+  const lower = name.toLowerCase();
+  const found = DURATION_RULES.find(r => lower.includes(r.match));
+  return found ? found.months : 1;
+}
+
+// Rozkłada pozycje sekwencyjnie od podanej daty startowej, proporcjonalnie
+// do orientacyjnego czasu trwania każdej z nich. Jeśli w danych pojawia się
+// pozycja oznaczona "[Faza 2]" (budowa etapowa), przed nią wstawiana jest
+// realna przerwa (gapMonths) — inaczej harmonogram i tak zakładałby budowę
+// ciągłą, mimo wybranego trybu etapowego.
+function assignScheduleDates(items, startIso, gapMonths) {
+  if (!startIso) return items;
+  let cursor = new Date(startIso + 'T00:00:00');
+  let gapInserted = !gapMonths;
+
+  return items.map(it => {
+    if (!gapInserted && it.name.startsWith('[Faza 2]')) {
+      cursor.setDate(cursor.getDate() + Math.round(gapMonths * 30));
+      gapInserted = true;
+    }
+
+    const months = estimateDurationMonths(it.name);
+    const from = new Date(cursor);
+    const to = new Date(cursor);
+    to.setDate(to.getDate() + Math.round(months * 30));
+    cursor = new Date(to);
+
+    const toIso = d => d.toISOString().slice(0, 10);
+    return { ...it, monthFrom: toIso(from), monthTo: toIso(to) };
+  });
+}
+
+function templateLabel(a) {
+  const scianyNazwa = { murowana:'murowany', szkieletowa:'szkieletowy (konstrukcja drewniana)', prefabrykowana:'prefabrykowany/modułowy' }[a.sciany];
+  const wykNazwa = { deweloperski:'standard deweloperski', pod_klucz:'pod klucz', premium:'pod klucz — podwyższony standard' }[a.wykonczenie];
+  const isEnergo = a.fundament === 'plyta' && a.ogrzewanie === 'pompa' && a.wentylacja === 'rekuperacja';
+  const dachNazwa = a.dach === 'plaski' ? ', dach płaski' : '';
+  const etapNazwa = a.tryb === 'etapowy' ? ' — realizacja etapowa' : '';
+  return `${scianyNazwa}${isEnergo ? ' (energooszczędny)' : ''}${dachNazwa}, ${wykNazwa}${etapNazwa}`;
+}
+
+function buildLineItems(a) {
+  const isEnergo = a.fundament === 'plyta' && a.ogrzewanie === 'pompa' && a.wentylacja === 'rekuperacja';
+  const core = [];
+  const systems = [];
+
+  // Przyłącza i sieci zewnętrzne — zawsze na samym początku, niezależnie
+  // od technologii ścian czy fazowania: media muszą być dostępne od
+  // startu budowy, nie da się ich sensownie odsunąć w czasie.
+  core.push(li('Przyłącza i sieci zewnętrzne', 20000, ['Przyłącze wodociągowe','Przyłącze kanalizacyjne (lub szambo/przydomowa oczyszczalnia)','Przyłącze elektroenergetyczne','Przyłącze gazowe (jeśli dotyczy)']));
+
+  if (a.sciany === 'prefabrykowana') {
+    core.push(foundationItem(a.fundament, 'prefabrykat'));
+    core.push(li('Pakiet prefabrykowany (ściany, strop, dach w cenie)', 315000, ['Zakup i montaż gotowych elementów wg wybranego producenta']));
+    core.push(li('Wykończenie "domykające" (uszczelnienia, obróbki)', 20000, ['Prace uzupełniające po montażu']));
+    systems.push(li('Przyłącza i instalacje "ostatniego metra"', 32000, ['Podłączenie do przyłączy']));
+  } else {
+    const ctx = a.sciany === 'szkieletowa' ? 'lekki' : 'standard';
+    core.push(foundationItem(a.fundament, ctx));
+    core.push(structureItem(a.sciany));
+    core.push(...roofItems(a.dach, a.sciany));
+    core.push(stolarkaItem(isEnergo));
+    core.push(elewacjaItem(a.sciany));
+  }
+
+  systems.push(elektrykaItem(isEnergo));
+  systems.push(TPL_SANITARNA);
+  const went = wentylacjaItem(a.wentylacja);
+  if (went) systems.push(went);
+  systems.push(ogrzewanieItem(a.ogrzewanie, a.wentylacja));
+
+  const finishing = finishingItems(a.wykonczenie, a.sciany);
+
+  // Tereny zewnętrzne — realizowane praktycznie zawsze na końcu inwestycji,
+  // niezależnie od technologii budynku.
+  const zewnetrze = [
+    li('Ogrodzenie', 18000, ['Słupki i podmurówka','Przęsła lub siatka','Brama wjazdowa i furtka']),
+    li('Podjazd i utwardzenia', 16000, ['Podbudowa','Kostka brukowa lub inna nawierzchnia','Obrzeża']),
+    li('Ogród i tereny zielone', 10000, ['Niwelacja terenu','Trawnik','Nasadzenia podstawowe'])
+  ];
+
+  if (a.tryb === 'etapowy') {
+    const faza2 = [...systems, ...finishing, ...zewnetrze].map(x => li('[Faza 2] ' + x.name, x.planned, x.scope));
+    return [...core, ...faza2];
+  }
+
+  return [...core, ...systems, ...finishing, ...zewnetrze];
+}
+
+let templateAnswers = {};
+
+function selectAnswer(question, value, btnEl) {
+  templateAnswers[question] = value;
+  document.querySelectorAll(`.survey-opts[data-q="${question}"] .survey-opt`).forEach(b => b.classList.remove('selected'));
+  btnEl.classList.add('selected');
+
+  if (question === 'tryb') {
+    const gapWrap = document.getElementById('qa-gap-wrap');
+    gapWrap.style.display = (value === 'etapowy') ? 'block' : 'none';
+    if (value !== 'etapowy') document.getElementById('qa-gap-months').value = '';
+  }
+}
+
+function openTemplateModal() {
+  templateAnswers = {};
+  document.querySelectorAll('.survey-opt').forEach(b => b.classList.remove('selected'));
+  document.getElementById('qa-start-date-container').innerHTML = stdDateFieldHtml('qa-start-date', 'markDateFieldValidity(this)');
+  document.getElementById('qa-gap-months').value = '';
+  document.getElementById('qa-gap-wrap').style.display = 'none';
+  document.getElementById('template-modal').classList.add('show');
+}
+
+function closeTemplateModal() {
+  document.getElementById('template-modal').classList.remove('show');
+}
+
+function generateFromTemplate() {
+  if (state.kosztorysZatwierdzony) return;
+  const required = ['fundament','sciany','dach','ogrzewanie','wentylacja','wykonczenie','tryb'];
+  const missing = required.filter(q => !templateAnswers[q]);
+  if (missing.length) {
+    alert('Odpowiedz na wszystkie pytania, żeby dobrać właściwy szablon.');
+    return;
+  }
+
+  const startDateInput = document.getElementById('qa-start-date');
+  const startResult = markDateFieldValidity(startDateInput);
+  if (startResult === false) return; // pole jest już żółte z widocznym komunikatem — nic więcej nie robimy
+  const startIso = startResult || '';
+
+  const gapMonths = (templateAnswers.tryb === 'etapowy')
+    ? (parseFloat(document.getElementById('qa-gap-months').value) || 0)
+    : 0;
+
+  let items = buildLineItems(templateAnswers);
+  const label = templateLabel(templateAnswers);
+
+  if (startIso) {
+    items = assignScheduleDates(items, startIso, gapMonths);
+  }
+
+  state.lineItems = items.map((it, idx) => ({
+    id: 'item-' + Date.now() + '-' + idx,
+    name: it.name,
+    planned: it.planned,
+    scopeItems: scopeOf(it.scope),
+    monthFrom: it.monthFrom || '',
+    monthTo: it.monthTo || '',
+    offers: [],
+    dokumenty: [], zdjecia: [],
+    leadTime: suggestLeadtimeDefaults(it.name)
+  }));
+
+  closeTemplateModal();
+  const scheduleNote = startIso ? ' Harmonogram wstępnie rozłożony od podanej daty — dostosuj go dowolnie.' : '';
+  document.getElementById('template-result-banner').innerHTML =
+    `<div class="template-result-banner">Wygenerowano szablon: <b>${label}</b>. Kwoty są orientacyjne — sprawdź i dostosuj każdą pozycję.${scheduleNote}</div>`;
+
+  render();
+  saveState();
+}
+
+// Pozycje, dla których wyprzedzenie zamówienia jest "oczywiste" — jeśli
+// nazwa pozycji zawiera jedno z tych słów kluczowych, wyprzedzenie
+// ustawia się automatycznie, żeby użytkownik nie musiał o tym pamiętać.
+// Wciąż w pełni edytowalne/usuwalne w panelu terminów krytycznych.
+const LEADTIME_DEFAULTS = [
+  { match: 'stolarka okienna', realizacjaTygodnie: 4, zamowienieTygodnie: 2 },
+  { match: 'okna', realizacjaTygodnie: 4, zamowienieTygodnie: 2 },
+  { match: 'stolarka drzwiowa', realizacjaTygodnie: 3, zamowienieTygodnie: 1 },
+  { match: 'brama', realizacjaTygodnie: 4, zamowienieTygodnie: 2 },
+  { match: 'garażow', realizacjaTygodnie: 4, zamowienieTygodnie: 2 },
+  { match: 'pompa ciepła', realizacjaTygodnie: 3, zamowienieTygodnie: 1 },
+  // Więźba i pokrycie dachowe — wybór dostawcy realnie zajmuje ok. 8 tyg.,
+  // a od podpisania umowy do wbudowania kolejne 4 tyg.
+  { match: 'więźba', realizacjaTygodnie: 4, zamowienieTygodnie: 8 },
+  { match: 'prefabrykowany', realizacjaTygodnie: 6, zamowienieTygodnie: 2 },
+  // Instalacje — zbieranie ofert i umowa ok. 4 tyg., realizacja ok. 2 miesiące.
+  // Ważne zastrzeżenie niezależne od technologii: instalatorzy zwykle
+  // wymagają zamkniętego budynku (dach, okna, drzwi) przed startem prac.
+  { match: 'instalacja elektryczna', realizacjaTygodnie: 8, zamowienieTygodnie: 4,
+    note: 'Instalatorzy zwykle wymagają zamkniętego budynku (dach, okna, drzwi) przed rozpoczęciem prac — niezależnie od technologii ścian.' },
+  { match: 'instalacja sanitarna', realizacjaTygodnie: 8, zamowienieTygodnie: 4,
+    note: 'Instalatorzy zwykle wymagają zamkniętego budynku (dach, okna, drzwi) przed rozpoczęciem prac — niezależnie od technologii ścian.' },
+  { match: 'wentylacja', realizacjaTygodnie: 8, zamowienieTygodnie: 4,
+    note: 'Instalatorzy zwykle wymagają zamkniętego budynku przed rozpoczęciem prac.' },
+  { match: 'ogrzewanie', realizacjaTygodnie: 8, zamowienieTygodnie: 4,
+    note: 'Instalatorzy zwykle wymagają zamkniętego budynku przed rozpoczęciem prac.' },
+  { match: 'pompa ciepła', realizacjaTygodnie: 8, zamowienieTygodnie: 4 },
+  // Tynki — warto pytać już w trakcie murowania ścian, nie czekać na koniec SSO.
+  { match: 'tynki', realizacjaTygodnie: 4, zamowienieTygodnie: 4,
+    note: 'Warto zacząć pytać tynkarzy już w trakcie murowania ścian — dobre ekipy mają kalendarz zapełniony z wyprzedzeniem.' },
+  { match: 'wykończenie ścian wewnętrznych', realizacjaTygodnie: 4, zamowienieTygodnie: 4 },
+  // Podłogi/wykończenie — decyzje materiałowe warto podejmować dużo
+  // wcześniej niż inne pozycje (dostępność materiałów bywa ograniczona).
+  { match: 'podłogi', realizacjaTygodnie: 4, zamowienieTygodnie: 12,
+    note: 'Decyzje o podłogach i materiałach wykończeniowych warto podejmować dużo wcześniej niż się wydaje — dostępność bywa ograniczona, dobrze mieć to "na oku" od dawna.' },
+  { match: 'łazienki i kuchnia', realizacjaTygodnie: 4, zamowienieTygodnie: 4,
+    note: 'Ustal z wykonawcą, KTO dostarcza urządzenia (biały montaż) — zlecenie kompletne czy zakup we własnym zakresie. Łatwo o tym zapomnieć.' }
+];
+
+function suggestLeadtimeDefaults(name) {
+  const lower = name.toLowerCase();
+  const found = LEADTIME_DEFAULTS.find(r => lower.includes(r.match));
+  return found ? { realizacjaTygodnie: found.realizacjaTygodnie, zamowienieTygodnie: found.zamowienieTygodnie, note: found.note || '' } : null;
+}
+
 function suggestScopeItems(name) {
   const lower = name.toLowerCase();
   const found = SCOPE_SUGGESTIONS.find(s => lower.includes(s.match));
@@ -245,17 +1111,158 @@ function fmt(n) {
 function isoToDisplay(iso) {
   if (!iso) return '';
   const [y, m, d] = iso.split('-');
-  return d + ':' + m + ':' + y;
+  return d + '.' + m + '.' + y;
 }
 
+// Jedyny poprawny zapis ręczny to DD.MM.RRRR (z kropkami). Każde inne
+// odstępstwo (inny separator, dopiski typu "r.", brak wiodących zer w
+// nietypowym miejscu itp.) jest traktowane jako błąd — użytkownik ma
+// wtedy do wyboru albo poprawić zapis, albo skorzystać z kalendarza.
 function displayToIso(text) {
-  const match = text.trim().match(/^(\d{1,2})[:.\-\/](\d{1,2})[:.\-\/](\d{4})$/);
+  const match = text.trim().match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
   if (!match) return null;
-  const [, d, m, y] = match;
-  const dd = d.padStart(2, '0');
-  const mm = m.padStart(2, '0');
+  const [, dd, mm, y] = match;
   if (Number(mm) < 1 || Number(mm) > 12 || Number(dd) < 1 || Number(dd) > 31) return null;
   return y + '-' + mm + '-' + dd;
+}
+
+// Wspólna walidacja pola daty dla WSZYSTKICH pól w aplikacji — puste pole
+// jest OK (nic nie podświetlamy), poprawny format czyści podświetlenie,
+// a każde inne odstępstwo od DD.MM.RRRR podświetla pole na żółto i
+// pokazuje WIDOCZNY komunikat pod polem (nie tylko podpowiedź po
+// najechaniu, żeby nie dało się tego przeoczyć). Kalendarz zostaje jako
+// alternatywa niezależnie od tego, co użytkownik wpisze ręcznie.
+function markDateFieldValidity(inputEl) {
+  const text = inputEl.value.trim();
+  if (text === '') {
+    inputEl.style.background = '';
+    inputEl.style.borderColor = '';
+    inputEl.title = '';
+    clearInlineDateError(inputEl);
+    return null;
+  }
+  const iso = displayToIso(text);
+  if (!iso) {
+    inputEl.style.background = '#fef9c3';
+    inputEl.style.borderColor = '#eab308';
+    inputEl.title = 'Nieprawidłowy format. Jedyny poprawny zapis to DD.MM.RRRR — albo użyj kalendarza 📅.';
+    showInlineDateError(inputEl);
+    return false;
+  }
+  inputEl.style.background = '';
+  inputEl.style.borderColor = '';
+  inputEl.title = '';
+  clearInlineDateError(inputEl);
+  return iso;
+}
+
+function showInlineDateError(inputEl) {
+  const anchor = inputEl.closest('.date-field') || inputEl;
+  const forKey = inputEl.id || 'anon';
+  let msgEl = anchor.parentElement.querySelector('.date-error-msg[data-for="' + forKey + '"]');
+  if (!msgEl) {
+    msgEl = document.createElement('p');
+    msgEl.className = 'date-error-msg';
+    msgEl.setAttribute('data-for', forKey);
+    anchor.insertAdjacentElement('afterend', msgEl);
+  }
+  msgEl.textContent = 'Nieprawidłowy format.';
+}
+
+function clearInlineDateError(inputEl) {
+  const anchor = inputEl.closest('.date-field') || inputEl;
+  const forKey = inputEl.id || 'anon';
+  const msgEl = anchor.parentElement.querySelector('.date-error-msg[data-for="' + forKey + '"]');
+  if (msgEl) msgEl.remove();
+}
+
+/* ----------------------------------------------------------------------
+   Generyczny kalendarz dla SAMODZIELNYCH pól daty — takich, które nie są
+   przypisane do pozycji/oferty (np. termin startu w ankiecie, data
+   notatki, data odbioru w protokole). Identyfikowany wyłącznie unikalnym
+   id pola, więc jeden mechanizm obsługuje wszystkie takie przypadki.
+   ---------------------------------------------------------------------- */
+
+function stdCalKey(fieldId) { return 'std::' + fieldId; }
+
+function buildStdCalendarInner(fieldId, isoValue) {
+  const key = stdCalKey(fieldId);
+  if (!calendarViewState[key]) {
+    let y, m;
+    if (isoValue) { const p = isoValue.split('-').map(Number); y = p[0]; m = p[1]; }
+    else { const t = new Date(); y = t.getFullYear(); m = t.getMonth() + 1; }
+    calendarViewState[key] = { year: y, month: m };
+  }
+  const view = calendarViewState[key];
+  const monthNames = ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
+  const daysInMonth = new Date(view.year, view.month, 0).getDate();
+  const firstDow = (new Date(view.year, view.month - 1, 1).getDay() + 6) % 7;
+  const weekdayLabels = ['Pn','Wt','Śr','Cz','Pt','So','Nd'];
+
+  let html = `<div class="cal-header">
+    <span class="cal-nav-btn" onclick="navigateStdCalendar('${fieldId}',-1,'${isoValue || ''}')">‹</span>
+    <span>${monthNames[view.month - 1]} ${view.year}</span>
+    <span class="cal-nav-btn" onclick="navigateStdCalendar('${fieldId}',1,'${isoValue || ''}')">›</span>
+  </div>
+  <div class="cal-grid">`;
+
+  weekdayLabels.forEach(w => { html += `<div class="cal-day weekday-label">${w}</div>`; });
+  for (let i = 0; i < firstDow; i++) html += '<div class="cal-day empty"></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const thisIso = view.year + '-' + String(view.month).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    const isSelected = isoValue === thisIso;
+    html += `<div class="cal-day${isSelected ? ' selected' : ''}" onclick="pickStdCalendarDate('${fieldId}','${thisIso}')">${d}</div>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function navigateStdCalendar(fieldId, direction, isoValue) {
+  const key = stdCalKey(fieldId);
+  if (!calendarViewState[key]) {
+    calendarViewState[key] = (() => {
+      if (isoValue) { const p = isoValue.split('-').map(Number); return { year: p[0], month: p[1] }; }
+      const t = new Date(); return { year: t.getFullYear(), month: t.getMonth() + 1 };
+    })();
+  }
+  const view = calendarViewState[key];
+  view.month += direction;
+  if (view.month < 1) { view.month = 12; view.year--; }
+  if (view.month > 12) { view.month = 1; view.year++; }
+  const popup = document.getElementById('std-calpopup-' + fieldId);
+  const inner = popup ? popup.querySelector('.calendar-popup-inner') : null;
+  if (inner) inner.innerHTML = buildStdCalendarInner(fieldId, isoValue);
+}
+
+function pickStdCalendarDate(fieldId, isoValue) {
+  const input = document.getElementById(fieldId);
+  if (!input) return;
+  input.value = isoToDisplay(isoValue);
+  delete calendarViewState[stdCalKey(fieldId)];
+  // Odpalamy natywne zdarzenie change — zadziała dokładnie ten sam
+  // handler, co przy ręcznym wpisywaniu, niezależnie od tego, czy pole
+  // tylko waliduje, czy dodatkowo zapisuje wartość do stanu aplikacji.
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+  const popup = document.getElementById('std-calpopup-' + fieldId);
+  if (popup) {
+    const inner = popup.querySelector('.calendar-popup-inner');
+    if (inner) inner.innerHTML = buildStdCalendarInner(fieldId, isoValue);
+  }
+}
+
+function stdDateFieldHtml(fieldId, changeHandlerExpr, isoValue) {
+  const displayValue = isoToDisplay(isoValue || '');
+  const popupId = 'std-calpopup-' + fieldId;
+  return `
+    <div class="date-field">
+      <input type="text" id="${fieldId}" class="date-text-input" value="${displayValue}" placeholder="DD.MM.RRRR"
+        onchange="${changeHandlerExpr}" />
+      <div class="date-icon-wrap" title="Najedź, aby zobaczyć kalendarz">
+        📅
+        <div class="calendar-popup" id="${popupId}"><div class="calendar-popup-inner">${buildStdCalendarInner(fieldId, isoValue || '')}</div></div>
+      </div>
+    </div>
+  `;
 }
 
 let calendarViewState = {};
@@ -327,9 +1334,10 @@ function pickCalendarDate(itemId, field, isoValue) {
 function dateFieldHtml(itemId, field, isoValue) {
   const displayValue = isoToDisplay(isoValue);
   const popupId = 'calpopup-' + itemId + '-' + field;
+  const inputId = 'dateinput-' + itemId + '-' + field;
   return `
     <div class="date-field">
-      <input type="text" class="date-text-input" value="${displayValue}" placeholder="DD:MM:RRRR"
+      <input type="text" id="${inputId}" class="date-text-input" value="${displayValue}" placeholder="DD.MM.RRRR"
         onchange="handleDateTextChange(this, '${itemId}', '${field}')" />
       <div class="date-icon-wrap" title="Najedź, aby zobaczyć kalendarz">
         📅
@@ -340,27 +1348,120 @@ function dateFieldHtml(itemId, field, isoValue) {
 }
 
 function handleDateTextChange(inputEl, itemId, field) {
-  const text = inputEl.value;
   const item = state.lineItems.find(i => i.id === itemId);
   if (!item) return;
 
-  if (text.trim() === '') {
-    item[field] = '';
-    inputEl.style.borderColor = '';
-    render();
-    saveState();
-    return;
-  }
+  const result = markDateFieldValidity(inputEl);
+  if (result === false) return; // nieprawidłowy format — pole zostaje żółte, nic nie zapisujemy
 
-  const iso = displayToIso(text);
-  if (!iso) {
-    inputEl.style.borderColor = '#dc2626';
-    inputEl.title = 'Nieprawidłowy format. Użyj DD:MM:RRRR (np. 15:03:2026)';
-    return;
+  item[field] = result || ''; // null (puste pole) -> '', iso string -> zapisujemy
+  render();
+  saveState();
+}
+
+/* ---------- to samo, ale dla zakresu dat POJEDYNCZEJ OFERTY (nie pozycji) ---------- */
+
+function offerCalKey(itemId, offerId, field) {
+  return 'offer::' + itemId + '::' + offerId + '::' + field;
+}
+
+function buildOfferCalendarInner(itemId, offerId, field, isoValue) {
+  const key = offerCalKey(itemId, offerId, field);
+  if (!calendarViewState[key]) {
+    let y, m;
+    if (isoValue) {
+      const parts = isoValue.split('-').map(Number);
+      y = parts[0]; m = parts[1];
+    } else {
+      const today = new Date();
+      y = today.getFullYear(); m = today.getMonth() + 1;
+    }
+    calendarViewState[key] = { year: y, month: m };
   }
-  inputEl.style.borderColor = '';
-  inputEl.title = '';
-  item[field] = iso;
+  const view = calendarViewState[key];
+  const monthNames = ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
+  const daysInMonth = new Date(view.year, view.month, 0).getDate();
+  const firstDow = (new Date(view.year, view.month - 1, 1).getDay() + 6) % 7;
+  const weekdayLabels = ['Pn','Wt','Śr','Cz','Pt','So','Nd'];
+
+  let html = `<div class="cal-header">
+    <span class="cal-nav-btn" onclick="navigateOfferCalendar('${itemId}','${offerId}','${field}',-1,'${isoValue || ''}')">‹</span>
+    <span>${monthNames[view.month - 1]} ${view.year}</span>
+    <span class="cal-nav-btn" onclick="navigateOfferCalendar('${itemId}','${offerId}','${field}',1,'${isoValue || ''}')">›</span>
+  </div>
+  <div class="cal-grid">`;
+
+  weekdayLabels.forEach(w => { html += `<div class="cal-day weekday-label">${w}</div>`; });
+  for (let i = 0; i < firstDow; i++) html += '<div class="cal-day empty"></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const thisIso = view.year + '-' + String(view.month).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    const isSelected = isoValue === thisIso;
+    html += `<div class="cal-day${isSelected ? ' selected' : ''}" onclick="pickOfferCalendarDate('${itemId}','${offerId}','${field}','${thisIso}')">${d}</div>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function navigateOfferCalendar(itemId, offerId, field, direction, isoValue) {
+  const key = offerCalKey(itemId, offerId, field);
+  if (!calendarViewState[key]) {
+    calendarViewState[key] = (() => {
+      if (isoValue) {
+        const parts = isoValue.split('-').map(Number);
+        return { year: parts[0], month: parts[1] };
+      }
+      const today = new Date();
+      return { year: today.getFullYear(), month: today.getMonth() + 1 };
+    })();
+  }
+  const view = calendarViewState[key];
+  view.month += direction;
+  if (view.month < 1) { view.month = 12; view.year--; }
+  if (view.month > 12) { view.month = 1; view.year++; }
+  const popup = document.getElementById('offer-calpopup-' + itemId + '-' + offerId + '-' + field);
+  const inner = popup ? popup.querySelector('.calendar-popup-inner') : null;
+  if (inner) inner.innerHTML = buildOfferCalendarInner(itemId, offerId, field, isoValue);
+}
+
+function pickOfferCalendarDate(itemId, offerId, field, isoValue) {
+  const item = state.lineItems.find(i => i.id === itemId);
+  if (!item) return;
+  const offer = item.offers.find(o => o.id === offerId);
+  if (!offer) return;
+  offer[field] = isoValue;
+  delete calendarViewState[offerCalKey(itemId, offerId, field)];
+  syncSelectedOfferDatesToItem(item);
+  render();
+  saveState();
+}
+
+function offerDateFieldHtml(itemId, offerId, field, isoValue) {
+  const displayValue = isoToDisplay(isoValue);
+  const popupId = 'offer-calpopup-' + itemId + '-' + offerId + '-' + field;
+  const inputId = 'offer-dateinput-' + itemId + '-' + offerId + '-' + field;
+  return `
+    <div class="date-field">
+      <input type="text" id="${inputId}" class="date-text-input" value="${displayValue}" placeholder="DD.MM.RRRR"
+        onchange="handleOfferDateTextChange(this, '${itemId}', '${offerId}', '${field}')" />
+      <div class="date-icon-wrap" title="Najedź, aby zobaczyć kalendarz">
+        📅
+        <div class="calendar-popup" id="${popupId}"><div class="calendar-popup-inner">${buildOfferCalendarInner(itemId, offerId, field, isoValue)}</div></div>
+      </div>
+    </div>
+  `;
+}
+
+function handleOfferDateTextChange(inputEl, itemId, offerId, field) {
+  const item = state.lineItems.find(i => i.id === itemId);
+  if (!item) return;
+  const offer = item.offers.find(o => o.id === offerId);
+  if (!offer) return;
+
+  const result = markDateFieldValidity(inputEl);
+  if (result === false) return;
+
+  offer[field] = result || '';
+  syncSelectedOfferDatesToItem(item);
   render();
   saveState();
 }
@@ -375,28 +1476,25 @@ const SATISFACTION_LABELS = {
   5: '5 — bardzo dobrze'
 };
 
-async function loadState() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      state = JSON.parse(saved);
-    }
-  } catch (e) {
-    console.log('Brak zapisanych danych, zaczynamy od nowa.');
-  }
-  document.getElementById('project-name').value = state.projectName || '';
-  render();
-}
+// loadState() i saveState() są teraz zdefiniowane globalnie w
+// assets/js/cloud-sync.js (dołączonym przed tym skryptem) — zamieniają
+// dawny zapis do localStorage na zapis w chmurze (Supabase przez Netlify
+// Functions). Ten plik nie definiuje ich już samodzielnie, żeby uniknąć
+// nadpisania — reszta kodu poniżej nadal woła te same nazwy funkcji.
 
-async function saveState() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    const indicator = document.getElementById('save-indicator');
-    indicator.classList.add('show');
-    setTimeout(() => indicator.classList.remove('show'), 1200);
-  } catch (e) {
-    console.error('Błąd zapisu:', e);
-  }
+// Krótkie, konkretne potwierdzenie akcji (np. "Dodano dokument") zamiast
+// domyślnego stanu zapisu — używa OSOBNEGO elementu #toast, niezależnego
+// od stałego wskaźnika #save-indicator (ten drugi zawsze pokazuje aktualny
+// status zapisu w chmurze i nie powinien być nadpisywany przez toasty).
+function showToast(message, duration) {
+  duration = duration || 1800;
+  const toast = document.getElementById('toast');
+  clearTimeout(toast._toastTimeout);
+  toast.textContent = '✓ ' + message;
+  toast.classList.add('show');
+  toast._toastTimeout = setTimeout(() => {
+    toast.classList.remove('show');
+  }, duration);
 }
 
 function switchTab(tab) {
@@ -404,10 +1502,15 @@ function switchTab(tab) {
   document.getElementById('panel-kosztorys').classList.toggle('active', tab === 'kosztorys');
   document.getElementById('panel-oferty').classList.toggle('active', tab === 'oferty');
   document.getElementById('panel-harmonogram').classList.toggle('active', tab === 'harmonogram');
+  document.getElementById('panel-przebieg').classList.toggle('active', tab === 'przebieg');
+  document.getElementById('panel-dokumentacja').classList.toggle('active', tab === 'dokumentacja');
   if (tab === 'harmonogram') renderHarmonogram();
+  if (tab === 'przebieg') renderPrzebiegTab();
+  if (tab === 'dokumentacja') renderDokumentacjaTab();
 }
 
 function addLineItem() {
+  if (state.kosztorysZatwierdzony) return;
   const nameInput = document.getElementById('new-item-name');
   const plannedInput = document.getElementById('new-item-planned');
   const name = nameInput.value.trim();
@@ -421,7 +1524,9 @@ function addLineItem() {
     scopeItems: suggestScopeItems(name),
     monthFrom: '',
     monthTo: '',
-    offers: []
+    offers: [],
+    dokumenty: [], zdjecia: [],
+    leadTime: suggestLeadtimeDefaults(name)
   });
 
   nameInput.value = '';
@@ -431,6 +1536,7 @@ function addLineItem() {
 }
 
 function updateItemField(id, field, value) {
+  if (state.kosztorysZatwierdzony) return;
   const item = state.lineItems.find(i => i.id === id);
   if (!item) return;
   item[field] = (field === 'planned') ? (parseFloat(value) || 0) : value;
@@ -439,12 +1545,14 @@ function updateItemField(id, field, value) {
 }
 
 function removeItem(id) {
+  if (state.kosztorysZatwierdzony) return;
   state.lineItems = state.lineItems.filter(i => i.id !== id);
   render();
   saveState();
 }
 
 function addScopeItem(itemId) {
+  if (state.kosztorysZatwierdzony) return;
   const input = document.getElementById('new-scope-' + itemId);
   const text = input.value.trim();
   if (!text) return;
@@ -457,6 +1565,7 @@ function addScopeItem(itemId) {
 }
 
 function updateScopeItemText(itemId, scopeId, value) {
+  if (state.kosztorysZatwierdzony) return;
   const item = state.lineItems.find(i => i.id === itemId);
   if (!item) return;
   const scope = item.scopeItems.find(s => s.id === scopeId);
@@ -467,6 +1576,7 @@ function updateScopeItemText(itemId, scopeId, value) {
 }
 
 function removeScopeItem(itemId, scopeId) {
+  if (state.kosztorysZatwierdzony) return;
   const item = state.lineItems.find(i => i.id === itemId);
   if (!item) return;
   item.scopeItems = item.scopeItems.filter(s => s.id !== scopeId);
@@ -477,6 +1587,18 @@ function removeScopeItem(itemId, scopeId) {
   saveState();
 }
 
+// Jeśli pozycja ma dokładnie jedną ofertę, oznaczamy ją jako wybraną
+// automatycznie — nie ma czego porównywać, więc kliknięcie "Wybierz"
+// byłoby zbędnym krokiem.
+function autoSelectSingleOffers() {
+  state.lineItems.forEach(item => {
+    if (item.offers.length === 1) {
+      item.offers[0].selected = true;
+      syncSelectedOfferDatesToItem(item);
+    }
+  });
+}
+
 function addOffer(itemId) {
   const item = state.lineItems.find(i => i.id === itemId);
   if (!item) return;
@@ -485,10 +1607,12 @@ function addOffer(itemId) {
     price: null,
     contractor: '',
     satisfaction: null,
-    availability: '',
+    termFrom: '',
+    termTo: '',
     selected: false,
     coveredScopeIds: []
   });
+  autoSelectSingleOffers();
   render();
   saveState();
 }
@@ -522,6 +1646,16 @@ function toggleScopeCoverage(itemId, offerId, scopeId, checked) {
   saveState();
 }
 
+// Termin realizacji wybranej oferty zasila harmonogram — to wykonawca,
+// nie samo zamierzenie, wie realnie kiedy zrobi robotę.
+function syncSelectedOfferDatesToItem(item) {
+  const selected = item.offers.find(o => o.selected);
+  if (selected && (selected.termFrom || selected.termTo)) {
+    if (selected.termFrom) item.monthFrom = selected.termFrom;
+    if (selected.termTo) item.monthTo = selected.termTo;
+  }
+}
+
 function selectOffer(itemId, offerId) {
   const item = state.lineItems.find(i => i.id === itemId);
   if (!item) return;
@@ -530,6 +1664,7 @@ function selectOffer(itemId, offerId) {
   const wasSelected = offer.selected;
   item.offers.forEach(o => { o.selected = false; });
   offer.selected = !wasSelected;
+  syncSelectedOfferDatesToItem(item);
   render();
   saveState();
 }
@@ -538,6 +1673,82 @@ function removeOffer(itemId, offerId) {
   const item = state.lineItems.find(i => i.id === itemId);
   if (!item) return;
   item.offers = item.offers.filter(o => o.id !== offerId);
+  autoSelectSingleOffers();
+  render();
+  saveState();
+}
+
+function openQuickAddModal() {
+  document.getElementById('qa-wykonawca').value = '';
+  document.getElementById('qa-term-from-container').innerHTML = stdDateFieldHtml('qa-term-from', 'markDateFieldValidity(this)');
+  document.getElementById('qa-term-to-container').innerHTML = stdDateFieldHtml('qa-term-to', 'markDateFieldValidity(this)');
+
+  const satSelect = document.getElementById('qa-satisfaction');
+  satSelect.innerHTML = '<option value="">— wybierz —</option>' +
+    Object.entries(SATISFACTION_LABELS).map(([val, label]) => `<option value="${val}">${label}</option>`).join('');
+
+  const rowsContainer = document.getElementById('qa-price-rows');
+  if (state.lineItems.length === 0) {
+    rowsContainer.innerHTML = '<p class="ref-line">Brak pozycji kosztorysu — dodaj je najpierw w zakładce Kosztorys.</p>';
+  } else {
+    rowsContainer.innerHTML = state.lineItems.map(item => `
+      <div class="qa-price-row" data-item-id="${item.id}">
+        <span class="qa-price-label">${item.name} <span class="muted">(plan: ${fmt(item.planned)})</span></span>
+        <input type="number" placeholder="cena (zł)" />
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('quick-add-modal').classList.add('show');
+}
+
+function closeQuickAddModal() {
+  document.getElementById('quick-add-modal').classList.remove('show');
+}
+
+function submitQuickAdd() {
+  const wykonawca = document.getElementById('qa-wykonawca').value.trim();
+  const satisfaction = document.getElementById('qa-satisfaction').value || null;
+
+  const termFromInput = document.getElementById('qa-term-from');
+  const termToInput = document.getElementById('qa-term-to');
+  const termFromResult = markDateFieldValidity(termFromInput);
+  if (termFromResult === false) return; // pole jest już żółte z widocznym komunikatem
+  const termToResult = markDateFieldValidity(termToInput);
+  if (termToResult === false) return;
+  const termFrom = termFromResult || '';
+  const termTo = termToResult || '';
+
+  let addedCount = 0;
+  document.querySelectorAll('#qa-price-rows .qa-price-row').forEach(row => {
+    const itemId = row.dataset.itemId;
+    const priceInput = row.querySelector('input[type="number"]');
+    const price = parseFloat(priceInput.value);
+    if (!isNaN(price) && price > 0) {
+      const item = state.lineItems.find(i => i.id === itemId);
+      if (item) {
+        item.offers.push({
+          id: 'offer-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+          price: price,
+          contractor: wykonawca,
+          satisfaction: satisfaction,
+          termFrom: termFrom,
+          termTo: termTo,
+          selected: false,
+          coveredScopeIds: []
+        });
+        addedCount++;
+      }
+    }
+  });
+
+  if (addedCount === 0) {
+    alert('Wpisz cenę dla przynajmniej jednej pozycji.');
+    return;
+  }
+
+  autoSelectSingleOffers();
+  closeQuickAddModal();
   render();
   saveState();
 }
@@ -556,7 +1767,7 @@ function handleResetClick() {
   } else {
     clearTimeout(resetTimeout);
     resetConfirming = false;
-    state = { projectName: '', lineItems: [] };
+    state = { projectName: '', lineItems: [], kosztorysZatwierdzony: false, dokumentacjaOgolna: defaultDokumentacjaOgolna(), notatkiSpotkan: [], protokoly: [] };
     document.getElementById('project-name').value = '';
     btn.textContent = 'Wyczyść wszystkie dane';
     btn.classList.remove('confirming');
@@ -577,6 +1788,33 @@ function render() {
 function renderKosztorysTab() {
   const container = document.getElementById('line-items-kosztorys');
   const emptyState = document.getElementById('empty-state-kosztorys');
+  const locked = !!state.kosztorysZatwierdzony;
+
+  // Sekcja zatwierdzenia — zawsze renderowana, treść zależy od stanu.
+  const approvalEl = document.getElementById('approval-section');
+  if (locked) {
+    approvalEl.innerHTML = `
+      <div class="approval-box approved">
+        <p>✅ Kosztorys zatwierdzony i ostateczny.</p>
+        <div class="btn-row">
+          <button class="primary" onclick="switchTab('oferty')">Przejdź do Ofert i analizy →</button>
+          <button class="secondary" onclick="unapproveKosztorys()">Cofnij zatwierdzenie</button>
+        </div>
+      </div>`;
+  } else if (state.lineItems.length > 0) {
+    approvalEl.innerHTML = `
+      <div class="approval-box pending">
+        <div class="btn-row">
+          <button class="primary" onclick="approveKosztorys()">Zatwierdź kosztorys</button>
+        </div>
+      </div>`;
+  } else {
+    approvalEl.innerHTML = '';
+  }
+
+  // Formularz dodawania i szablon mają sens tylko, dopóki kosztorys nie jest zatwierdzony.
+  document.getElementById('template-cta-box').style.display = locked ? 'none' : 'block';
+  document.getElementById('add-form-box').style.display = locked ? 'none' : 'flex';
 
   if (state.lineItems.length === 0) {
     container.innerHTML = '';
@@ -588,24 +1826,24 @@ function renderKosztorysTab() {
   container.innerHTML = state.lineItems.map(item => {
     const scopeItemsHtml = item.scopeItems.map(scope => `
       <div class="scope-item-row">
-        <input type="text" value="${scope.text}"
+        <input type="text" value="${scope.text}" ${locked ? 'readonly' : ''}
           onchange="updateScopeItemText('${item.id}', '${scope.id}', this.value)" />
-        <button class="tiny-btn" onclick="removeScopeItem('${item.id}', '${scope.id}')">✕</button>
+        ${locked ? '' : `<button class="tiny-btn" onclick="removeScopeItem('${item.id}', '${scope.id}')">✕</button>`}
       </div>
     `).join('');
 
     return `
-      <div class="line-item">
+      <div class="line-item ${locked ? 'locked' : ''}">
         <div class="line-item-header">
-          <input type="text" class="line-item-name" value="${item.name}"
+          <input type="text" class="line-item-name" value="${item.name}" ${locked ? 'readonly' : ''}
             onchange="updateItemField('${item.id}', 'name', this.value)" />
-          <button class="remove-btn" onclick="removeItem('${item.id}')">Usuń pozycję</button>
+          ${locked ? '' : `<button class="remove-btn" onclick="removeItem('${item.id}')">Usuń pozycję</button>`}
         </div>
 
         <div class="row" style="margin-top:8px;">
           <div class="field">
             <label>Kwota z kosztorysu (zł)</label>
-            <input type="number" value="${item.planned}"
+            <input type="number" value="${item.planned}" ${locked ? 'readonly' : ''}
               onchange="updateItemField('${item.id}', 'planned', this.value)" />
           </div>
           <div class="field">
@@ -617,19 +1855,870 @@ function renderKosztorysTab() {
             ${dateFieldHtml(item.id, 'monthTo', item.monthTo)}
           </div>
         </div>
-        <p class="date-hint">Format: DD:MM:RRRR — albo najedź na ikonę 📅, żeby zobaczyć kalendarz i kliknąć dzień.</p>
+        <p class="date-hint">Format: DD.MM.RRRR — albo najedź na ikonę 📅, żeby zobaczyć kalendarz i kliknąć dzień.</p>
 
         <div class="scope-box">
           <div class="scope-box-header">Sugerowany zakres oferty (edytuj, dodaj lub usuń punkty)</div>
           ${scopeItemsHtml}
+          ${locked ? '' : `
           <div class="scope-add-row">
             <input type="text" id="new-scope-${item.id}" placeholder="Dodaj punkt zakresu..." />
             <button class="secondary" onclick="addScopeItem('${item.id}')">Dodaj</button>
-          </div>
+          </div>`}
         </div>
       </div>
     `;
   }).join('');
+}
+
+function approveKosztorys() {
+  if (state.lineItems.length === 0) return;
+  state.kosztorysZatwierdzony = true;
+
+  // Każda pozycja bez żadnej oferty dostaje automatycznie ofertę
+  // referencyjną = kwota z kosztorysu (100% zakresu), żeby zakładka Oferty
+  // nie startowała od zera i od razu było widać punkt odniesienia.
+  state.lineItems.forEach(item => {
+    if (item.offers.length === 0) {
+      item.offers.push({
+        id: 'offer-baseline-' + item.id,
+        price: item.planned,
+        contractor: 'Kosztorys (wartość wyjściowa)',
+        satisfaction: null,
+        termFrom: item.monthFrom || '',
+        termTo: item.monthTo || '',
+        selected: false,
+        coveredScopeIds: item.scopeItems.map(s => s.id),
+        isBaseline: true
+      });
+    }
+  });
+
+  autoSelectSingleOffers();
+  render();
+  saveState();
+}
+
+function unapproveKosztorys() {
+  state.kosztorysZatwierdzony = false;
+  render();
+  saveState();
+}
+
+// Zakres dat do osi czasu — obejmuje plan z kosztorysu oraz wszystkie
+// oferty z ustawionym terminem, żeby zmieściły się na wspólnej skali.
+/* --------------------------------------------------------------------
+   TERMINY KRYTYCZNE — zamówienia z wyprzedzeniem (np. okna trzeba
+   zamówić z wyprzedzeniem, a samo złożenie zamówienia/umowa też trwa).
+   Dwa osobne pola tygodni, żeby było jasne, ile z całego wyprzedzenia
+   to czas realizacji przez dostawcę, a ile to czas samej procedury
+   zamawiania — deadline liczony wstecz od planowanego terminu
+   realizacji pozycji (Kosztorys/Harmonogram).
+   -------------------------------------------------------------------- */
+
+let leadtimeModalItemId = null;
+
+function openLeadtimeModal(itemId) {
+  if (!itemId) return; // z selecta "— wybierz pozycję —" może przyjść pusty string
+  const item = state.lineItems.find(i => i.id === itemId);
+  if (!item) return;
+  if (!item.leadTime) item.leadTime = { realizacjaTygodnie: null, zamowienieTygodnie: null };
+  leadtimeModalItemId = itemId;
+
+  document.getElementById('leadtime-modal-title').textContent = 'Wyprzedzenie zamówienia — ' + item.name;
+  document.getElementById('leadtime-modal-realizacja').value = item.leadTime.realizacjaTygodnie ?? '';
+  document.getElementById('leadtime-modal-zamowienie').value = item.leadTime.zamowienieTygodnie ?? '';
+  document.getElementById('leadtime-modal').classList.add('show');
+}
+
+function closeLeadtimeModal() {
+  document.getElementById('leadtime-modal').classList.remove('show');
+  leadtimeModalItemId = null;
+}
+
+function saveLeadtimeModal() {
+  if (!leadtimeModalItemId) return;
+  const item = state.lineItems.find(i => i.id === leadtimeModalItemId);
+  if (!item) return;
+
+  const realizacja = parseFloat(document.getElementById('leadtime-modal-realizacja').value);
+  const zamowienie = parseFloat(document.getElementById('leadtime-modal-zamowienie').value);
+  const existingNote = (item.leadTime && item.leadTime.note) || '';
+
+  item.leadTime = {
+    realizacjaTygodnie: isNaN(realizacja) ? null : realizacja,
+    zamowienieTygodnie: isNaN(zamowienie) ? null : zamowienie,
+    note: existingNote
+  };
+
+  closeLeadtimeModal();
+  renderOfertyTab();
+  saveState();
+}
+
+function removeLeadtime(itemId) {
+  const item = state.lineItems.find(i => i.id === itemId);
+  if (!item) return;
+  item.leadTime = null;
+  renderOfertyTab();
+  saveState();
+}
+
+// JEDNA WSPÓLNA oś czasu całego projektu — wszystkie pozycje z ustawionym
+// terminem realizacji jako wiersze na tej samej skali, a dla pozycji
+// z wyprzedzeniem zamówienia dodatkowo znacznik terminu "zamów do".
+// Znacznik "dziś" powtórzony w każdym wierszu na tej samej pozycji % —
+// wizualnie czyta się jako jedna, ciągła linia, a jest dużo prostszy
+// i pewniejszy w implementacji niż jeden element rozciągnięty przez
+// całą wysokość zmiennej liczby wierszy.
+// Ikony budowlane dopasowywane po nazwie pozycji — czysto kosmetyczne,
+// żeby oś czasu czytało się szybciej niż same nazwy tekstowe.
+const STAGE_ICONS = [
+  { match: 'przyłącz', icon: '🔌' },
+  { match: 'fundament', icon: '🏗️' },
+  { match: 'ścian', icon: '🧱' },
+  { match: 'konstrukcja szkieletowa', icon: '🪵' },
+  { match: 'więźba', icon: '🏠' },
+  { match: 'dach', icon: '🏠' },
+  { match: 'pokrycie', icon: '🏠' },
+  { match: 'stolarka okienna', icon: '🪟' },
+  { match: 'okna', icon: '🪟' },
+  { match: 'stolarka drzwiowa', icon: '🚪' },
+  { match: 'elewacja', icon: '🎨' },
+  { match: 'elektryczna', icon: '⚡' },
+  { match: 'sanitarna', icon: '🚰' },
+  { match: 'wentylacja', icon: '💨' },
+  { match: 'ogrzewanie', icon: '🔥' },
+  { match: 'pompa ciepła', icon: '🔥' },
+  { match: 'tynki', icon: '🎨' },
+  { match: 'podłog', icon: '⬛' },
+  { match: 'łazienk', icon: '🚿' },
+  { match: 'kuchni', icon: '🚿' },
+  { match: 'drzwiowa wewnętrzna', icon: '🚪' },
+  { match: 'ogrodzeni', icon: '🚧' },
+  { match: 'podjazd', icon: '🚧' },
+  { match: 'ogród', icon: '🌳' },
+  { match: 'prefabrykowan', icon: '📦' }
+];
+
+function getStageIcon(name) {
+  const lower = name.toLowerCase();
+  const found = STAGE_ICONS.find(r => lower.includes(r.match));
+  return found ? found.icon : '📋';
+}
+
+// Grupowanie etapów w 4 szersze fazy — te same kategorie, których już
+// używamy w generatorze szablonu kosztorysu (core/systems/finishing/zewnętrze).
+const STAGE_GROUPS = [
+  { match: 'przyłącz', group: 'stan_surowy' },
+  { match: 'fundament', group: 'stan_surowy' },
+  { match: 'ścian', group: 'stan_surowy' },
+  { match: 'konstrukcja szkieletowa', group: 'stan_surowy' },
+  { match: 'więźba', group: 'stan_surowy' },
+  { match: 'dach', group: 'stan_surowy' },
+  { match: 'pokrycie', group: 'stan_surowy' },
+  { match: 'stolarka okienna', group: 'stan_surowy' },
+  { match: 'okna', group: 'stan_surowy' },
+  { match: 'elewacja', group: 'stan_surowy' },
+  { match: 'prefabrykowan', group: 'stan_surowy' },
+  { match: 'elektryczna', group: 'instalacje' },
+  { match: 'sanitarna', group: 'instalacje' },
+  { match: 'wentylacja', group: 'instalacje' },
+  { match: 'ogrzewanie', group: 'instalacje' },
+  { match: 'pompa ciepła', group: 'instalacje' },
+  { match: 'tynki', group: 'wykonczenie' },
+  { match: 'podłog', group: 'wykonczenie' },
+  { match: 'łazienk', group: 'wykonczenie' },
+  { match: 'kuchni', group: 'wykonczenie' },
+  { match: 'drzwiowa wewnętrzna', group: 'wykonczenie' },
+  { match: 'ogrodzeni', group: 'zewnetrze' },
+  { match: 'podjazd', group: 'zewnetrze' },
+  { match: 'ogród', group: 'zewnetrze' },
+  { match: 'brama', group: 'zewnetrze' },
+  { match: 'garażow', group: 'zewnetrze' }
+];
+
+const GROUP_META = {
+  stan_surowy: { label: 'Stan surowy', color: '#dbeafe' },
+  instalacje: { label: 'Instalacje', color: '#fef3c7' },
+  wykonczenie: { label: 'Wykończenie', color: '#dcfce7' },
+  zewnetrze: { label: 'Tereny zewnętrzne', color: '#f3e8ff' }
+};
+
+function getStageGroup(name) {
+  const lower = name.toLowerCase();
+  const found = STAGE_GROUPS.find(r => lower.includes(r.match));
+  return found ? found.group : 'stan_surowy';
+}
+
+// Znaczniki początków miesięcy w zakresie osi — pomagają orientować się,
+// co przypada mniej więcej w którym miesiącu, bez liczenia dni na oko.
+function toggleHoverMenu(btnEl) {
+  const menu = btnEl.nextElementSibling;
+  if (menu) menu.classList.toggle('show');
+}
+
+let documentModalItemId = null;
+let documentModalFileData = null; // { dataUrl, fileType: 'image'|'pdf', fileName }
+const MAX_DOCUMENT_FILE_MB = 3;
+
+function openDocumentModal(itemId) {
+  documentModalItemId = itemId;
+  documentModalFileData = null;
+  document.getElementById('document-modal-nazwa').value = '';
+  document.getElementById('document-modal-file').value = '';
+  document.getElementById('document-modal-preview').innerHTML = '';
+  document.getElementById('document-add-modal').classList.add('show');
+}
+
+function closeDocumentModal() {
+  document.getElementById('document-add-modal').classList.remove('show');
+  documentModalItemId = null;
+  documentModalFileData = null;
+}
+
+async function handleDocumentFileSelect(inputEl) {
+  const file = inputEl.files[0];
+  if (!file) return;
+  const previewEl = document.getElementById('document-modal-preview');
+
+  if (file.type.startsWith('image/')) {
+    try {
+      const dataUrl = await compressImage(file, 1200, 0.75);
+      documentModalFileData = { dataUrl, fileType: 'image', fileName: file.name };
+      previewEl.innerHTML = `<img src="${dataUrl}" style="max-width:160px;max-height:160px;border-radius:6px;border:1px solid #e5e7eb;display:block" />`;
+    } catch (e) {
+      alert('Nie udało się przetworzyć zdjęcia. Spróbuj innego pliku.');
+      inputEl.value = '';
+    }
+  } else if (file.type === 'application/pdf') {
+    if (file.size > MAX_DOCUMENT_FILE_MB * 1024 * 1024) {
+      alert(`Plik PDF jest za duży (maks. ${MAX_DOCUMENT_FILE_MB} MB ze względu na limit pamięci przeglądarki). Zapisz samą nazwę dokumentu bez pliku, a sam plik przechowuj gdzie indziej.`);
+      inputEl.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      documentModalFileData = { dataUrl: e.target.result, fileType: 'pdf', fileName: file.name };
+      previewEl.innerHTML = `<div style="display:flex;align-items:center;gap:8px;font-size:12.5px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:8px 10px"><span style="font-size:20px">📄</span><span>${file.name}</span></div>`;
+    };
+    reader.readAsDataURL(file);
+  } else {
+    alert('Obsługiwane są tylko zdjęcia (JPG/PNG) i pliki PDF.');
+    inputEl.value = '';
+  }
+}
+
+function saveDocumentModal() {
+  if (!documentModalItemId) return;
+  const item = state.lineItems.find(i => i.id === documentModalItemId);
+  if (!item) return;
+
+  const nazwa = document.getElementById('document-modal-nazwa').value.trim();
+  if (!nazwa) { alert('Podaj nazwę dokumentu.'); return; }
+
+  if (!item.dokumenty) item.dokumenty = [];
+  const doc = { id: 'dok-poz-' + Date.now(), text: nazwa, status: 'brakuje', note: '' };
+  if (documentModalFileData) {
+    doc.fileDataUrl = documentModalFileData.dataUrl;
+    doc.fileType = documentModalFileData.fileType;
+    doc.fileName = documentModalFileData.fileName;
+  }
+  item.dokumenty.push(doc);
+
+  closeDocumentModal();
+  renderOfertyTab();
+  saveState();
+  showToast(`Dodano dokument „${nazwa}" do pozycji „${item.name}"${documentModalFileData ? ' (z załącznikiem)' : ''}`);
+}
+
+// Podgląd załączonego pliku — zdjęcie w lightboxie (jak przy notatkach),
+// PDF otwarty w nowej karcie przeglądarki (natywna przeglądarka PDF).
+// Konwertuje długi data:...;base64,... na prawdziwy obiekt Blob. Surowy
+// data URL przekazany do window.open() bywa błędnie obsługiwany przez
+// zewnętrzne aplikacje PDF (systemowe, nie wbudowaną przeglądarkę PDF) —
+// dostają URL, którego nie potrafią wczytać, i pokazują pustą stronę.
+// Blob URL (blob:...) jest traktowany jako prawdziwy zasób, nie tekst.
+function dataUrlToBlob(dataUrl) {
+  const [header, base64] = dataUrl.split(',');
+  const mimeMatch = header.match(/data:(.*?);base64/);
+  const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+  const binary = atob(base64);
+  const array = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
+  return new Blob([array], { type: mime });
+}
+
+function openDocumentPreview(dataUrl, fileType) {
+  if (fileType === 'image') {
+    openPhotoLightbox(dataUrl);
+  } else {
+    openPdfLightbox(dataUrl);
+  }
+}
+
+// Wykorzystuje ten sam mechanizm kompresji co zdjęcia w notatkach ze
+// spotkania (processPhotoForStorage) — spójne podejście do wszystkich
+// zdjęć w aplikacji, ta sama ochrona przed zapchaniem localStorage.
+function triggerPhotoUploadForItem(itemId) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.style.display = 'none';
+  document.body.appendChild(input);
+  input.addEventListener('change', async () => {
+    const file = input.files[0];
+    if (file) {
+      try {
+        const photo = await processPhotoForStorage(file);
+        const item = state.lineItems.find(i => i.id === itemId);
+        if (item) {
+          if (!item.zdjecia) item.zdjecia = [];
+          item.zdjecia.push(photo);
+          renderOfertyTab();
+          saveState();
+          showToast(`Dodano zdjęcie do pozycji „${item.name}"`);
+        }
+      } catch (e) {
+        console.error('Błąd przetwarzania zdjęcia:', e);
+        alert('Nie udało się dodać zdjęcia. Spróbuj ponownie albo wybierz inny plik.');
+      }
+    }
+    document.body.removeChild(input);
+  });
+  input.click();
+}
+
+function computeMonthTicks(minDate, maxDate, pctFor) {
+  const monthNamesShort = ['sty','lut','mar','kwi','maj','cze','lip','sie','wrz','paź','lis','gru'];
+  const ticks = [];
+  const d = new Date(minDate + 'T00:00:00');
+  d.setDate(1);
+  if (d.toISOString().slice(0, 10) < minDate) d.setMonth(d.getMonth() + 1);
+  while (d.toISOString().slice(0, 10) <= maxDate) {
+    const iso = d.toISOString().slice(0, 10);
+    ticks.push({ pct: pctFor(iso), label: monthNamesShort[d.getMonth()] + ' ' + d.getFullYear() });
+    d.setMonth(d.getMonth() + 1);
+  }
+  return ticks;
+}
+
+function renderUnifiedProjectTimeline() {
+  const itemsWithDates = state.lineItems.filter(i => i.monthFrom && i.monthTo);
+  if (itemsWithDates.length === 0) {
+    return '<p class="ref-line">Ustal terminy realizacji pozycji w Kosztorysie (ręcznie albo przez szablon), żeby zobaczyć tu oś czasu całego projektu.</p>';
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayIso = today.toISOString().slice(0, 10);
+
+  function itemDeadlineIso(item) {
+    if (!item.leadTime || (!item.leadTime.realizacjaTygodnie && !item.leadTime.zamowienieTygodnie)) return null;
+    const totalWeeks = (item.leadTime.realizacjaTygodnie || 0) + (item.leadTime.zamowienieTygodnie || 0);
+    const d = new Date(item.monthFrom + 'T00:00:00');
+    d.setDate(d.getDate() - totalWeeks * 7);
+    return d.toISOString().slice(0, 10);
+  }
+
+  // Zakres wspólnej osi: wszystkie monthFrom/monthTo, wszystkie deadline'y
+  // zamówień oraz dzisiejsza data — żeby nic nie wypadło poza skalę.
+  const allDates = [todayIso];
+  itemsWithDates.forEach(i => {
+    allDates.push(i.monthFrom, i.monthTo);
+    const dl = itemDeadlineIso(i);
+    if (dl) allDates.push(dl);
+  });
+  const minDate = allDates.reduce((a, b) => (a < b ? a : b));
+  const maxDate = allDates.reduce((a, b) => (a > b ? a : b));
+  const minMs = new Date(minDate).getTime();
+  const maxMs = new Date(maxDate).getTime();
+  const totalMs = Math.max(maxMs - minMs, 86400000);
+  const pctFor = iso => ((new Date(iso).getTime() - minMs) / totalMs) * 100;
+  const todayPct = pctFor(todayIso);
+
+  // Krzywa narastającej wartości inwestycji (tzw. krzywa S) — dla każdej
+  // pozycji zakładamy, że jej kwota "narasta" liniowo między jej własnym
+  // monthFrom a monthTo (a nie jest doliczana od razu w całości na
+  // starcie albo na końcu). Sumujemy to po wszystkich pozycjach w danym
+  // momencie, próbkując oś czasu w regularnych odstępach.
+  const totalPlannedForCurve = state.lineItems.reduce((sum, i) => sum + i.planned, 0);
+  const CURVE_SAMPLES = 60;
+  const curvePoints = [];
+  for (let i = 0; i <= CURVE_SAMPLES; i++) {
+    const t = minMs + (maxMs - minMs) * (i / CURVE_SAMPLES);
+    let cumulative = 0;
+    itemsWithDates.forEach(item => {
+      const fromMs = new Date(item.monthFrom).getTime();
+      const toMs = new Date(item.monthTo).getTime();
+      let frac;
+      if (t <= fromMs) frac = 0;
+      else if (t >= toMs) frac = 1;
+      else frac = (toMs > fromMs) ? (t - fromMs) / (toMs - fromMs) : 1;
+      cumulative += item.planned * frac;
+    });
+    const valuePct = totalPlannedForCurve > 0 ? (cumulative / totalPlannedForCurve) * 100 : 0;
+    curvePoints.push({ xPct: (i / CURVE_SAMPLES) * 100, valuePct });
+  }
+  const CHART_HEIGHT = 230;
+  const CURVE_TOP_PX = 60;   // rezerwa miejsca nad krzywą na podpisy przy wysokich wartościach
+  const CURVE_BOTTOM_PX = CHART_HEIGHT; // 0% = sam dół wykresu
+  const curveSpanPx = CURVE_BOTTOM_PX - CURVE_TOP_PX;
+  const yForValue = valuePct => CURVE_BOTTOM_PX - (valuePct / 100) * curveSpanPx;
+
+  const svgPathD = curvePoints
+    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.xPct.toFixed(2)} ${(100 - p.valuePct).toFixed(2)}`)
+    .join(' ');
+  const svgAreaD = svgPathD + ` L 100 100 L 0 100 Z`;
+  const todayValuePct = (() => {
+    const idx = Math.round(todayPct / 100 * CURVE_SAMPLES);
+    const clamped = Math.min(Math.max(idx, 0), CURVE_SAMPLES);
+    return curvePoints[clamped] ? curvePoints[clamped].valuePct : 0;
+  })();
+
+  function curveValueAtIso(iso) {
+    const t = new Date(iso).getTime();
+    let cumulative = 0;
+    itemsWithDates.forEach(it => {
+      const fromMs = new Date(it.monthFrom).getTime();
+      const toMs = new Date(it.monthTo).getTime();
+      let frac;
+      if (t <= fromMs) frac = 0;
+      else if (t >= toMs) frac = 1;
+      else frac = (toMs > fromMs) ? (t - fromMs) / (toMs - fromMs) : 1;
+      cumulative += it.planned * frac;
+    });
+    return totalPlannedForCurve > 0 ? (cumulative / totalPlannedForCurve) * 100 : 0;
+  }
+
+  // Etykieta jest ukryta domyślnie i pokazuje się tylko po najechaniu/
+  // dotknięciu (jak w poprzedniej wersji) — skoro widoczna jest zawsze
+  // najwyżej jedna naraz, nie trzeba już rozstawiać wielu poziomów.
+  const LABEL_LIFT = 26;
+
+  const markersHtml = itemsWithDates.map((item, idx) => {
+    const xPct = pctFor(item.monthFrom);
+    const curveValue = curveValueAtIso(item.monthFrom);
+    const pointY = yForValue(curveValue);
+    const lift = LABEL_LIFT;
+    const deadlineIso = itemDeadlineIso(item);
+    const selected = getSelectedOffer(item);
+
+    let statusLine = '';
+    if (deadlineIso) {
+      const deadlineDate = new Date(deadlineIso + 'T00:00:00');
+      const daysLeft = Math.round((deadlineDate - today) / 86400000);
+      if (selected) {
+        statusLine = `<p class="hover-status ok">✅ Zabezpieczone${selected.isBaseline ? ' (domyślną)' : ''}</p>`;
+      } else if (daysLeft < 0) {
+        statusLine = `<p class="hover-status warn">Zamów do ${isoToDisplay(deadlineIso)} — termin minął!</p>`;
+      } else if (daysLeft <= 14) {
+        statusLine = `<p class="hover-status warn">Zamów do ${isoToDisplay(deadlineIso)} — pilne (${daysLeft} dni)</p>`;
+      } else {
+        statusLine = `<p class="hover-status">Zamów do ${isoToDisplay(deadlineIso)} (${daysLeft} dni)</p>`;
+      }
+    } else if (selected) {
+      statusLine = `<p class="hover-status ok">✅ Wybrano ofertę${selected.isBaseline ? ' (domyślną)' : ''}</p>`;
+    }
+
+    const dokumenty = item.dokumenty || [];
+    const docsWithFile = dokumenty.filter(d => d.fileDataUrl);
+    const docsWithoutFile = dokumenty.filter(d => !d.fileDataUrl);
+    const zdjCount = (item.zdjecia || []).length;
+
+    const extraInfo = [];
+    if (docsWithoutFile.length > 0) extraInfo.push(`📄 ${docsWithoutFile.length} bez pliku`);
+    if (zdjCount > 0) extraInfo.push(`📷 ${zdjCount}`);
+    const extraInfoHtml = extraInfo.length
+      ? `<p class="hover-status" style="color:#6b7280;font-weight:600">${extraInfo.join('  ')}</p>`
+      : '';
+
+    const docChipsHtml = docsWithFile.map(d => {
+      const label = d.text.length > 16 ? d.text.slice(0, 16) + '…' : d.text;
+      return `<button onclick="event.stopPropagation(); openDocumentPreview('${d.fileDataUrl}', '${d.fileType}')"
+        style="display:inline-flex;align-items:center;gap:4px;font-size:10px;background:#f0f2f7;border:1px solid #d1d5db;border-radius:5px;padding:3px 7px;margin:2px 4px 2px 0;cursor:pointer;color:#1f2a4f">
+        ${d.fileType === 'image' ? '🖼️' : '📄'} ${label}
+      </button>`;
+    }).join('');
+
+    const photoThumbsHtml = (item.zdjecia || []).slice(0, 3).map(p =>
+      `<img src="${p.dataUrl}" onclick="event.stopPropagation(); openPhotoLightbox('${p.dataUrl}')" style="width:32px;height:32px;object-fit:cover;border-radius:4px;border:1px solid #e5e7eb;cursor:zoom-in;margin-right:3px" />`
+    ).join('');
+
+    return `
+      <div class="curve-marker" style="left:${xPct}%; top:${pointY}px; z-index:${10 + idx}">
+        <div class="curve-marker-dot">${getStageIcon(item.name)}</div>
+        <div class="curve-marker-leader" style="height:${lift}px"></div>
+        <div class="curve-marker-label" style="bottom:${lift}px">
+          <span class="stage-chevron">${getStageIcon(item.name)} ${item.name}</span>
+        </div>
+        <div class="stage-hover-detail" style="bottom:${lift + 22}px">
+          <span class="stage-chevron">${item.name}</span>
+          <p class="hover-dates">${isoToDisplay(item.monthFrom)} – ${isoToDisplay(item.monthTo)}</p>
+          ${statusLine}
+          ${extraInfoHtml}
+          ${docChipsHtml ? `<div style="margin-top:4px">${docChipsHtml}</div>` : ''}
+          ${photoThumbsHtml ? `<div style="margin-top:4px">${photoThumbsHtml}</div>` : ''}
+          <div class="hover-actions">
+            <button class="hover-add-btn" onclick="event.stopPropagation(); toggleHoverMenu(this)">+ Dodaj</button>
+            <div class="hover-menu">
+              <button onclick="openLeadtimeModal('${item.id}')">⏱ Termin (wyprzedzenie)</button>
+              <button onclick="openDocumentModal('${item.id}')">📄 Dokument</button>
+              <button onclick="triggerPhotoUploadForItem('${item.id}')">📷 Zdjęcie</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  const deadlineFlagsHtml = itemsWithDates.map(item => {
+    const deadlineIso = itemDeadlineIso(item);
+    return deadlineIso
+      ? `<div class="deadline-flag" style="left:${pctFor(deadlineIso)}%;top:${CHART_HEIGHT - 9}px" title="Zamów do: ${isoToDisplay(deadlineIso)}"></div>`
+      : '';
+  }).join('');
+
+  // Zakresy 4 szerszych faz — tło pokazujące, na jakim etapie
+  // zaawansowania jesteśmy w danym momencie osi, bez czytania każdej
+  // pozycji z osobna.
+  const groupRanges = {};
+  itemsWithDates.forEach(item => {
+    const g = getStageGroup(item.name);
+    if (!groupRanges[g]) groupRanges[g] = { minFrom: item.monthFrom, maxTo: item.monthTo };
+    else {
+      if (item.monthFrom < groupRanges[g].minFrom) groupRanges[g].minFrom = item.monthFrom;
+      if (item.monthTo > groupRanges[g].maxTo) groupRanges[g].maxTo = item.monthTo;
+    }
+  });
+  const bandsHtml = Object.entries(groupRanges).map(([group, range]) => {
+    const left = pctFor(range.minFrom);
+    const width = Math.max(pctFor(range.maxTo) - left, 2);
+    const meta = GROUP_META[group];
+    return `<div class="phase-band-full" style="left:${left}%;width:${width}%;background:${meta.color}"><span class="phase-band-label">${meta.label}</span></div>`;
+  }).join('');
+
+  const monthTicksHtml = computeMonthTicks(minDate, maxDate, pctFor).map(t => `
+    <div class="month-tick" style="left:${t.pct}%;height:${CHART_HEIGHT}px"></div>
+    <span class="month-tick-label-bottom" style="left:${t.pct}%">${t.label}</span>
+  `).join('');
+
+  return `
+    <div class="horizontal-timeline">
+      <p class="timeline-title" style="margin:0 0 6px 16px">Narastająca wartość inwestycji</p>
+      <div class="unified-chart-wrap" style="height:${CHART_HEIGHT}px">
+        <span class="value-curve-axis-label" style="top:${CURVE_TOP_PX - 5}px">100%</span>
+        <span class="value-curve-axis-label" style="top:${CURVE_TOP_PX + curveSpanPx / 2 - 5}px">50%</span>
+        <span class="value-curve-axis-label" style="top:${CHART_HEIGHT - 13}px">0%</span>
+        ${bandsHtml}
+        ${monthTicksHtml}
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="value-curve-svg"
+          style="top:${CURVE_TOP_PX}px;height:${curveSpanPx}px">
+          <path d="${svgAreaD}" fill="#fff3d6" stroke="none"></path>
+          <path d="${svgPathD}" fill="none" stroke="#ffb719" stroke-width="1.6" vector-effect="non-scaling-stroke"></path>
+        </svg>
+        <div class="unified-today-line" style="left:${todayPct}%;height:${CHART_HEIGHT}px" title="Dziś"></div>
+        <div class="value-curve-today-dot" style="left:${todayPct}%; top:${yForValue(todayValuePct)}px" title="Dziś: ${todayValuePct.toFixed(0)}% wartości"></div>
+        ${deadlineFlagsHtml}
+        ${markersHtml}
+      </div>
+      <div class="timeline-axis-labels" style="padding-left:0;margin:40px 16px 0">
+        <span>${isoToDisplay(minDate)}</span><span>${isoToDisplay(maxDate)}</span>
+      </div>
+    </div>
+    <div class="leadtime-legend" style="margin-top:10px">
+      <span><span class="leadtime-legend-swatch" style="background:#ffb719;border-radius:50%;width:10px;height:10px"></span>Etap (klik/najedź na nazwę = szczegóły)</span>
+      <span><span class="leadtime-legend-swatch" style="background:#dc2626;width:2px;border-radius:0"></span>Dziś</span>
+      <span><span class="legend-triangle"></span>Zamów do (pozycje z wyprzedzeniem)</span>
+    </div>
+  `;
+}
+
+// Kompaktowa lista do zarządzania wyprzedzeniem — sama liczba i status,
+// bez powtarzania osi czasu (ta jest teraz jedna, wspólna, wyżej).
+function renderLeadtimeManageList() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const withLeadtime = state.lineItems
+    .filter(i => i.leadTime && (i.leadTime.realizacjaTygodnie || i.leadTime.zamowienieTygodnie))
+    .map(item => {
+      const totalWeeks = (item.leadTime.realizacjaTygodnie || 0) + (item.leadTime.zamowienieTygodnie || 0);
+      let deadlineDate = null;
+      let daysLeft = null;
+      if (item.monthFrom) {
+        deadlineDate = new Date(item.monthFrom + 'T00:00:00');
+        deadlineDate.setDate(deadlineDate.getDate() - totalWeeks * 7);
+        daysLeft = Math.round((deadlineDate - today) / 86400000);
+      }
+      return { item, totalWeeks, deadlineDate, daysLeft };
+    })
+    .sort((a, b) => {
+      if (a.daysLeft === null) return 1;
+      if (b.daysLeft === null) return -1;
+      return a.daysLeft - b.daysLeft;
+    });
+
+  const withoutLeadtime = state.lineItems.filter(i => !i.leadTime || (!i.leadTime.realizacjaTygodnie && !i.leadTime.zamowienieTygodnie));
+
+  let html = '';
+
+  if (withLeadtime.length > 0) {
+    html += withLeadtime.map(({ item, totalWeeks, deadlineDate, daysLeft }) => {
+      const selected = getSelectedOffer(item);
+      let deadlineInfo, statusBadge;
+
+      if (selected) {
+        // Cel osiągnięty — jest WYBRANA oferta, więc nieważne, ile dni
+        // zostało do deadline'u, zamówienie jest już zabezpieczone.
+        deadlineInfo = deadlineDate ? `Zamów do: ${isoToDisplay(deadlineDate.toISOString().slice(0, 10))}` : '';
+        statusBadge = selected.isBaseline
+          ? '<span class="badge ok">✅ Zabezpieczone — wybrano ofertę (domyślną)</span>'
+          : '<span class="badge ok">✅ Zabezpieczone — wybrano ofertę</span>';
+      } else if (deadlineDate) {
+        deadlineInfo = `Zamów do: <strong>${isoToDisplay(deadlineDate.toISOString().slice(0, 10))}</strong>`;
+        if (daysLeft < 0) statusBadge = '<span class="badge warn">Termin minął!</span>';
+        else if (daysLeft <= 14) statusBadge = `<span class="badge warn">Pilne — ${daysLeft} dni</span>`;
+        else statusBadge = `<span class="badge ok">Czas jeszcze jest (${daysLeft} dni)</span>`;
+      } else {
+        deadlineInfo = 'Ustal termin realizacji w Kosztorysie, żeby obliczyć deadline.';
+        statusBadge = '';
+      }
+
+      const noteHtml = item.leadTime.note
+        ? `<p class="date-hint" style="margin:3px 0 0;font-style:italic">💡 ${item.leadTime.note}</p>`
+        : '';
+
+      return `
+        <div class="line-item" style="padding:10px 16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <div style="flex:1">
+              <span style="font-weight:700;font-size:13.5px">${item.name}</span>
+              <span class="date-hint" style="margin-left:8px">${item.leadTime.realizacjaTygodnie || 0}+${item.leadTime.zamowienieTygodnie || 0} tyg. = ${totalWeeks} tyg. razem</span>
+              <p class="status-line" style="margin:2px 0 0">${deadlineInfo} ${statusBadge}</p>
+              ${noteHtml}
+            </div>
+            <div style="display:flex;gap:6px;flex-shrink:0">
+              <button class="secondary" onclick="openLeadtimeModal('${item.id}')">Edytuj</button>
+              <button class="tiny-btn" onclick="removeLeadtime('${item.id}')">✕</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  if (withoutLeadtime.length > 0) {
+    html += `
+      <div class="template-cta" style="margin-top:10px">
+        <p>Dodaj wyprzedzenie dla pozycji, która go wymaga:</p>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+          <select id="leadtime-add-select" style="max-width:260px">
+            <option value="">— wybierz pozycję —</option>
+            ${withoutLeadtime.map(i => `<option value="${i.id}">${i.name}</option>`).join('')}
+          </select>
+          <button class="secondary" onclick="openLeadtimeModal(document.getElementById('leadtime-add-select').value)">Ustaw wyprzedzenie</button>
+        </div>
+      </div>
+    `;
+  }
+
+  return html || '<p class="ref-line">Brak pozycji kosztorysu.</p>';
+}
+
+function renderLeadtimePanel() {
+  const container = document.getElementById('leadtime-content');
+  if (!container) return;
+  container.innerHTML = renderUnifiedProjectTimeline() + renderLeadtimeManageList();
+  attachStageMarkerHoverHandlers();
+}
+
+// Zwykły CSS :hover urywałby się w "dziurze" między małą ikoną a dymkiem
+// unoszącym się nad nią (mysz w drodze tam przez chwilę nie jest nad
+// żadnym elementem). Sterujemy więc widocznością z JS z buforem 500ms
+// przy opuszczaniu, żeby zdążyć dojechać kursorem do dymka i kliknąć coś w środku.
+function attachStageMarkerHoverHandlers() {
+  const allMarkers = document.querySelectorAll('.curve-marker');
+  allMarkers.forEach(marker => {
+    marker.addEventListener('mouseenter', () => {
+      clearTimeout(marker._hideTimeout);
+      // Tylko jeden dymek aktywny naraz — najechanie na nową ikonę
+      // natychmiast chowa wszystkie inne, nie czekając na ich własne
+      // timery (inaczej przy szybkim ruchu myszy zostawało kilka naraz).
+      allMarkers.forEach(other => {
+        if (other !== marker) {
+          clearTimeout(other._hideTimeout);
+          other.classList.remove('pinned');
+        }
+      });
+      marker.classList.add('pinned');
+    });
+    marker.addEventListener('mouseleave', () => {
+      marker._hideTimeout = setTimeout(() => {
+        marker.classList.remove('pinned');
+      }, 500);
+    });
+  });
+}
+
+// Zakres dat do osi czasu — obejmuje plan z kosztorysu oraz wszystkie
+// oferty z ustawionym terminem, żeby zmieściły się na wspólnej skali.
+function computeTimelineRange(item) {
+  const dates = [];
+  item.offers.forEach(o => {
+    if (o.termFrom) dates.push(o.termFrom);
+    if (o.termTo) dates.push(o.termTo);
+  });
+  if (item.monthFrom) dates.push(item.monthFrom);
+  if (item.monthTo) dates.push(item.monthTo);
+  if (dates.length === 0) return null;
+  return {
+    minDate: dates.reduce((a, b) => (a < b ? a : b)),
+    maxDate: dates.reduce((a, b) => (a > b ? a : b))
+  };
+}
+
+function renderOfferTimeline(item) {
+  const range = computeTimelineRange(item);
+
+  if (!range) {
+    return `
+      <div class="offer-timeline">
+        <p class="timeline-title">Oś czasu deklarowanych terminów</p>
+        <p class="ref-line" style="margin:0">Ustal termin realizacji w Kosztorysie albo dodaj ofertę z terminem, żeby zobaczyć tu porównanie.</p>
+      </div>
+    `;
+  }
+
+  const minMs = new Date(range.minDate).getTime();
+  const maxMs = new Date(range.maxDate).getTime();
+  const totalMs = Math.max(maxMs - minMs, 86400000); // minimum 1 dzień, żeby uniknąć dzielenia przez zero
+  const pctFor = iso => ((new Date(iso).getTime() - minMs) / totalMs) * 100;
+
+  let rows = '';
+  if (item.monthFrom && item.monthTo) {
+    const left = pctFor(item.monthFrom);
+    const width = Math.max(pctFor(item.monthTo) - left, 1);
+    rows += `
+      <div class="timeline-row">
+        <span class="timeline-label">Plan (kosztorys)</span>
+        <div class="timeline-track"><div class="timeline-bar timeline-plan" style="left:${left}%;width:${width}%"></div></div>
+      </div>`;
+  }
+
+  item.offers.forEach(offer => {
+    if (!offer.termFrom || !offer.termTo) return;
+    const left = pctFor(offer.termFrom);
+    const width = Math.max(pctFor(offer.termTo) - left, 1);
+    const label = (offer.contractor || 'Oferta bez nazwy') + (offer.price != null ? ' — ' + fmt(offer.price) : '');
+    rows += `
+      <div class="timeline-row">
+        <span class="timeline-label" title="${label}">${label}</span>
+        <div class="timeline-track"><div class="timeline-bar ${offer.selected ? 'timeline-selected' : ''}" style="left:${left}%;width:${width}%"></div></div>
+      </div>`;
+  });
+
+  if (!rows) {
+    return `
+      <div class="offer-timeline">
+        <p class="timeline-title">Oś czasu deklarowanych terminów</p>
+        <p class="ref-line" style="margin:0">Ustal termin realizacji w Kosztorysie albo dodaj ofertę z terminem, żeby zobaczyć tu porównanie.</p>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="offer-timeline">
+      <p class="timeline-title">Oś czasu deklarowanych terminów</p>
+      <div class="timeline-axis-labels"><span>${isoToDisplay(range.minDate)}</span><span>${isoToDisplay(range.maxDate)}</span></div>
+      ${rows}
+    </div>
+  `;
+}
+
+function toggleScopeExpand(itemId, offerId) {
+  const row = document.getElementById('scope-expand-' + itemId + '-' + offerId);
+  if (row) row.style.display = (row.style.display === 'none') ? 'table-row' : 'none';
+}
+
+function renderOffersTable(item) {
+  if (item.offers.length === 0) {
+    return '<p class="ref-line">Brak ofert dla tej pozycji.</p>';
+  }
+
+  const rows = item.offers.map(offer => {
+    const isIncomplete = !offer.isBaseline && offer.price !== null && (!offer.contractor || !offer.satisfaction);
+    const coveredIds = offer.coveredScopeIds || [];
+    const totalScope = item.scopeItems.length;
+    const coveredCount = item.scopeItems.filter(s => coveredIds.includes(s.id)).length;
+    let coverageClass = 'coverage-none';
+    if (totalScope > 0 && coveredCount === totalScope) coverageClass = 'coverage-full';
+    else if (coveredCount > 0) coverageClass = 'coverage-partial';
+
+    const scopeRibbon = item.scopeItems.length > 0 ? `
+      <div class="scope-ribbon">
+        ${item.scopeItems.map(scope => `
+          <label class="scope-check-label">
+            <input type="checkbox" ${coveredIds.includes(scope.id) ? 'checked' : ''}
+              onchange="toggleScopeCoverage('${item.id}', '${offer.id}', '${scope.id}', this.checked)" />
+            ${scope.text}
+          </label>
+        `).join('')}
+      </div>
+    ` : '<p class="date-hint" style="margin:0">Ta pozycja nie ma rozbitego zakresu prac.</p>';
+
+    return `
+      <tr class="offer-table-row ${offer.selected ? 'selected' : ''}">
+        <td>
+          <button class="select-offer-btn ${offer.selected ? 'is-selected' : ''}" onclick="selectOffer('${item.id}', '${offer.id}')">
+            ${offer.selected ? '✓' : 'Wybierz'}
+          </button>
+        </td>
+        <td><input type="number" value="${offer.price ?? ''}" placeholder="cena" style="width:95px"
+          onchange="updateOfferField('${item.id}', '${offer.id}', 'price', this.value)" /></td>
+        <td><input type="text" value="${offer.contractor || ''}" placeholder="nazwa firmy" style="width:130px"
+          onchange="updateOfferField('${item.id}', '${offer.id}', 'contractor', this.value)" /></td>
+        <td>
+          <select onchange="updateOfferField('${item.id}', '${offer.id}', 'satisfaction', this.value)" style="width:112px">
+            <option value="">—</option>
+            ${Object.entries(SATISFACTION_LABELS).map(([val, label]) =>
+              `<option value="${val}" ${offer.satisfaction == val ? 'selected' : ''}>${label}</option>`
+            ).join('')}
+          </select>
+        </td>
+        <td>
+          <div style="display:flex;gap:4px">
+            ${offerDateFieldHtml(item.id, offer.id, 'termFrom', offer.termFrom)}
+            ${offerDateFieldHtml(item.id, offer.id, 'termTo', offer.termTo)}
+          </div>
+        </td>
+        <td>
+          <button class="coverage-badge-btn ${coverageClass}" onclick="toggleScopeExpand('${item.id}','${offer.id}')">Zakres: ${coveredCount}/${totalScope}</button>
+        </td>
+        <td style="white-space:nowrap">
+          ${offer.isBaseline ? '<span class="badge empty">Punkt odn.</span>' : ''}
+          ${isIncomplete ? '<span class="badge warn">Uzupełnij</span>' : ''}
+        </td>
+        <td><button class="tiny-btn" onclick="removeOffer('${item.id}', '${offer.id}')" title="Usuń ofertę">✕</button></td>
+      </tr>
+      <tr class="offer-scope-expand-row" id="scope-expand-${item.id}-${offer.id}" style="display:none">
+        <td colspan="8">${scopeRibbon}</td>
+      </tr>
+    `;
+  }).join('');
+
+  return `
+    <div style="overflow-x:auto">
+      <table class="offers-compare-table">
+        <thead>
+          <tr>
+            <th></th><th>Cena (zł)</th><th>Wykonawca</th><th>Satysfakcja</th>
+            <th>Termin wg wykonawcy (od / do)</th><th>Zakres</th><th></th><th></th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
 }
 
 function renderOfertyTab() {
@@ -665,6 +2754,8 @@ function renderOfertyTab() {
       ? 'Dodaj pierwszą pozycję kosztorysu w zakładce "Kosztorys", żeby zacząć śledzić pokrycie.'
       : `${itemsWithSelected.length} z ${state.lineItems.length} pozycji ma wybraną ofertę.`;
 
+  renderLeadtimePanel();
+
   const container = document.getElementById('line-items-oferty');
   const emptyState = document.getElementById('empty-state-oferty');
 
@@ -681,69 +2772,6 @@ function renderOfertyTab() {
     if (item.offers.length > 0 && !selectedOffer) badge = '<span class="badge warn">Brak wybranej oferty</span>';
     if (selectedOffer) badge = '<span class="badge ok">Wybrano ofertę</span>';
 
-    const offersHtml = item.offers.map(offer => {
-      const isIncomplete = offer.price !== null && (!offer.contractor || !offer.satisfaction);
-      const coveredIds = offer.coveredScopeIds || [];
-      const totalScope = item.scopeItems.length;
-      const coveredCount = item.scopeItems.filter(s => coveredIds.includes(s.id)).length;
-      let coverageClass = 'coverage-none';
-      if (totalScope > 0 && coveredCount === totalScope) coverageClass = 'coverage-full';
-      else if (coveredCount > 0) coverageClass = 'coverage-partial';
-
-      const scopeRibbon = item.scopeItems.length > 0 ? `
-        <div class="scope-ribbon">
-          ${item.scopeItems.map(scope => `
-            <label class="scope-check-label">
-              <input type="checkbox" ${coveredIds.includes(scope.id) ? 'checked' : ''}
-                onchange="toggleScopeCoverage('${item.id}', '${offer.id}', '${scope.id}', this.checked)" />
-              ${scope.text}
-            </label>
-          `).join('')}
-        </div>
-      ` : '';
-
-      return `
-        <div class="offer-row ${offer.selected ? 'selected' : ''}">
-          <div class="offer-top">
-            <button class="select-offer-btn ${offer.selected ? 'is-selected' : ''}"
-              onclick="selectOffer('${item.id}', '${offer.id}')">
-              ${offer.selected ? '✓ Wybrana' : 'Wybierz'}
-            </button>
-            <span class="coverage-badge ${coverageClass}">Zakres: ${coveredCount}/${totalScope}</span>
-            ${isIncomplete ? '<span class="badge warn">Uzupełnij dane</span>' : ''}
-            <button class="remove-btn" onclick="removeOffer('${item.id}', '${offer.id}')" style="margin-left:auto;">Usuń ofertę</button>
-          </div>
-          <div class="row">
-            <div class="field">
-              <label>Cena oferty (zł)</label>
-              <input type="number" value="${offer.price ?? ''}" placeholder="wpisz cenę"
-                onchange="updateOfferField('${item.id}', '${offer.id}', 'price', this.value)" />
-            </div>
-            <div class="field">
-              <label>Wykonawca (opcjonalnie)</label>
-              <input type="text" value="${offer.contractor || ''}" placeholder="nazwa firmy"
-                onchange="updateOfferField('${item.id}', '${offer.id}', 'contractor', this.value)" />
-            </div>
-            <div class="field">
-              <label>Stopień satysfakcji</label>
-              <select onchange="updateOfferField('${item.id}', '${offer.id}', 'satisfaction', this.value)">
-                <option value="">— wybierz —</option>
-                ${Object.entries(SATISFACTION_LABELS).map(([val, label]) =>
-                  `<option value="${val}" ${offer.satisfaction == val ? 'selected' : ''}>${label}</option>`
-                ).join('')}
-              </select>
-            </div>
-            <div class="field">
-              <label>Dostępność firmy</label>
-              <input type="text" value="${offer.availability || ''}" placeholder="np. od maja 2026"
-                onchange="updateOfferField('${item.id}', '${offer.id}', 'availability', this.value)" />
-            </div>
-          </div>
-          ${scopeRibbon}
-        </div>
-      `;
-    }).join('');
-
     return `
       <div class="line-item">
         <div class="line-item-header">
@@ -751,8 +2779,9 @@ function renderOfertyTab() {
           <span style="font-size:13px; color:#6b7280;">Plan: ${fmt(item.planned)}</span>
           ${badge}
         </div>
-        <div class="offers-list">${offersHtml}</div>
-        <button class="secondary" style="margin-top:8px;" onclick="addOffer('${item.id}')">+ Dodaj kontrofertę</button>
+        ${renderOfferTimeline(item)}
+        ${renderOffersTable(item)}
+        <button class="secondary" style="margin-top:10px;" onclick="addOffer('${item.id}')">+ Dodaj kontrofertę</button>
       </div>
     `;
   }).join('');
@@ -770,6 +2799,596 @@ function generateMonthRange(fromStr, toStr) {
   }
   return months;
 }
+
+/* ====================================================================
+   PRZEBIEG BUDOWY — notatki ze spotkania + protokoły odbioru
+   ==================================================================== */
+
+/* ---------- notatki ze spotkania ---------- */
+
+/* --------------------------------------------------------------------
+   MODAL "DODAJ NOTATKĘ" — data, treść, zdjęcia (z kompresją)
+   -------------------------------------------------------------------- */
+
+const MAX_ZDJEC_NA_NOTATKE = 6;
+let notatkaModalPhotos = []; // tymczasowa lista już skompresowanych zdjęć, zanim użytkownik zatwierdzi całą notatkę
+
+// Zmniejsza zdjęcie po stronie przeglądarki przed zapisaniem — bez tego
+// kilka zdjęć z telefonu w oryginalnej jakości mogłoby przekroczyć limit
+// pamięci przeglądarki (localStorage ma zwykle 5-10 MB na całą aplikację).
+//
+// CELOWO WYIZOLOWANA FUNKCJA: dziś zwraca skompresowane zdjęcie jako
+// base64 (do zapisu lokalnego). Przy integracji z Supabase Storage
+// wystarczy podmienić WNĘTRZE tej funkcji na prawdziwy upload pliku,
+// zwracający URL zamiast base64 — reszta kodu (modal, podgląd,
+// wyświetlanie w liście notatek) zostaje bez zmian.
+function compressImage(file, maxWidth, quality) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxWidth) {
+          height = Math.round(height * (maxWidth / width));
+          width = maxWidth;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => reject(new Error('Nie udało się wczytać obrazu.'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Nie udało się odczytać pliku.'));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function processPhotoForStorage(file) {
+  const dataUrl = await compressImage(file, 1000, 0.7);
+  return { id: 'photo-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7), dataUrl };
+}
+
+function openNotatkaModal() {
+  notatkaModalPhotos = [];
+  document.getElementById('notatka-modal-tekst').value = '';
+  document.getElementById('notatka-modal-photos').value = '';
+  document.getElementById('notatka-modal-photo-preview').innerHTML = '';
+  document.getElementById('notatka-modal-date-container').innerHTML =
+    stdDateFieldHtml('notatka-modal-data', 'markDateFieldValidity(this)');
+  document.getElementById('notatka-modal').classList.add('show');
+}
+
+function closeNotatkaModal() {
+  document.getElementById('notatka-modal').classList.remove('show');
+}
+
+async function handleNotatkaPhotoSelect(inputEl) {
+  const files = Array.from(inputEl.files || []).filter(f => f.type.startsWith('image/'));
+  const wolneMiejsca = MAX_ZDJEC_NA_NOTATKE - notatkaModalPhotos.length;
+
+  if (files.length > wolneMiejsca) {
+    alert(`Można dodać maksymalnie ${MAX_ZDJEC_NA_NOTATKE} zdjęć do jednej notatki. Dodano pierwsze ${Math.max(wolneMiejsca, 0)}.`);
+  }
+
+  for (const file of files.slice(0, Math.max(wolneMiejsca, 0))) {
+    try {
+      const photo = await processPhotoForStorage(file);
+      notatkaModalPhotos.push(photo);
+    } catch (e) {
+      console.error('Błąd przetwarzania zdjęcia:', e);
+    }
+  }
+
+  inputEl.value = ''; // pozwala dodać to samo zdjęcie ponownie, jeśli trzeba
+  renderNotatkaModalPhotoPreview();
+}
+
+function renderNotatkaModalPhotoPreview() {
+  const container = document.getElementById('notatka-modal-photo-preview');
+  container.innerHTML = notatkaModalPhotos.map(p => `
+    <div style="position:relative">
+      <img src="${p.dataUrl}" style="width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb;display:block" />
+      <button onclick="removeNotatkaModalPhoto('${p.id}')"
+        style="position:absolute;top:-6px;right:-6px;background:#dc2626;color:white;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;line-height:1">✕</button>
+    </div>
+  `).join('');
+}
+
+function removeNotatkaModalPhoto(photoId) {
+  notatkaModalPhotos = notatkaModalPhotos.filter(p => p.id !== photoId);
+  renderNotatkaModalPhotoPreview();
+}
+
+function submitNotatkaModal() {
+  const tekstInput = document.getElementById('notatka-modal-tekst');
+  const tekst = tekstInput.value.trim();
+  if (!tekst) return;
+
+  const dataInput = document.getElementById('notatka-modal-data');
+  let dataIso;
+  if (dataInput.value.trim()) {
+    const result = markDateFieldValidity(dataInput);
+    if (result === false) return; // pole jest już żółte z widocznym komunikatem
+    dataIso = result;
+  } else {
+    dataIso = new Date().toISOString().slice(0, 10);
+  }
+
+  state.notatkiSpotkan.unshift({
+    id: 'notatka-' + Date.now(),
+    data: dataIso,
+    tekst,
+    zdjecia: notatkaModalPhotos.slice()
+  });
+
+  closeNotatkaModal();
+  renderPrzebiegTab();
+  saveState();
+}
+
+// Proste powiększenie zdjęcia na cały ekran po kliknięciu miniaturki
+// w liście notatek — to jest "podgląd na komputerze", o który chodziło.
+function openPhotoLightbox(dataUrl) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;display:flex;align-items:center;justify-content:center;cursor:zoom-out;padding:24px';
+  overlay.innerHTML = `<img src="${dataUrl}" style="max-width:100%;max-height:100%;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,0.4)" />`;
+  overlay.onclick = () => overlay.remove();
+  document.body.appendChild(overlay);
+}
+
+// Podgląd PDF w oknie modalnym (nie w nowej karcie) — używa <iframe> na
+// blob: URL, więc renderuje się wbudowaną przeglądarką PDF przeglądarki,
+// bez oddawania pliku do zewnętrznej aplikacji systemowej.
+function openPdfLightbox(dataUrl) {
+  let blobUrl;
+  try {
+    blobUrl = URL.createObjectURL(dataUrlToBlob(dataUrl));
+  } catch (e) {
+    console.error('Błąd otwierania podglądu PDF:', e);
+    alert('Nie udało się otworzyć podglądu PDF.');
+    return;
+  }
+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;display:flex;align-items:center;justify-content:center;padding:24px';
+
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '✕ Zamknij';
+  closeBtn.style.cssText = 'position:absolute;top:24px;right:24px;background:#1f2a4f;color:white;border:none;border-radius:6px;padding:8px 16px;cursor:pointer;font-size:13px;font-weight:600;z-index:2';
+
+  const frameWrap = document.createElement('div');
+  frameWrap.style.cssText = 'background:white;border-radius:8px;width:100%;height:100%;max-width:900px;box-shadow:0 10px 40px rgba(0,0,0,0.4);overflow:hidden';
+
+  const iframe = document.createElement('iframe');
+  iframe.src = blobUrl;
+  iframe.style.cssText = 'width:100%;height:100%;border:none';
+
+  const closeAndCleanup = () => {
+    overlay.remove();
+    URL.revokeObjectURL(blobUrl); // porządkujemy pamięć dopiero po zamknięciu podglądu
+  };
+  closeBtn.onclick = closeAndCleanup;
+  overlay.onclick = (e) => { if (e.target === overlay) closeAndCleanup(); };
+
+  frameWrap.appendChild(iframe);
+  overlay.appendChild(closeBtn);
+  overlay.appendChild(frameWrap);
+  document.body.appendChild(overlay);
+}
+
+function removeNotatka(id) {
+  state.notatkiSpotkan = state.notatkiSpotkan.filter(n => n.id !== id);
+  renderPrzebiegTab();
+  saveState();
+}
+
+/* --------------------------------------------------------------------
+   PROTOKOŁY ODBIORU — samodzielna lista dokumentów (nie po jednym na
+   pozycję kosztorysu). Każdy protokół ma temat (wybrany z listy pozycji
+   kosztorysu albo wpisany samodzielnie), typ (końcowy/częściowy —
+   częściowe mają automatyczną numerację w obrębie tego samego tematu)
+   i auto-uzupełnianego wykonawcę na podstawie poprzedniego protokołu
+   tego samego tematu albo wybranej oferty z kosztorysu.
+   -------------------------------------------------------------------- */
+
+let editingProtokolId = null;
+
+function nextCzesciowyNumer(temat) {
+  const existing = state.protokoly.filter(p => p.temat === temat && p.typ === 'czesciowy' && p.id !== editingProtokolId);
+  if (existing.length === 0) return 1;
+  return Math.max(...existing.map(p => p.numerCzesciowy || 0)) + 1;
+}
+
+// Podpowiada wykonawcę: najpierw sprawdza, czy dla tego samego tematu
+// istnieje już wcześniejszy protokół (kontynuacja przy odbiorach
+// częściowych), a dopiero potem, czy temat odpowiada dokładnie nazwie
+// pozycji kosztorysu z wybraną ofertą.
+function suggestWykonawcaForTemat(temat) {
+  const existing = state.protokoly.filter(p => p.temat === temat && p.id !== editingProtokolId);
+  if (existing.length > 0 && existing[0].wykonawca) return existing[0].wykonawca;
+
+  const item = state.lineItems.find(i => i.name === temat);
+  if (item) {
+    const sel = getSelectedOffer(item);
+    if (sel && sel.contractor) return sel.contractor;
+  }
+  return '';
+}
+
+function openProtokolModal(protokolId) {
+  editingProtokolId = protokolId || null;
+  const existing = protokolId ? state.protokoly.find(p => p.id === protokolId) : null;
+
+  document.getElementById('protokol-modal-title').textContent = existing ? 'Edytuj protokół odbioru' : 'Dodaj protokół odbioru';
+
+  const datalist = document.getElementById('protokol-temat-datalist');
+  datalist.innerHTML = state.lineItems.map(i => `<option value="${i.name}"></option>`).join('');
+
+  const tematInput = document.getElementById('protokol-modal-temat');
+  tematInput.value = existing ? existing.temat : '';
+
+  const typ = existing ? existing.typ : 'koncowy';
+  document.querySelectorAll('#protokol-typ-opts .survey-opt').forEach(b => b.classList.toggle('selected', b.dataset.v === typ));
+  document.getElementById('protokol-numer-wrap').style.display = (typ === 'czesciowy') ? 'block' : 'none';
+  document.getElementById('protokol-modal-numer').value = existing && existing.numerCzesciowy
+    ? existing.numerCzesciowy
+    : nextCzesciowyNumer(tematInput.value);
+
+  document.getElementById('protokol-modal-wykonawca').value = existing ? (existing.wykonawca || '') : '';
+  document.getElementById('protokol-modal-autofill-hint').style.display = 'none';
+  document.getElementById('protokol-modal-zakres').value = existing ? (existing.zakresReczny || '') : '';
+  document.getElementById('protokol-modal-uwagi').value = existing ? (existing.uwagi || '') : '';
+
+  document.getElementById('protokol-modal-date-container').innerHTML =
+    stdDateFieldHtml('protokol-modal-data', 'markDateFieldValidity(this)', existing ? existing.dataOdbioru : '');
+
+  document.getElementById('protokol-edit-modal').classList.add('show');
+}
+
+function closeProtokolModal() {
+  document.getElementById('protokol-edit-modal').classList.remove('show');
+  editingProtokolId = null;
+}
+
+function selectProtokolTyp(typ, btnEl) {
+  document.querySelectorAll('#protokol-typ-opts .survey-opt').forEach(b => b.classList.remove('selected'));
+  btnEl.classList.add('selected');
+  document.getElementById('protokol-numer-wrap').style.display = (typ === 'czesciowy') ? 'block' : 'none';
+  if (typ === 'czesciowy') {
+    const temat = document.getElementById('protokol-modal-temat').value.trim();
+    document.getElementById('protokol-modal-numer').value = nextCzesciowyNumer(temat);
+  }
+}
+
+function handleProtokolTematChange() {
+  const temat = document.getElementById('protokol-modal-temat').value.trim();
+  const typEl = document.querySelector('#protokol-typ-opts .survey-opt.selected');
+  const typ = typEl ? typEl.dataset.v : 'koncowy';
+
+  if (typ === 'czesciowy') {
+    document.getElementById('protokol-modal-numer').value = nextCzesciowyNumer(temat);
+  }
+
+  const wykonawcaInput = document.getElementById('protokol-modal-wykonawca');
+  if (!wykonawcaInput.value.trim() && temat) {
+    const suggestion = suggestWykonawcaForTemat(temat);
+    if (suggestion) {
+      wykonawcaInput.value = suggestion;
+      document.getElementById('protokol-modal-autofill-hint').style.display = 'block';
+    }
+  }
+}
+
+function saveProtokolModal() {
+  const temat = document.getElementById('protokol-modal-temat').value.trim();
+  if (!temat) return;
+
+  const typEl = document.querySelector('#protokol-typ-opts .survey-opt.selected');
+  const typ = typEl ? typEl.dataset.v : 'koncowy';
+  const numerCzesciowy = (typ === 'czesciowy')
+    ? (parseInt(document.getElementById('protokol-modal-numer').value, 10) || 1)
+    : null;
+
+  const dateInput = document.getElementById('protokol-modal-data');
+  let dataIso = '';
+  if (dateInput.value.trim()) {
+    const result = markDateFieldValidity(dateInput);
+    if (result === false) return; // pole jest już żółte z widocznym komunikatem
+    dataIso = result;
+  }
+
+  const wykonawca = document.getElementById('protokol-modal-wykonawca').value.trim();
+  const zakresReczny = document.getElementById('protokol-modal-zakres').value.trim();
+  const uwagi = document.getElementById('protokol-modal-uwagi').value.trim();
+
+  if (editingProtokolId) {
+    const existing = state.protokoly.find(p => p.id === editingProtokolId);
+    if (existing) {
+      Object.assign(existing, { temat, typ, numerCzesciowy, dataOdbioru: dataIso, wykonawca, zakresReczny, uwagi });
+    }
+  } else {
+    state.protokoly.unshift({
+      id: 'protokol-' + Date.now(),
+      temat, typ, numerCzesciowy,
+      dataOdbioru: dataIso, wykonawca, zakresReczny, uwagi
+    });
+  }
+
+  closeProtokolModal();
+  renderPrzebiegTab();
+  saveState();
+}
+
+function removeProtokol(id) {
+  state.protokoly = state.protokoly.filter(p => p.id !== id);
+  renderPrzebiegTab();
+  saveState();
+}
+
+// Buduje pełną, gotową do wydruku treść protokołu. Jeśli temat dokładnie
+// odpowiada nazwie pozycji kosztorysu, dociąga z niej zakres prac,
+// wartość i planowany termin — w przeciwnym razie te pola są pominięte
+// (temat może być dowolnym, samodzielnie wpisanym tekstem).
+function generateProtokolHtml(protokol) {
+  const item = state.lineItems.find(i => i.name === protokol.temat);
+  const selected = item ? getSelectedOffer(item) : null;
+
+  const wartosc = selected ? fmt(selected.price) : (item ? fmt(item.planned) + ' (kwota z kosztorysu)' : null);
+  const terminOd = (selected && selected.termFrom) ? isoToDisplay(selected.termFrom) : (item ? (isoToDisplay(item.monthFrom) || '—') : null);
+  const terminDo = (selected && selected.termTo) ? isoToDisplay(selected.termTo) : (item ? (isoToDisplay(item.monthTo) || '—') : null);
+  const dataOdbioru = isoToDisplay(protokol.dataOdbioru) || '……………………………';
+  const wykonawca = protokol.wykonawca || '……………………………………';
+
+  // Ręcznie wpisany zakres (jeśli cokolwiek wpisano) ma pierwszeństwo nad
+  // automatycznym z pozycji kosztorysu — pozwala nadpisać albo uzupełnić
+  // zakres dla tematów, które nie odpowiadają dokładnie żadnej pozycji.
+  const zakresRecznyLinie = (protokol.zakresReczny || '').split('\n').map(s => s.trim()).filter(Boolean);
+  let zakresHtml;
+  if (zakresRecznyLinie.length) {
+    zakresHtml = zakresRecznyLinie.map(l => `<li>${l}</li>`).join('');
+  } else if (item && item.scopeItems && item.scopeItems.length) {
+    zakresHtml = item.scopeItems.map(s => `<li>${s.text}</li>`).join('');
+  } else {
+    zakresHtml = '<li>(brak podanego zakresu prac)</li>';
+  }
+  const typLabel = protokol.typ === 'czesciowy' ? `Odbiór częściowy nr ${protokol.numerCzesciowy}` : 'Odbiór końcowy';
+
+  return `
+    <div style="font-family:'Inter',sans-serif;color:#11172a;padding:40px;max-width:800px;margin:0 auto">
+      <h1 style="font-family:'Zilla Slab',serif;font-size:22px;margin:0 0 4px">Protokół odbioru robót</h1>
+      <p style="color:#6b7280;margin:0 0 4px">${state.projectName || 'Projekt bez nazwy'}</p>
+      <p style="color:#1f2a4f;font-weight:700;margin:0 0 22px">${typLabel}</p>
+
+      <table style="width:100%;border-collapse:collapse;margin-bottom:22px;font-size:14px">
+        <tr><td style="padding:5px 0;font-weight:700;width:230px;vertical-align:top">Temat odbioru:</td><td>${protokol.temat}</td></tr>
+        <tr><td style="padding:5px 0;font-weight:700;vertical-align:top">Wykonawca:</td><td>${wykonawca}</td></tr>
+        ${wartosc ? `<tr><td style="padding:5px 0;font-weight:700;vertical-align:top">Wartość robót:</td><td>${wartosc}</td></tr>` : ''}
+        ${terminOd ? `<tr><td style="padding:5px 0;font-weight:700;vertical-align:top">Planowany termin realizacji:</td><td>${terminOd} – ${terminDo}</td></tr>` : ''}
+        <tr><td style="padding:5px 0;font-weight:700;vertical-align:top">Data odbioru:</td><td>${dataOdbioru}</td></tr>
+      </table>
+
+      <h3 style="font-family:'Zilla Slab',serif;font-size:15px;margin:0 0 8px">Zakres odbieranych prac</h3>
+      <ul style="margin:0 0 22px;padding-left:20px;font-size:14px">${zakresHtml}</ul>
+
+      <h3 style="font-family:'Zilla Slab',serif;font-size:15px;margin:0 0 8px">Uwagi / usterki</h3>
+      <p style="min-height:70px;border:1px solid #e5e7eb;border-radius:6px;padding:10px;font-size:14px;white-space:pre-wrap;margin:0 0 40px">${protokol.uwagi ? protokol.uwagi : '(brak uwag)'}</p>
+
+      <div style="display:flex;justify-content:space-between;margin-top:50px">
+        <div style="width:44%;text-align:center;font-size:13px">
+          <div style="border-top:1px solid #11172a;padding-top:6px">Podpis Inwestora</div>
+        </div>
+        <div style="width:44%;text-align:center;font-size:13px">
+          <div style="border-top:1px solid #11172a;padding-top:6px">Podpis Wykonawcy</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function drukujProtokol(protokolId) {
+  const protokol = state.protokoly.find(p => p.id === protokolId);
+  if (!protokol) return;
+  document.getElementById('protokol-print-area').innerHTML = generateProtokolHtml(protokol);
+  window.print();
+}
+
+function renderPrzebiegTab() {
+  /* --- notatki ze spotkania --- */
+  const notatkiEl = document.getElementById('notatki-content');
+  if (state.notatkiSpotkan.length === 0) {
+    notatkiEl.innerHTML = '<p class="ref-line">Brak notatek — dodaj pierwszą poniżej.</p>';
+  } else {
+    notatkiEl.innerHTML = state.notatkiSpotkan.map(n => `
+      <div class="line-item" style="padding:12px 16px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+          <div style="flex:1">
+            <span style="font-weight:700;font-size:13px">${isoToDisplay(n.data)}</span>
+            <p style="margin:4px 0 0;font-size:13.5px;color:#374151">${n.tekst}</p>
+            ${(n.zdjecia && n.zdjecia.length) ? `
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">
+                ${n.zdjecia.map(p => `<img src="${p.dataUrl}" onclick="openPhotoLightbox('${p.dataUrl}')" style="width:56px;height:56px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb;cursor:zoom-in" />`).join('')}
+              </div>
+            ` : ''}
+          </div>
+          <button class="tiny-btn" onclick="removeNotatka('${n.id}')">✕</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  /* --- protokoły odbioru --- */
+  const protokolyEl = document.getElementById('protokoly-content');
+  if (!state.protokoly || state.protokoly.length === 0) {
+    protokolyEl.innerHTML = '<p class="ref-line">Brak protokołów — dodaj pierwszy przyciskiem poniżej.</p>';
+    return;
+  }
+
+  protokolyEl.innerHTML = state.protokoly.map(p => {
+    const typLabel = p.typ === 'czesciowy' ? `Odbiór częściowy nr ${p.numerCzesciowy}` : 'Odbiór końcowy';
+    const detale = [
+      typLabel,
+      p.dataOdbioru ? isoToDisplay(p.dataOdbioru) : null,
+      p.wykonawca || null
+    ].filter(Boolean).join(' • ');
+
+    return `
+      <div class="line-item">
+        <div class="line-item-header">
+          <span class="line-item-name" style="border:none;background:transparent;font-weight:700;padding:0">${p.temat}</span>
+          <button class="tiny-btn" onclick="removeProtokol('${p.id}')">✕</button>
+        </div>
+        <p class="date-hint" style="margin:2px 0 10px">${detale}</p>
+        ${p.uwagi ? `<p class="status-line" style="margin:0 0 10px">Uwagi: ${p.uwagi}</p>` : ''}
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="secondary" onclick="openProtokolModal('${p.id}')">Edytuj</button>
+          <button class="secondary" onclick="drukujProtokol('${p.id}')">Drukuj protokół odbioru</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+
+/* ====================================================================
+   DOKUMENTACJA POWYKONAWCZA — checklista ogólna + dokumenty per pozycja
+   ==================================================================== */
+
+function defaultDokumentacjaOgolna() {
+  const items = [
+    'Dziennik budowy (oryginał)',
+    'Protokoły odbioru robót zanikających',
+    'Atesty i certyfikaty materiałów budowlanych',
+    'Gwarancje na urządzenia i instalacje',
+    'Inwentaryzacja geodezyjna powykonawcza',
+    'Świadectwo charakterystyki energetycznej',
+    'Protokoły prób i badań instalacji (elektryczna, szczelność gazu, itp.)',
+    'Zawiadomienie o zakończeniu budowy / pozwolenie na użytkowanie'
+  ];
+  return items.map((text, idx) => ({
+    id: 'dok-ogolny-' + Date.now() + '-' + idx,
+    text,
+    status: 'brakuje',
+    note: ''
+  }));
+}
+
+function addDokumentOgolny() {
+  const input = document.getElementById('new-dok-ogolny');
+  const text = input.value.trim();
+  if (!text) return;
+  state.dokumentacjaOgolna.push({ id: 'dok-ogolny-' + Date.now(), text, status: 'brakuje', note: '' });
+  input.value = '';
+  renderDokumentacjaTab();
+  saveState();
+}
+
+function toggleDokumentOgolny(docId) {
+  const doc = state.dokumentacjaOgolna.find(d => d.id === docId);
+  if (!doc) return;
+  doc.status = (doc.status === 'zebrane') ? 'brakuje' : 'zebrane';
+  renderDokumentacjaTab();
+  saveState();
+}
+
+function updateDokumentOgolnyNote(docId, note) {
+  const doc = state.dokumentacjaOgolna.find(d => d.id === docId);
+  if (!doc) return;
+  doc.note = note;
+  saveState();
+}
+
+function removeDokumentOgolny(docId) {
+  state.dokumentacjaOgolna = state.dokumentacjaOgolna.filter(d => d.id !== docId);
+  renderDokumentacjaTab();
+  saveState();
+}
+
+function addDokumentDoPozycji(itemId) {
+  const input = document.getElementById('new-dok-pozycja-' + itemId);
+  const text = input.value.trim();
+  if (!text) return;
+  const item = state.lineItems.find(i => i.id === itemId);
+  if (!item) return;
+  if (!item.dokumenty) item.dokumenty = [];
+  item.dokumenty.push({ id: 'dok-poz-' + Date.now(), text, status: 'brakuje', note: '' });
+  input.value = '';
+  renderDokumentacjaTab();
+  saveState();
+}
+
+function toggleDokumentPozycji(itemId, docId) {
+  const item = state.lineItems.find(i => i.id === itemId);
+  if (!item) return;
+  const doc = (item.dokumenty || []).find(d => d.id === docId);
+  if (!doc) return;
+  doc.status = (doc.status === 'zebrane') ? 'brakuje' : 'zebrane';
+  renderDokumentacjaTab();
+  saveState();
+}
+
+function removeDokumentPozycji(itemId, docId) {
+  const item = state.lineItems.find(i => i.id === itemId);
+  if (!item) return;
+  item.dokumenty = (item.dokumenty || []).filter(d => d.id !== docId);
+  renderDokumentacjaTab();
+  saveState();
+}
+
+function renderDokumentacjaTab() {
+  if (!state.dokumentacjaOgolna) state.dokumentacjaOgolna = defaultDokumentacjaOgolna();
+  state.lineItems.forEach(item => { if (!item.dokumenty) item.dokumenty = []; });
+
+  const ogolnaEl = document.getElementById('dokumentacja-ogolna-content');
+  ogolnaEl.innerHTML = state.dokumentacjaOgolna.map(doc => `
+    <div class="scope-item-row" style="align-items:center">
+      <label style="display:flex;align-items:center;gap:8px;flex:1;font-size:13px;cursor:pointer">
+        <input type="checkbox" ${doc.status === 'zebrane' ? 'checked' : ''} onchange="toggleDokumentOgolny('${doc.id}')" />
+        <span style="${doc.status === 'zebrane' ? 'text-decoration:line-through;color:#9ca3af' : ''}">${doc.text}</span>
+      </label>
+      <input type="text" placeholder="notatka (gdzie jest, kto ma kopię...)" value="${doc.note || ''}"
+        style="max-width:220px;font-size:12px"
+        onchange="updateDokumentOgolnyNote('${doc.id}', this.value)" />
+      <button class="tiny-btn" onclick="removeDokumentOgolny('${doc.id}')">✕</button>
+    </div>
+  `).join('');
+
+  const pozycjeEl = document.getElementById('dokumentacja-pozycje-content');
+  if (state.lineItems.length === 0) {
+    pozycjeEl.innerHTML = '<p class="ref-line">Brak pozycji kosztorysu — dodaj je w zakładce Kosztorys.</p>';
+    return;
+  }
+
+  pozycjeEl.innerHTML = state.lineItems.map(item => `
+    <div class="line-item">
+      <div class="line-item-header">
+        <span class="line-item-name" style="border:none;background:transparent;font-weight:700;padding:0">${item.name}</span>
+      </div>
+      <div class="scope-box" style="margin-top:8px">
+        ${item.dokumenty.length === 0 ? '<p class="date-hint" style="margin:0 0 6px">Brak dopisanych dokumentów dla tej pozycji.</p>' : ''}
+        ${item.dokumenty.map(doc => `
+          <div class="scope-item-row" style="align-items:center">
+            <label style="display:flex;align-items:center;gap:8px;flex:1;font-size:13px;cursor:pointer">
+              <input type="checkbox" ${doc.status === 'zebrane' ? 'checked' : ''} onchange="toggleDokumentPozycji('${item.id}', '${doc.id}')" />
+              <span style="${doc.status === 'zebrane' ? 'text-decoration:line-through;color:#9ca3af' : ''}">${doc.text}</span>
+            </label>
+            ${doc.fileDataUrl ? `<button class="secondary" style="padding:3px 10px;font-size:11px" onclick="openDocumentPreview('${doc.fileDataUrl}', '${doc.fileType}')">${doc.fileType === 'image' ? '🖼️ Podgląd' : '📄 Podgląd PDF'}</button>` : ''}
+            <button class="tiny-btn" onclick="removeDokumentPozycji('${item.id}', '${doc.id}')">✕</button>
+          </div>
+        `).join('')}
+        <div class="scope-add-row">
+          <input type="text" id="new-dok-pozycja-${item.id}" placeholder="Dodaj dokument dla tej pozycji (np. atest materiału)..." />
+          <button class="secondary" onclick="addDokumentDoPozycji('${item.id}')">Dodaj</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
 
 function renderHarmonogram() {
   const container = document.getElementById('harmonogram-content');
@@ -813,7 +3432,7 @@ function renderHarmonogram() {
     const startIdx = sortedMonths.indexOf(from);
     const colspan = span.length;
 
-    html += `<tr><td class="task-name">${item.name}${sel && !sel.availability ? '<span class="risk-flag">brak dostępności</span>' : ''}</td>`;
+    html += `<tr><td class="task-name">${item.name}${sel && (!sel.termFrom || !sel.termTo) ? '<span class="risk-flag">termin niepotwierdzony przez wykonawcę</span>' : ''}</td>`;
 
     for (let i = 0; i < startIdx; i++) html += '<td class="gantt-empty-cell"></td>';
 
@@ -879,6 +3498,26 @@ function renderHarmonogram() {
 document.getElementById('project-name').addEventListener('change', function() {
   state.projectName = this.value;
   saveState();
+});
+
+// Obsługa dotyku dla WSZYSTKICH kalendarzy w aplikacji (pozycje kosztorysu,
+// oferty, protokoły, notatki, ankieta) — jeden wspólny listener, bo
+// wszystkie używają tych samych klas .date-icon-wrap/.calendar-popup.
+// Na telefonie nie ma odpowiednika "najechania myszką" (CSS :hover), więc
+// samo dotknięcie ikony musi przełączać widoczność kalendarza.
+document.addEventListener('click', (e) => {
+  // Kliknięcie WEWNĄTRZ już otwartego kalendarza (strzałka nawigacji,
+  // wybór konkretnego dnia) — nie ruszamy widoczności, niech dzień/strzałka
+  // obsłuży to swoim własnym onclick (a próba przełączenia tutaj
+  // zamknęłaby kalendarz, zanim zdążysz w nim cokolwiek kliknąć).
+  if (e.target.closest('.calendar-popup')) return;
+
+  const wrap = e.target.closest('.date-icon-wrap');
+  const wasOpen = wrap && wrap.classList.contains('tapped');
+
+  document.querySelectorAll('.date-icon-wrap.tapped').forEach(el => el.classList.remove('tapped'));
+
+  if (wrap && !wasOpen) wrap.classList.add('tapped');
 });
 
 loadState();
