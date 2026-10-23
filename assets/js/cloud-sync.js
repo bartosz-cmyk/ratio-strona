@@ -46,6 +46,9 @@ function setProjectIdInUrl(id) {
 
 let currentProjectId = getProjectIdFromUrl();
 
+// true = kosztorys otwarty z cudzego linku; zapisy są blokowane.
+let isReadOnly = false;
+
 // ---------- debounce ----------
 // Zapis do chmury dopiero 1200ms po ostatniej zmianie — bez tego
 // każde naciśnięcie klawisza w polu tekstowym wywoływałoby osobne
@@ -75,6 +78,9 @@ function setSaveIndicator(status) {
   } else if (status === 'offline') {
     el.textContent = '⚠ Offline — zmiany zapisane lokalnie, wyślemy po powrocie sieci';
     el.classList.add('save-offline');
+  } else if (status === 'readonly') {
+    el.textContent = '👁 Tylko do odczytu — zmiany nie są zapisywane';
+    el.classList.add('save-offline');
   } else if (status === 'error') {
     el.textContent = '✗ Błąd zapisu — spróbuj ponownie';
     el.classList.add('save-error');
@@ -86,19 +92,26 @@ function setSaveIndicator(status) {
 // stan lokalnie (localStorage jako bufor AWARYJNY, nie jako docelowe
 // miejsce przechowywania) i próbujemy ponownie, gdy przeglądarka
 // zgłosi powrót online.
-const OFFLINE_BUFFER_KEY = 'ratio-mvp-offline-buffer';
+// Bufor jest OSOBNY dla każdego kosztorysu (klucz zawiera id projektu,
+// albo "new" dla jeszcze niezapisanego). Wcześniej był jeden wspólny
+// bufor, przez co stan jednego kosztorysu mógł zostać zapisany do
+// innego, otwartego później z linku.
+const OFFLINE_BUFFER_PREFIX = 'ratio-mvp-offline-buffer:';
+const LEGACY_OFFLINE_BUFFER_KEY = 'ratio-mvp-offline-buffer';
+
+function offlineBufferKey(projectId) {
+  return OFFLINE_BUFFER_PREFIX + (projectId || 'new');
+}
+
+// Stary wspólny bufor nie wiadomo do którego projektu należy — usuwamy.
+try { localStorage.removeItem(LEGACY_OFFLINE_BUFFER_KEY); } catch (e) {}
 
 function bufferStateOffline(stateSnapshot) {
   try {
-    localStorage.setItem(OFFLINE_BUFFER_KEY, JSON.stringify(stateSnapshot));
+    localStorage.setItem(offlineBufferKey(currentProjectId), JSON.stringify(stateSnapshot));
   } catch (e) {
     // Najczęstsza przyczyna: QuotaExceededError — zbyt dużo zdjęć w
-    // notatkach/dokumentacji, żeby zmieścić się w limicie localStorage
-    // przeglądarki. To tylko bufor awaryjny na wypadek braku sieci, więc
-    // brak miejsca na niego nie jest tak krytyczny jak dawniej (kiedy
-    // localStorage był JEDYNYM miejscem przechowywania danych) — ale
-    // ostrzegamy użytkownika, bo w tym jednym przypadku zmiany naprawdę
-    // mogą się nie zapisać, dopóki sieć nie wróci.
+    // notatkach/dokumentacji, żeby zmieścić się w limicie localStorage.
     console.error('Nie udało się zbuforować stanu offline:', e);
     if (e.name === 'QuotaExceededError' || e.code === 22) {
       alert('Przekroczono limit pamięci przeglądarki (prawdopodobnie zbyt dużo zdjęć) i nie udało się zbuforować zmian offline. Połącz się z internetem jak najszybciej, żeby zapisać dane w chmurze.');
@@ -106,24 +119,25 @@ function bufferStateOffline(stateSnapshot) {
   }
 }
 
-function readOfflineBuffer() {
+function readOfflineBuffer(projectId) {
   try {
-    const raw = localStorage.getItem(OFFLINE_BUFFER_KEY);
+    const raw = localStorage.getItem(offlineBufferKey(projectId));
     return raw ? JSON.parse(raw) : null;
   } catch (e) {
     return null;
   }
 }
 
-function clearOfflineBuffer() {
-  localStorage.removeItem(OFFLINE_BUFFER_KEY);
+function clearOfflineBuffer(projectId) {
+  try { localStorage.removeItem(offlineBufferKey(projectId)); } catch (e) {}
 }
 
-window.addEventListener('online', () => {
-  const buffered = readOfflineBuffer();
+window.addEventListener('online', async () => {
+  const buffered = readOfflineBuffer(currentProjectId);
   if (buffered) {
-    setSaveIndicator('saving');
-    performSave(buffered).then(() => clearOfflineBuffer());
+    // performSave sam czyści bufor po udanym zapisie; przy porażce
+    // bufor zostaje (wcześniej był kasowany nawet po nieudanej próbie).
+    await performSave(buffered);
   }
 });
 
@@ -133,10 +147,14 @@ window.addEventListener('offline', () => {
 
 // ---------- właściwy zapis (wywoływany po odczekaniu debounce) ----------
 async function performSave(stateSnapshot) {
+  if (isReadOnly) {
+    setSaveIndicator('readonly');
+    return false;
+  }
   if (!navigator.onLine) {
     bufferStateOffline(stateSnapshot);
     setSaveIndicator('offline');
-    return;
+    return false;
   }
 
   setSaveIndicator('saving');
@@ -160,21 +178,33 @@ async function performSave(stateSnapshot) {
       })
     });
 
+    if (res.status === 403) {
+      // Cudzy kosztorys — nie buforujemy (bufor próbowałby to wysłać
+      // ponownie po powrocie sieci), tylko przechodzimy w tryb odczytu.
+      isReadOnly = true;
+      clearOfflineBuffer(currentProjectId);
+      setSaveIndicator('readonly');
+      return false;
+    }
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
 
     // Pierwszy zapis nowego kosztorysu — dopisujemy nadane id do URL,
     // żeby kolejne zapisy trafiały jako UPDATE, nie kolejny INSERT.
     if (!currentProjectId && data.id) {
+      clearOfflineBuffer(null); // bufor "new" już niepotrzebny
       currentProjectId = data.id;
       setProjectIdInUrl(data.id);
     }
 
+    clearOfflineBuffer(currentProjectId);
     setSaveIndicator('saved');
+    return true;
   } catch (err) {
     console.error('Zapis do chmury nie powiódł się, buforuję lokalnie:', err);
     bufferStateOffline(stateSnapshot);
     setSaveIndicator('error');
+    return false;
   }
 }
 
@@ -205,7 +235,9 @@ async function loadState() {
   }
 
   try {
-    const res = await fetch(`/.netlify/functions/get-estimate?id=${encodeURIComponent(currentProjectId)}`);
+    const res = await fetch(`/.netlify/functions/get-estimate?id=${encodeURIComponent(currentProjectId)}`, {
+      headers: { 'X-Session-Id': SESSION_ID }
+    });
 
     if (res.status === 404) {
       console.warn('Kosztorys o podanym id nie istnieje — zaczynam od pustego stanu.');
@@ -237,18 +269,17 @@ async function loadState() {
     const nameInput = document.getElementById('project-name');
     if (nameInput) nameInput.value = state.projectName;
 
-    // Jeśli otwierający NIE jest twórcą tego kosztorysu (inny sessionId),
-    // w przyszłości można by tu przełączyć UI w tryb tylko-do-odczytu.
-    // Na razie aplikacja nie ma takiego trybu, więc tylko informacyjny log.
-    if (data.sessionId && data.sessionId !== SESSION_ID) {
-      console.info('Ten kosztorys został utworzony w innej przeglądarce/sesji — otwierasz z linku.');
-    }
+    // Otwierający NIE jest twórcą kosztorysu — blokujemy zapisy.
+    // Pełny tryb tylko-do-odczytu w UI (wyszarzone pola) jest odłożony.
+    isReadOnly = data.isOwner !== true;
+    if (isReadOnly) setSaveIndicator('readonly');
 
     render();
   } catch (err) {
     console.error('Nie udało się wczytać kosztorysu z chmury:', err);
     // Awaryjnie: spróbuj lokalnego bufora offline, jeśli akurat istnieje.
-    const buffered = readOfflineBuffer();
+    // Tylko bufor TEGO kosztorysu, nigdy innego.
+    const buffered = readOfflineBuffer(currentProjectId);
     if (buffered) {
       Object.assign(state, buffered);
       render();

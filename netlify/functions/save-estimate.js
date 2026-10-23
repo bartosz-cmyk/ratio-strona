@@ -106,7 +106,10 @@ exports.handler = async (event) => {
         .eq('id', id)
         .eq('session_id', sessionId)
         .select('id, updated_at')
-        .single();
+        // maybeSingle zamiast single: przy 0 dopasowanych wierszach
+        // (cudzy kosztorys albo nieistniejące id) zwraca data = null
+        // zamiast błędu PGRST116, więc trafiamy w 403 poniżej, nie w 500.
+        .maybeSingle();
 
       if (error) throw error;
       if (!data) {

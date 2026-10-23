@@ -9,6 +9,11 @@
 // dotyczy WYŁĄCZNIE zapisu (patrz save-estimate.js), nie odczytu.
 // To świadomy kompromis: bez kont użytkowników to jedyny sensowny
 // sposób na "podziel się kosztorysem z wykonawcą przez link".
+//
+// BEZPIECZEŃSTWO: session_id właściciela NIGDY nie wychodzi z serwera —
+// to on uprawnia do zapisu. Klient przysyła własny sessionId w nagłówku
+// X-Session-Id (nie w URL, żeby nie lądował w logach i historii),
+// a my odpowiadamy tylko isOwner: true/false.
 
 const { createClient } = require('@supabase/supabase-js');
 
@@ -26,6 +31,8 @@ exports.handler = async (event) => {
   }
 
   const id = event.queryStringParameters && event.queryStringParameters.id;
+  const headers = event.headers || {};
+  const clientSessionId = headers['x-session-id'] || headers['X-Session-Id'] || null;
   if (!id) {
     return {
       statusCode: 400,
@@ -58,10 +65,9 @@ exports.handler = async (event) => {
         notatkiSpotkan: data.notatki_spotkan,
         protokoly: data.protokoly,
         updatedAt: data.updated_at,
-        // Frontend porówna to z własnym sessionId, żeby wiedzieć, czy
-        // to "swój" kosztorys (tryb edycji) czy cudzy, otwarty z linku
-        // (potencjalnie tryb tylko-do-odczytu w przyszłej wersji UI).
-        sessionId: data.session_id
+        // Tylko informacja, czy otwierający jest właścicielem (tryb edycji)
+        // czy otwiera cudzy kosztorys z linku (tryb tylko-do-odczytu).
+        isOwner: !!clientSessionId && clientSessionId === data.session_id
       })
     };
   } catch (err) {
