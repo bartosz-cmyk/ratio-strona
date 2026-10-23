@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Poradnik inwestora — 3 tomy o budowie domu | Ratio</title>
+<meta name="description" content="Seria „Poradnik inwestora” w PDF: budowa domu systemem gospodarczym, systemem zleconym i z generalnym wykonawcą. Wybierz tom dopasowany do sposobu, w jaki budujesz." />
+<link rel="icon" type="image/svg+xml" href="assets/logo-symbol.svg" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="assets/style.css" />
+<style>
+  .kup.is-soon { background:#e5e7eb; color:#6b7280; cursor:not-allowed; box-shadow:none; transform:none; }
+  .kup.is-soon:hover { background:#e5e7eb; }
+  details > summary { list-style:none; cursor:pointer; }
+  details > summary::-webkit-details-marker { display:none; }
+  details[open] .chev { transform:rotate(180deg); }
+  .tom-hl { box-shadow:0 0 0 3px #ffb719; }
+</style>
+</head>
+
+<body class="bg-white antialiased">
+
+<!-- NAWIGACJA -->
+<header class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm border-b border-gray-100">
+  <nav class="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+    <a href="index.html" class="flex items-center">
+      <img src="assets/logo-black.svg" alt="Ratio Logo" class="h-12" />
+    </a>
+    <div class="flex items-center gap-6">
+      <a href="jak-pracujemy.html" class="hidden sm:inline text-sm font-semibold text-ink hover:text-navy transition">Jak pracujemy</a>
+      <a href="case-studies.html" class="hidden sm:inline text-sm font-semibold text-ink hover:text-navy transition">Case studies</a>
+      <a href="ankiety.html" class="hidden sm:inline text-sm font-semibold text-ink hover:text-navy transition">Ankiety</a>
+      <a href="poradniki.html" class="hidden sm:inline text-sm font-semibold text-navy">Poradniki</a>
+      <a href="index.html#kontakt"
+         class="inline-flex items-center rounded-full bg-navy px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-navy-light">
+        Kontakt
+      </a>
+    </div>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="bg-[#1f2a4f] overflow-hidden">
+  <div class="max-w-7xl mx-auto px-6 py-16 sm:py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <div>
+      <p class="text-accent font-semibold tracking-wide uppercase text-sm mb-5 font-sans">Poradnik inwestora · seria 3 tomów</p>
+      <h1 class="text-3xl sm:text-5xl font-bold text-white leading-tight tracking-tight">
+        Poradnik do sposobu, w&nbsp;jaki naprawdę budujesz.
+      </h1>
+      <p class="mt-6 text-lg text-gray-200 leading-relaxed font-sans max-w-xl">
+        Budowa systemem gospodarczym, przez osobne ekipy albo z&nbsp;generalnym wykonawcą to trzy
+        różne zestawy decyzji, ryzyk i&nbsp;umów. Dlatego zamiast jednej grubej książki są trzy tomy.
+        Każdy ma harmonogram, liczby i&nbsp;listy kontrolne dla jednej metody.
+      </p>
+      <div class="mt-9 flex flex-col sm:flex-row gap-4">
+        <a href="#tomy" class="inline-flex items-center justify-center rounded-full bg-accent px-7 py-3.5 text-base font-bold text-ink transition hover:bg-accent-light font-sans">
+          Zobacz tomy
+        </a>
+        <a href="ankiety/profil-inwestora.html" class="inline-flex items-center justify-center rounded-full border border-white/30 px-7 py-3.5 text-base font-semibold text-white transition hover:border-accent hover:text-accent font-sans">
+          Nie wiesz który? Zrób ankietę
+        </a>
+      </div>
+    </div>
+    <div class="flex justify-center lg:justify-end">
+      <img src="assets/poradniki/produkt-pakiet-3-tomy.jpg" alt="Trzy tomy serii Poradnik inwestora" class="w-full max-w-md rounded-2xl shadow-2xl shadow-black/30" />
+    </div>
+  </div>
+</section>
+
+<!-- KTÓRY TOM -->
+<section class="bg-gray-50 py-16 sm:py-20">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="max-w-2xl mb-10">
+      <h2 class="text-2xl sm:text-3xl font-bold text-ink">Który tom jest dla Ciebie?</h2>
+      <p class="mt-3 text-gray-600 font-sans">
+        Tomy odpowiadają ośmiu profilom z&nbsp;bezpłatnej ankiety
+        <a href="ankiety/profil-inwestora.html" class="font-semibold text-navy underline decoration-accent decoration-2 underline-offset-4 hover:text-accent">„Profil inwestora”</a>.
+        Znasz swój profil? Znajdź go poniżej.
+      </p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 font-sans">
+      <a href="#tom-1" class="group bg-white rounded-2xl p-7 border border-gray-100 shadow-sm hover:shadow-md transition">
+        <p class="text-xs font-bold uppercase tracking-wider text-accent mb-3">Tom 1 · Budujesz sam</p>
+        <p class="text-ink font-semibold mb-4">Prowadzisz budowę bez generalnego wykonawcy i&nbsp;część prac robisz własnymi rękami.</p>
+        <div class="flex flex-wrap gap-2">
+          <span class="rounded-full bg-navy/5 px-3 py-1 text-xs font-semibold text-navy">Gospodarz</span>
+          <span class="rounded-full bg-navy/5 px-3 py-1 text-xs font-semibold text-navy">Solista</span>
+        </div>
+      </a>
+      <a href="#tom-2" class="group bg-white rounded-2xl p-7 border border-gray-100 shadow-sm hover:shadow-md transition">
+        <p class="text-xs font-bold uppercase tracking-wider text-accent mb-3">Tom 2 · Koordynujesz ekipy</p>
+        <p class="text-ink font-semibold mb-4">Nie pracujesz fizycznie, ale sam zatrudniasz osobne ekipy na kolejne etapy.</p>
+        <div class="flex flex-wrap gap-2">
+          <span class="rounded-full bg-navy/5 px-3 py-1 text-xs font-semibold text-navy">Dyrygent</span>
+          <span class="rounded-full bg-navy/5 px-3 py-1 text-xs font-semibold text-navy">Etapowiec</span>
+        </div>
+      </a>
+      <a href="#tom-3" class="group bg-white rounded-2xl p-7 border border-gray-100 shadow-sm hover:shadow-md transition">
+        <p class="text-xs font-bold uppercase tracking-wider text-accent mb-3">Tom 3 · Wybierasz wykonawcę</p>
+        <p class="text-ink font-semibold mb-4">Oddajesz budowę jednej firmie i&nbsp;chcesz nie stracić nad nią kontroli.</p>
+        <div class="flex flex-wrap gap-2">
+          <span class="rounded-full bg-navy/5 px-3 py-1 text-xs font-semibold text-navy">Zleceniodawca</span>
+          <span class="rounded-full bg-navy/5 px-3 py-1 text-xs font-semibold text-navy">Nadzorca</span>
+          <span class="rounded-full bg-navy/5 px-3 py-1 text-xs font-semibold text-navy">Kurator detalu</span>
+          <span class="rounded-full bg-navy/5 px-3 py-1 text-xs font-semibold text-navy">Architekt spokoju</span>
+        </div>
+      </a>
+    </div>
+    <p class="mt-6 text-sm text-gray-500 font-sans">
+      Solista najczęściej korzysta z&nbsp;tomów 1 i&nbsp;2, Etapowiec z&nbsp;tomów 2 i&nbsp;3. Przy dwóch lub trzech tomach taniej wychodzi <a href="#pakiet" class="font-semibold text-navy hover:text-accent">pakiet</a>.
+    </p>
+  </div>
+</section>
+
+<!-- TOMY -->
+<div id="tomy">
+
+<!-- TOM 1 -->
+<section id="tom-1" class="py-16 sm:py-24 scroll-mt-20">
+  <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-12 items-start">
+    <div class="flex justify-center lg:sticky lg:top-28">
+      <img src="assets/poradniki/okladka-tom-1-budujesz-sam.jpg" alt="Okładka: Budowa domu systemem gospodarczym" class="tom-cover w-full max-w-sm rounded-lg shadow-2xl shadow-navy/30" loading="lazy" />
+    </div>
+    <div class="font-sans">
+      <p class="text-sm font-bold uppercase tracking-wider text-accent">Tom 1 · Budujesz sam</p>
+      <h2 class="mt-3 text-3xl sm:text-4xl font-bold text-ink leading-tight">Budowa domu systemem gospodarczym</h2>
+      <p class="mt-4 text-lg text-gray-600 leading-relaxed">
+        Jak poprowadzić własną budowę i&nbsp;część prac wykonać samodzielnie, od decyzji o&nbsp;metodzie
+        do odbioru domu. Z&nbsp;harmonogramem, roboczogodzinami i&nbsp;listami kontrolnymi dla domu
+        parterowego o&nbsp;powierzchni około 100&nbsp;m².
+      </p>
+
+      <dl class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="rounded-xl bg-accent p-5"><dt class="sr-only">Oszczędność</dt><dd class="font-slab text-3xl font-bold text-ink">8–15%</dd><p class="mt-1 text-sm font-medium text-ink/80">oszczędności netto wobec generalnego wykonawcy</p></div>
+        <div class="rounded-xl bg-[#11172a] p-5"><dt class="sr-only">Czas</dt><dd class="font-slab text-3xl font-bold text-white">18–24</dd><p class="mt-1 text-sm text-gray-300">miesiące realizacji</p></div>
+        <div class="rounded-xl bg-[#11172a] p-5"><dt class="sr-only">Twój czas</dt><dd class="font-slab text-3xl font-bold text-white">5–10 h</dd><p class="mt-1 text-sm text-gray-300">Twojej pracy tygodniowo poza samym wykonawstwem</p></div>
+      </dl>
+
+      <p class="mt-8 text-sm font-semibold text-ink">Dla profili: <span class="text-navy">Gospodarz, Solista</span></p>
+      <p class="mt-1 text-sm text-gray-500">PDF A4 · 70 stron · 14 rozdziałów w&nbsp;3 częściach · do czytania na ekranie i&nbsp;do druku</p>
+
+      <details class="mt-6 rounded-xl border border-gray-200 bg-gray-50">
+        <summary class="flex items-center justify-between px-5 py-4 font-semibold text-ink">Spis treści<span class="chev transition text-navy">⌄</span></summary>
+        <div class="px-5 pb-5 text-sm text-gray-700 space-y-4">
+          <div><p class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">I · Przed budową</p>
+            <ol class="space-y-1.5">
+              <li><b>01</b> Zakres Twojej odpowiedzialności</li>
+              <li><b>02</b> Rozpoznanie lokalnego rynku</li>
+              <li><b>03</b> Formalności, dziennik i&nbsp;podatki</li>
+              <li><b>04</b> Wybór ekip, pytania i&nbsp;umowa</li>
+              <li><b>05</b> Harmonogram miesiąc po miesiącu</li>
+              <li><b>06</b> Budżet, rezerwa i&nbsp;płynność</li>
+            </ol></div>
+          <div><p class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">II · Etapy budowy</p>
+            <ol class="space-y-1.5">
+              <li><b>07</b> Stan zerowy</li>
+              <li><b>08</b> Mury, wieniec i&nbsp;strop</li>
+              <li><b>09</b> Dach i&nbsp;stolarka</li>
+              <li><b>10</b> Ocieplenie i&nbsp;elewacja</li>
+              <li><b>11</b> Tynki, wylewki, wykończenie</li>
+              <li><b>12</b> Kiedy oddać koordynację</li>
+            </ol></div>
+          <div><p class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">III · Zamknięcie i&nbsp;pierwszy rok</p>
+            <ol class="space-y-1.5">
+              <li><b>13</b> Odbiory i&nbsp;roboty zanikające</li>
+              <li><b>14</b> Zakończenie budowy i&nbsp;odbiór</li>
+              <li><b>—</b> Na koniec: kalendarz decyzji</li>
+            </ol></div>
+        </div>
+      </details>
+
+      <div class="mt-8 flex flex-col sm:flex-row sm:items-center gap-4">
+        <a data-kup="tom1" class="kup inline-flex items-center justify-center rounded-full bg-accent px-8 py-4 text-base font-bold text-ink shadow-lg shadow-accent/30 transition hover:bg-accent-light hover:-translate-y-0.5" rel="noopener">Kup za 89 zł</a>
+        <p class="text-sm text-gray-500">Cena brutto <span data-cena="tom1">89 zł</span> · PDF od razu na e-mail</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TOM 2 -->
+<section id="tom-2" class="py-16 sm:py-24 bg-gray-50 scroll-mt-20">
+  <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-12 items-start">
+    <div class="flex justify-center lg:sticky lg:top-28">
+      <img src="assets/poradniki/okladka-tom-2-koordynujesz-ekipy.jpg" alt="Okładka: Budowa domu systemem zleconym" class="tom-cover w-full max-w-sm rounded-lg shadow-2xl shadow-navy/30" loading="lazy" />
+    </div>
+    <div class="font-sans">
+      <p class="text-sm font-bold uppercase tracking-wider text-accent">Tom 2 · Koordynujesz ekipy</p>
+      <h2 class="mt-3 text-3xl sm:text-4xl font-bold text-ink leading-tight">Budowa domu systemem zleconym</h2>
+      <p class="mt-4 text-lg text-gray-600 leading-relaxed">
+        Dla inwestora, który nie muruje i&nbsp;nie kładzie płytek, ale też nie oddaje całości jednej firmie.
+        Osobne umowy z&nbsp;ekipami na kolejne etapy, wzory klauzul, harmonogram z&nbsp;buforami
+        i&nbsp;listy odbiorów.
+      </p>
+
+      <dl class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="rounded-xl bg-accent p-5"><dt class="sr-only">Oszczędność</dt><dd class="font-slab text-3xl font-bold text-ink">5–10%</dd><p class="mt-1 text-sm font-medium text-ink/80">oszczędności wobec generalnego wykonawcy</p></div>
+        <div class="rounded-xl bg-[#11172a] p-5"><dt class="sr-only">Czas</dt><dd class="font-slab text-3xl font-bold text-white">14–20</dd><p class="mt-1 text-sm text-gray-300">miesięcy realizacji</p></div>
+        <div class="rounded-xl bg-[#11172a] p-5"><dt class="sr-only">Twój czas</dt><dd class="font-slab text-3xl font-bold text-white">5–8 h</dd><p class="mt-1 text-sm text-gray-300">koordynacji tygodniowo</p></div>
+      </dl>
+
+      <p class="mt-8 text-sm font-semibold text-ink">Dla profili: <span class="text-navy">Dyrygent, Etapowiec</span></p>
+      <p class="mt-1 text-sm text-gray-500">PDF A4 · 47 stron · 12 rozdziałów w&nbsp;3 częściach · do czytania na ekranie i&nbsp;do druku</p>
+
+      <details class="mt-6 rounded-xl border border-gray-200 bg-white">
+        <summary class="flex items-center justify-between px-5 py-4 font-semibold text-ink">Spis treści<span class="chev transition text-navy">⌄</span></summary>
+        <div class="px-5 pb-5 text-sm text-gray-700 space-y-4">
+          <div><p class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">I · Przed budową</p>
+            <ol class="space-y-1.5">
+              <li><b>01</b> Twoja rola: menedżer budowy</li>
+              <li><b>02</b> Budowa pocięta na pakiety</li>
+              <li><b>03</b> Kierownik budowy jako Twoje oko</li>
+              <li><b>04</b> Formalności, VAT i&nbsp;podwykonawcy</li>
+              <li><b>05</b> Kontraktowanie ekip i&nbsp;umowy</li>
+              <li><b>06</b> Harmonogram z&nbsp;buforami</li>
+              <li><b>07</b> Budżet, płatności i&nbsp;jedna tabela</li>
+            </ol></div>
+          <div><p class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">II · W&nbsp;trakcie budowy</p>
+            <ol class="space-y-1.5">
+              <li><b>08</b> Tydzień pracy menedżera budowy</li>
+              <li><b>09</b> Odbiory etapowe i&nbsp;roboty zanikające</li>
+              <li><b>10</b> Wariant Etapowca: firma i&nbsp;Ty</li>
+              <li><b>11</b> Gdy coś idzie nie tak</li>
+            </ol></div>
+          <div><p class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">III · Zamknięcie</p>
+            <ol class="space-y-1.5">
+              <li><b>12</b> Odbiór, rozliczenie i&nbsp;rękojmia</li>
+              <li><b>—</b> Na koniec: kalendarz decyzji</li>
+            </ol></div>
+        </div>
+      </details>
+
+      <div class="mt-8 flex flex-col sm:flex-row sm:items-center gap-4">
+        <a data-kup="tom2" class="kup inline-flex items-center justify-center rounded-full bg-accent px-8 py-4 text-base font-bold text-ink shadow-lg shadow-accent/30 transition hover:bg-accent-light hover:-translate-y-0.5" rel="noopener">Kup za 79 zł</a>
+        <p class="text-sm text-gray-500">Cena brutto <span data-cena="tom2">79 zł</span> · PDF od razu na e-mail</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TOM 3 -->
+<section id="tom-3" class="py-16 sm:py-24 scroll-mt-20">
+  <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-12 items-start">
+    <div class="flex justify-center lg:sticky lg:top-28">
+      <img src="assets/poradniki/okladka-tom-3-wybierasz-wykonawce.jpg" alt="Okładka: Budowa domu z generalnym wykonawcą" class="tom-cover w-full max-w-sm rounded-lg shadow-2xl shadow-navy/30" loading="lazy" />
+    </div>
+    <div class="font-sans">
+      <p class="text-sm font-bold uppercase tracking-wider text-accent">Tom 3 · Wybierasz wykonawcę i&nbsp;pilnujesz go</p>
+      <h2 class="mt-3 text-3xl sm:text-4xl font-bold text-ink leading-tight">Budowa domu z&nbsp;generalnym wykonawcą</h2>
+      <p class="mt-4 text-lg text-gray-600 leading-relaxed">
+        Jak oddać budowę jednej firmie i&nbsp;nie stracić nad nią kontroli: od zamkniętego projektu
+        i&nbsp;porównania ofert, przez umowę i&nbsp;nadzór, po odbiór końcowy i&nbsp;ostatnią ratę.
+      </p>
+
+      <dl class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="rounded-xl bg-accent p-5"><dt class="sr-only">Cena rynkowa</dt><dd class="font-slab text-3xl font-bold text-ink">5 000–6 500</dd><p class="mt-1 text-sm font-medium text-ink/80">zł/m² za stan deweloperski u&nbsp;generalnego wykonawcy (2026)</p></div>
+        <div class="rounded-xl bg-[#11172a] p-5"><dt class="sr-only">Czas</dt><dd class="font-slab text-3xl font-bold text-white">8–12</dd><p class="mt-1 text-sm text-gray-300">miesięcy realizacji przy zamkniętym projekcie</p></div>
+        <div class="rounded-xl bg-[#11172a] p-5"><dt class="sr-only">Twój czas</dt><dd class="font-slab text-3xl font-bold text-white">1 rozmowa</dd><p class="mt-1 text-sm text-gray-300">tygodniowo, z&nbsp;inspektorem, nie z&nbsp;wykonawcą</p></div>
+      </dl>
+
+      <p class="mt-8 text-sm font-semibold text-ink">Dla profili: <span class="text-navy">Zleceniodawca, Nadzorca, Kurator detalu, Architekt spokoju</span></p>
+      <p class="mt-1 text-sm text-gray-500">PDF A4 · 44 strony · 12 rozdziałów w&nbsp;3 częściach · do czytania na ekranie i&nbsp;do druku</p>
+
+      <details class="mt-6 rounded-xl border border-gray-200 bg-gray-50">
+        <summary class="flex items-center justify-between px-5 py-4 font-semibold text-ink">Spis treści<span class="chev transition text-navy">⌄</span></summary>
+        <div class="px-5 pb-5 text-sm text-gray-700 space-y-4">
+          <div><p class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">I · Zanim podpiszesz</p>
+            <ol class="space-y-1.5">
+              <li><b>01</b> Co kupujesz od generalnego wykonawcy</li>
+              <li><b>02</b> Projekt zamknięty przed ofertą</li>
+              <li><b>03</b> Zapytanie ofertowe i&nbsp;porównanie ofert</li>
+              <li><b>04</b> Sprawdzenie wykonawcy</li>
+              <li><b>05</b> Umowa z&nbsp;generalnym wykonawcą</li>
+              <li><b>06</b> Budżet, kredyt i&nbsp;rezerwa</li>
+            </ol></div>
+          <div><p class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">II · W&nbsp;trakcie budowy</p>
+            <ol class="space-y-1.5">
+              <li><b>07</b> Nadzór po Twojej stronie</li>
+              <li><b>08</b> Zmiany, dopłaty i&nbsp;zamienniki</li>
+              <li><b>09</b> Odbiory częściowe i&nbsp;roboty zanikające</li>
+              <li><b>10</b> Dom z&nbsp;prefabrykatu i&nbsp;pakiet pod klucz</li>
+              <li><b>11</b> Gdy wykonawca zawodzi</li>
+            </ol></div>
+          <div><p class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">III · Odbiór i&nbsp;pierwszy rok</p>
+            <ol class="space-y-1.5">
+              <li><b>12</b> Odbiór końcowy, ostatnia rata, rękojmia</li>
+              <li><b>—</b> Na koniec: kalendarz decyzji</li>
+            </ol></div>
+        </div>
+      </details>
+
+      <div class="mt-8 flex flex-col sm:flex-row sm:items-center gap-4">
+        <a data-kup="tom3" class="kup inline-flex items-center justify-center rounded-full bg-accent px-8 py-4 text-base font-bold text-ink shadow-lg shadow-accent/30 transition hover:bg-accent-light hover:-translate-y-0.5" rel="noopener">Kup za 79 zł</a>
+        <p class="text-sm text-gray-500">Cena brutto <span data-cena="tom3">79 zł</span> · PDF od razu na e-mail</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- PAKIET -->
+<section id="pakiet" class="bg-[#1f2a4f] py-16 sm:py-24 scroll-mt-20">
+  <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <img src="assets/poradniki/produkt-pakiet-3-tomy.jpg" alt="Pakiet trzech tomów" class="w-full max-w-md mx-auto rounded-2xl shadow-2xl shadow-black/30" loading="lazy" />
+    <div class="font-sans">
+      <p class="text-sm font-bold uppercase tracking-wider text-accent">Pakiet · 3 tomy</p>
+      <h2 class="mt-3 text-3xl sm:text-4xl font-bold text-white leading-tight">Cała seria w&nbsp;jednym zakupie</h2>
+      <p class="mt-4 text-lg text-gray-200 leading-relaxed">
+        Jeśli jeszcze wybierasz metodę albo łączysz dwie (firma stawia stan surowy, Ty wykańczasz),
+        porównaj wszystkie trzy drogi na tych samych liczbach. 161 stron, 38 rozdziałów.
+      </p>
+      <ul class="mt-6 space-y-2 text-gray-200">
+        <li class="flex gap-3"><span class="text-accent font-bold">✓</span> Tom 1 · Budujesz sam</li>
+        <li class="flex gap-3"><span class="text-accent font-bold">✓</span> Tom 2 · Koordynujesz ekipy</li>
+        <li class="flex gap-3"><span class="text-accent font-bold">✓</span> Tom 3 · Wybierasz wykonawcę i&nbsp;pilnujesz go</li>
+      </ul>
+      <div class="mt-8 flex flex-col sm:flex-row sm:items-center gap-4">
+        <a data-kup="pakiet" class="kup inline-flex items-center justify-center rounded-full bg-accent px-8 py-4 text-base font-bold text-ink transition hover:bg-accent-light hover:-translate-y-0.5" rel="noopener">Kup za 179 zł</a>
+        <p class="text-sm text-gray-300">Osobno <span data-suma>247 zł</span> · w&nbsp;pakiecie oszczędzasz <span data-oszczednosc class="font-semibold text-accent">68 zł</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- JAK TO DZIAŁA / FAQ -->
+<section class="py-16 sm:py-24">
+  <div class="max-w-4xl mx-auto px-6 font-sans">
+    <h2 class="text-2xl sm:text-3xl font-bold text-ink mb-10">Zakup i&nbsp;dostawa</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-14">
+      <div class="rounded-2xl border border-gray-100 p-6 shadow-sm"><p class="font-slab text-2xl font-bold text-accent">1</p><p class="mt-2 font-semibold text-ink">Wybierasz tom</p><p class="mt-1 text-sm text-gray-600">Po opisie albo po wyniku ankiety „Profil inwestora”.</p></div>
+      <div class="rounded-2xl border border-gray-100 p-6 shadow-sm"><p class="font-slab text-2xl font-bold text-accent">2</p><p class="mt-2 font-semibold text-ink">Płacisz</p><p class="mt-1 text-sm text-gray-600">BLIK, kartą albo Przelewy24.</p></div>
+      <div class="rounded-2xl border border-gray-100 p-6 shadow-sm"><p class="font-slab text-2xl font-bold text-accent">3</p><p class="mt-2 font-semibold text-ink">Pobierasz PDF</p><p class="mt-1 text-sm text-gray-600">Dostęp do pliku od razu po płatności, na podany e-mail.</p></div>
+    </div>
+
+    <div class="divide-y divide-gray-200 border-y border-gray-200">
+      <details class="py-5"><summary class="flex justify-between font-semibold text-ink">W jakiej formie dostanę poradnik?<span class="chev transition text-navy">⌄</span></summary>
+        <p class="mt-3 text-gray-600">Plik PDF w&nbsp;formacie A4 (ok. 5&nbsp;MB). Czytasz go na komputerze, tablecie i&nbsp;telefonie. Listy kontrolne i&nbsp;tabele możesz drukować i&nbsp;wykorzystywać na własnej budowie.</p></details>
+      <details class="py-5"><summary class="flex justify-between font-semibold text-ink">Czy dostanę fakturę?<span class="chev transition text-navy">⌄</span></summary>
+        <p class="mt-3 text-gray-600">Tak, dokument sprzedaży wystawia się automatycznie po płatności. Jeśli kupujesz na firmę, podaj NIP w&nbsp;formularzu zamówienia.</p></details>
+      <details class="py-5"><summary class="flex justify-between font-semibold text-ink">Który tom wybrać, jeśli łączę dwie metody?<span class="chev transition text-navy">⌄</span></summary>
+        <p class="mt-3 text-gray-600">Najczęstsze połączenia to Solista (tomy 1 i&nbsp;2) oraz Etapowiec (tomy 2 i&nbsp;3). Jeśli nie wiesz, gdzie jesteś, <a href="ankiety/profil-inwestora.html" class="font-semibold text-navy underline decoration-accent decoration-2 underline-offset-4">zrób bezpłatną ankietę</a>: wynik wskaże tom.</p></details>
+      <details class="py-5"><summary class="flex justify-between font-semibold text-ink">Czy to porada prawna?<span class="chev transition text-navy">⌄</span></summary>
+        <p class="mt-3 text-gray-600">Nie. Poradniki opierają się na typowych realizacjach i&nbsp;aktualnych przepisach, ale nie zastępują projektu, kierownika budowy, prawnika ani uprawnionego specjalisty. Wzory klauzul są punktem wyjścia do rozmowy, nie gotową umową.</p></details>
+      <details class="py-5"><summary class="flex justify-between font-semibold text-ink">Czy mogę udostępnić plik innym?<span class="chev transition text-navy">⌄</span></summary>
+        <p class="mt-3 text-gray-600">Egzemplarz jest przeznaczony do użytku własnego nabywcy. Kopiowanie, udostępnianie publiczne i&nbsp;odsprzedaż wymagają pisemnej zgody wydawcy.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- KONTAKT / FOOTER -->
+<footer id="kontakt" class="footer-gradient">
+  <div class="max-w-2xl mx-auto px-6 py-20 sm:py-28 text-center">
+    <h2 class="text-2xl sm:text-3xl font-bold text-white">Wolisz porozmawiać o&nbsp;swojej budowie?</h2>
+    <p class="mt-3 text-gray-300 font-sans mb-8">Odpowiadamy w&nbsp;ciągu 24 godzin roboczych.</p>
+    <a href="index.html#kontakt"
+       class="inline-flex items-center justify-center rounded-full bg-accent px-8 py-4 text-base font-bold text-ink transition hover:bg-accent-light font-sans">
+      Napisz do nas
+    </a>
+  </div>
+
+  <div class="border-t border-white/10">
+    <div class="max-w-7xl mx-auto px-6 py-14">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-10">
+        <div>
+          <img src="assets/logo-white.svg" alt="Ratio Logo" class="h-12 mb-6" />
+          <p class="text-sm text-gray-300 font-sans leading-relaxed">
+            RATIO Zarządzanie Inwestycjami Budowlanymi<br />
+            Bartosz Zapadka-Żydek
+          </p>
+          <p class="text-sm text-gray-400 font-sans mt-4">14-202 Iława, ul. Gdańska 2D/16</p>
+          <p class="text-sm text-gray-400 font-sans mt-1">
+            <a href="mailto:bartosz@ratiopro.net" class="hover:text-accent transition">bartosz@ratiopro.net</a>
+          </p>
+          <p class="text-sm text-gray-400 font-sans mt-1">
+            <a href="tel:+48537913341" class="hover:text-accent transition">+48 537 913 341</a>
+          </p>
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 font-sans mb-4">Nawigacja</p>
+          <ul class="space-y-3 font-sans text-sm">
+            <li><a href="index.html" class="text-gray-300 hover:text-accent transition">Strona główna</a></li>
+            <li><a href="index.html#uslugi" class="text-gray-300 hover:text-accent transition">Usługi</a></li>
+            <li><a href="jak-pracujemy.html" class="text-gray-300 hover:text-accent transition">Jak pracujemy</a></li>
+            <li><a href="case-studies.html" class="text-gray-300 hover:text-accent transition">Case studies</a></li>
+            <li><a href="ankiety.html" class="text-gray-300 hover:text-accent transition">Ankiety</a></li>
+            <li><a href="poradniki.html" class="text-gray-300 hover:text-accent transition">Poradniki</a></li>
+            <li><a href="index.html#kontakt" class="text-gray-300 hover:text-accent transition">Kontakt</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-white/10">
+      <div class="max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-3 text-xs text-gray-500 font-sans text-center">
+        <p>&copy; 2026 RATIO Zarządzanie Inwestycjami Budowlanymi Bartosz Zapadka-Żydek · NIP 7441843748 · REGON 544820288</p>
+        <div class="flex gap-4">
+          <a href="polityka-prywatnosci.html" class="hover:text-accent transition">Polityka prywatności</a>
+          <a href="regulamin.html" class="hover:text-accent transition">Regulamin</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/sklep.js"></script>
+<script>
+  // Podświetl tom polecony w wyniku ankiety: poradniki.html?profil=solista#tom-1
+  (function () {
+    var map = { gospodarz:[1], solista:[1,2], dyrygent:[2], etapowiec:[2,3],
+                nadzorca:[3], zleceniodawca:[3], kurator:[3], spokoj:[3] };
+    var p = new URLSearchParams(location.search).get('profil');
+    (map[p] || []).forEach(function (n) {
+      var img = document.querySelector('#tom-' + n + ' .tom-cover');
+      if (img) img.classList.add('tom-hl');
+    });
+  })();
+</script>
+</body>
+</html>
